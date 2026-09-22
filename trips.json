@@ -315,15 +315,15 @@
       "context": "extracurriculair",
       "study": null,
       "abroad": true,
-      "summary": "Hackathon van een dag op echte cases uit de Antwerpse haven.",
-      "body": "In het Havenhuis van Zaha Hadid werkten Vlaamse en Nederlandse studenten in gemengde teams aan echte AI-vraagstukken van havenbedrijven: ontploffingen voorkomen in verbrandingsovens bij Lanxess, gasflessen detecteren op de rontgen bij Indaver, en containerstromen plannen bij CLdN. Georganiseerd binnen het ART-IE-initiatief, met pitches en een prijsuitreiking aan het eind.",
+      "summary": "Gewonnen: slim stapelen van containers voor CLdN.",
+      "body": "Een praktijkgerichte AI-hackathon met cases van bedrijven uit de haven. Onze opdracht kwam van CLdN: als een schip binnenkomt staat de container die je nodig hebt vaak onderop, met drie andere erbovenop, en dat kost de kraan veel tijd. Bedenk een manier om 's nachts alles alvast op de beste plek te zetten.\n\nWe bouwden een werkende terminalsimulator met 3D-visualisatie en een nachtalgoritme dat herstapelt via greedy planning en tabu search. De doelfunctie woog de totale kraantijd, hoe logisch containers per bestemming gegroepeerd staan, en een inschatting van het energieverbruik van de kraan. Containers die bijna vertrekken schoven alvast naar de truckzijde, en een dagsimulatie liet zien wat dat deed met de doorstroming.\n\nZelf richtte ik me op het presenteren en op design thinking: het probleem oplossen vanuit Dirk, een fictieve kraanoperator, zodat de jury zag wat het algoritme voor een mens betekent. Twee minuten voor de pitch werden er nog aanpassingen aan de tool gedaan. We wonnen.",
       "tags": [
+        "Winnaar",
         "Hackathon",
         "AI",
-        "Haven",
-        "ART-IE"
-      ],
-      "todo": true
+        "Design thinking",
+        "CLdN"
+      ]
     },
     {
       "id": "rotterdam",

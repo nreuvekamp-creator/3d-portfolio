@@ -97,6 +97,9 @@ button{font:inherit;color:inherit;cursor:pointer}
 .p-where{color:var(--dim);font-size:.92rem;margin:0 0 18px}
 .p-sum{font-size:1.02rem;line-height:1.55;margin:0 0 14px}
 .p-text{color:var(--dim);line-height:1.7;margin:0}
+.p-text .par{display:block;margin-bottom:.9em}
+.p-text .par:last-child{margin-bottom:0}
+.p-text br{display:none}
 .p-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:22px}
 .tag{font-size:.72rem;padding:5px 11px;border-radius:999px;background:rgba(255,255,255,.07);
   border:1px solid var(--line);color:var(--dim)}
@@ -286,7 +289,17 @@ function openTrip(id){
   document.getElementById("pTitle").textContent = t.title;
   document.getElementById("pWhere").textContent = t.place + (t.country ? ", " + t.country : "");
   document.getElementById("pSum").textContent = esc(t.summary);
-  document.getElementById("pText").textContent = t.todo ? "" : esc(t.body);
+  var txt = document.getElementById("pText");
+  txt.textContent = "";
+  if (!t.todo) {
+    esc(t.body).split(/\n\s*\n/).forEach(function(par, i){
+      if (i) txt.appendChild(document.createElement("br"));
+      var sp = document.createElement("span");
+      sp.className = "par";
+      sp.textContent = par;
+      txt.appendChild(sp);
+    });
+  }
 
   var tags = document.getElementById("pTags");
   tags.textContent = "";
