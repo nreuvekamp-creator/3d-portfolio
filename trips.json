@@ -98,7 +98,7 @@
     },
     {
       "id": "wenen-1",
-      "title": "Innovatie Expeditie Wenen",
+      "title": "Urban Innovation Vienna",
       "place": "Karlsplatz, Wenen",
       "country": "Oostenrijk",
       "lat": 48.19917,
@@ -107,71 +107,74 @@
       "context": "studie",
       "study": "bi",
       "abroad": true,
-      "summary": "Innovatieve herinrichting van de Karlsplatz.",
-      "body": "De Karlsplatz is een van de drukste knooppunten van Wenen en tegelijk een plek waar niemand blijft hangen. Tijdens de expeditie werkten we aan voorstellen om die ruimte anders in te richten.",
+      "summary": "In een pressure cooker van een dag vier stedelijke opgaven oplossen.",
+      "body": "De afsluiting van het eerste jaar Business Innovation was een expeditie naar Wenen, met dertig studenten en een programma dat FHWien der WKW voor ons had samengesteld.\n\nVoor Urban Innovation Vienna werkten we aan vier stedelijke opgaven. In een pressure cooker van een dag moesten we tot iets komen waar de opdrachtgever daadwerkelijk iets aan had. Karlsplatz is precies het soort plek waar zo'n vraag over gaat: een van de drukste knooppunten van de stad, en tegelijk een plein waar niemand blijft hangen.",
       "tags": [
         "Stedelijke innovatie",
-        "Openbare ruimte"
+        "Pressure cooker",
+        "FHWien der WKW"
       ]
     },
     {
       "id": "wenen-2",
-      "title": "Wenen, tweede bezoek",
-      "place": "Wenen",
+      "title": "United Nations Vienna",
+      "place": "Vienna International Centre",
       "country": "Oostenrijk",
-      "lat": 48.2082,
-      "lon": 16.3738,
-      "date": "2024",
+      "lat": 48.2348,
+      "lon": 16.4166,
+      "date": "2024-05",
       "context": "studie",
       "study": "bi",
       "abroad": true,
-      "summary": "Tweede bezoek in het kader van de Business Innovation Expeditie.",
-      "body": "Nog aan te vullen: wat was hier het onderwerp en de datum?",
+      "summary": "Op bezoek bij een van de vier hoofdvestigingen van de VN.",
+      "body": "Wenen is naast New York, Genève en Nairobi een van de vier hoofdvestigingen van de Verenigde Naties. Het Vienna International Centre is formeel internationaal gebied: je loopt het land uit zonder de stad te verlaten. Onderdeel van de innovatie-expeditie, om te zien hoe besluitvorming werkt op een schaal waar geen enkel bedrijf bij in de buurt komt.",
       "tags": [
-        "Business Innovation Expeditie"
-      ],
-      "todo": true
+        "Verenigde Naties",
+        "Expeditie"
+      ]
     },
     {
       "id": "wenen-3",
-      "title": "Wenen, derde bezoek",
+      "title": "Frequentis en a:head bio",
       "place": "Wenen",
       "country": "Oostenrijk",
-      "lat": 48.1951,
-      "lon": 16.365,
-      "date": "2024",
+      "lat": 48.178,
+      "lon": 16.381,
+      "date": "2024-05",
       "context": "studie",
       "study": "bi",
       "abroad": true,
-      "summary": "Derde bezoek in het kader van de Business Innovation Expeditie.",
-      "body": "Nog aan te vullen: wat was hier het onderwerp en de datum?",
+      "summary": "Van hightech communicatie tot een biotech-start-up.",
+      "body": "Twee bedrijfsbezoeken die niet verder uit elkaar konden liggen. Frequentis bouwt communicatiesystemen voor luchtverkeersleiding en hulpdiensten: techniek waarbij een storing levens kost. a:head bio is een start-up die menselijk hersenweefsel kweekt om medicijnen op te testen.\n\nNaast elkaar gezet laten ze goed zien hoe breed innovatie is: de een schaalt decennia aan betrouwbaarheid op, de ander probeert iets te bouwen dat nog niet bestaat.",
       "tags": [
-        "Business Innovation Expeditie"
-      ],
-      "todo": true
+        "Bedrijfsbezoek",
+        "Hightech",
+        "Biotech"
+      ]
     },
     {
       "id": "madrid",
       "title": "Start-up Expeditie Madrid",
-      "place": "Madrid",
+      "place": "La Nave, Madrid",
       "country": "Spanje",
-      "lat": 40.4168,
-      "lon": -3.7038,
+      "lat": 40.3797,
+      "lon": -3.6702,
       "date": "2024-12",
       "context": "studie",
       "study": "bi",
       "abroad": true,
-      "summary": "Innovation center talks en presenteren voor een start-up publiek.",
-      "body": "Een week in de Madrileense start-up scene: gesprekken in innovation centers en zelf presenteren. Vooral leerzaam om te zien hoe anders een ecosysteem werkt dan het Nederlandse.",
+      "summary": "Een week in het innovatie-ecosysteem van Madrid, bij La Nave.",
+      "body": "La Nave is het innovatiecentrum van de stad Madrid, in een oude fabriekshal in Villaverde. We volgden er pitch trainings, luisterden naar ondernemers die hun bedrijf hadden opgebouwd, en werkten aan onze eigen business ideeen.\n\nOnderdeel van het start-up traject dat later uitmondde in de Dragons' Den. Vooral leerzaam om te zien hoe anders een ecosysteem werkt dan het Nederlandse.",
       "tags": [
         "Start-ups",
         "Pitchen",
-        "Innovation centers"
+        "La Nave",
+        "Expeditie"
       ]
     },
     {
       "id": "responsible-startup",
-      "title": "Responsible Start-up, winnaar Dragons' Den",
+      "title": "Blaze, winnaar Dragons' Den",
       "place": "'s-Hertogenbosch",
       "country": "Nederland",
       "lat": 51.6978,
@@ -180,17 +183,18 @@
       "context": "studie",
       "study": "bi",
       "abroad": false,
-      "summary": "Gewonnen: beste schaalbare sociale start-up.",
-      "body": "Tijdens het keuzesemester Responsible Start-up bouwden we aan een start-up die zowel maatschappelijk als commercieel moest kloppen. Onze pitch won de Dragons' Den in de categorie beste schaalbare sociale start-up.",
+      "summary": "Een product tegen straatintimidatie, eerste van alle groepen.",
+      "body": "Samen met Charlotte Harte ontwikkelde ik Blaze: een product voor vrouwveiligheid dat met fel licht en gericht geluid ongewenste personen op afstand houdt, zonder iemand langdurig pijn te doen.\n\nZestien weken start-up traject met experimenten, gastcolleges en de fieldtrip naar Madrid, afgesloten met de jaarlijkse Dragons' Den van Business Innovation. Van alle groepen werden wij eerste.",
       "tags": [
         "Winnaar",
-        "Sociale onderneming",
-        "Dragons' Den"
+        "Dragons' Den",
+        "Vrouwveiligheid",
+        "Start-up"
       ]
     },
     {
       "id": "volksbank",
-      "title": "Volksbank, Overstap Service",
+      "title": "ASN Bank, de overstapservice",
       "place": "Utrecht",
       "country": "Nederland",
       "lat": 52.0885,
@@ -199,12 +203,13 @@
       "context": "studie",
       "study": "bi",
       "abroad": false,
-      "summary": "Winnend voorstel voor het verbeteren van de customer journey.",
-      "body": "Op het hoofdkantoor in Utrecht keken we naar de Overstap Service, de reis die iemand aflegt bij het overstappen naar een andere bank. We brachten de knelpunten in kaart en ontwierpen een betere route. Ons voorstel werd verkozen.",
+      "summary": "\"Het klopte gewoon.\" Klantreis van nieuwe overstappers opnieuw ontworpen.",
+      "body": "Het eerste project binnen de keuzemodule Digitale Transformatie. Voor ASN Bank, onderdeel van de Volksbank, brachten we de klantreis in kaart van nieuwe klanten die de overstapservice gebruiken: wat gebeurt er stap voor stap, en waar loopt iemand vast.\n\nNa de presentatie op het hoofdkantoor in Utrecht kregen we als compliment dat het gewoon klopte, en dat de emotionele beleving van het herontwerp voelbaar was in de zaal. We werkten met PEGA en gingen naar huis met een pakket duurzame producten.",
       "tags": [
         "Winnaar",
-        "Customer journey",
-        "Hoofdkantoor"
+        "Klantreis",
+        "Digitale Transformatie",
+        "PEGA"
       ]
     },
     {
@@ -275,12 +280,12 @@
       "context": "studie",
       "study": "stage",
       "abroad": false,
-      "summary": "Marketingstage rond customer segmentatie.",
-      "body": "Vijf maanden marketingstage. Hoofdopdracht was de customer segmentatie, maar er kwam meer bij: een Lego Serious Play-sessie begeleiden, een videoproductie die uiteindelijk in de bioscoop draaide, en een extensie bouwen die de fee berekent voor de private trading desk.",
+      "summary": "Customer segmentatie, en een reclame die in de bioscoop draaide.",
+      "body": "Vijf maanden marketingstage. Mijn hoofdopdracht was customer segmentatie: het klantbestand slim opdelen zodat marketing gerichter kan.\n\nDaarnaast maakte ik content voor de Private Trading Desk, van concept tot professionele edit. Die reclame haalde meer dan 100.000 views en draaide uiteindelijk in Vue-bioscopen. Verder begeleidde ik een creatieve sessie met Lego Serious Play en bouwde ik een extensie die de fee berekent voor de trading desk.\n\nHet ging goed genoeg dat ze me daarna een plek aanboden.",
       "tags": [
         "Stage",
         "Customer segmentatie",
-        "Video",
+        "Bioscoopreclame",
         "Lego Serious Play"
       ]
     },
@@ -327,22 +332,22 @@
     },
     {
       "id": "rotterdam",
-      "title": "City Safari, honoursprogramma",
+      "title": "City Safari Rotterdam",
       "place": "Rotterdam",
       "country": "Nederland",
       "lat": 51.9225,
       "lon": 4.4792,
-      "date": "2024",
+      "date": "2023-09",
       "context": "extracurriculair",
       "study": "honours",
       "abroad": false,
-      "summary": "Op eigen houtje langs de huiskamers van Rotterdam.",
-      "body": "City Safari is geen rondleiding maar een ontdekkingsreis: je krijgt een routeboekje en gaat zelfstandig langs adressen van Rotterdammers die je verwachten. Particulieren, ondernemers, een moskee, een atelier. Je ziet de stad door de ogen van wie er woont.",
+      "summary": "Langs mensen thuis, tijdens de start van het Honours Impact Programma.",
+      "body": "Het Honours Impact Programma begon met een intensief kennismakingsweekend: boksles, mindfulness, en een City Safari door Rotterdam.\n\nCity Safari is geen rondleiding. Je krijgt een routeboekje en gaat zelfstandig langs adressen van mensen die je verwachten: een dagbesteding, mensen thuis met een bijzonder verhaal. We waren ook welkom bij Heilige Boontjes, dat mensen met een strafblad opleidt tot barista. Je ziet de stad door de ogen van wie er woont.",
       "tags": [
         "Honours",
-        "City Safari"
-      ],
-      "todo": true
+        "City Safari",
+        "Impact"
+      ]
     },
     {
       "id": "eindhoven-conf",
@@ -533,6 +538,44 @@
         "Inside joke"
       ],
       "todo": true
+    },
+    {
+      "id": "honours-impact",
+      "title": "Honours Impact Programma",
+      "place": "'s-Hertogenbosch",
+      "country": "Nederland",
+      "lat": 51.6889,
+      "lon": 5.293,
+      "date": "2024-06",
+      "context": "extracurriculair",
+      "study": "honours",
+      "abroad": false,
+      "summary": "Een jaar lang in drie fases naar een eigen interventie toewerken.",
+      "body": "Het honoursjaar van AvansExtra loopt in drie fases. In de Purpose-fase graaf je naar wat je zelf eigenlijk wilt, via gesprekken die dieper gaan dan je gewend bent. In de Wereldbeeldfase ga je op zoek naar perspectieven die niet de jouwe zijn; wij presenteerden onze bevindingen aan de andere honoursstudenten, de coaches en de Dragons.\n\nIn de Impactfase bedachten we een interventie samen met de gemeente 's-Hertogenbosch en haar sportafdeling. Afgerond, en wat mij betreft het traject dat het meest heeft veranderd aan hoe ik naar vraagstukken kijk.",
+      "tags": [
+        "Honours",
+        "Impact",
+        "Gemeente 's-Hertogenbosch"
+      ]
+    },
+    {
+      "id": "veluweloop",
+      "title": "Veluweloop vastgelegd",
+      "place": "Wageningen",
+      "country": "Nederland",
+      "lat": 51.9692,
+      "lon": 5.6654,
+      "date": "2025-10",
+      "context": "extracurriculair",
+      "study": null,
+      "abroad": false,
+      "summary": "Voor de tweede keer de fotograaf van de estafetteloop.",
+      "body": "De Veluweloop is een estafette van zo'n 85 kilometer door de Veluwe, met dit jaar 126 teams aan de start. Ik legde de 43e editie vast, voor de tweede keer. Een dag lang vooruit rijden, plek zoeken, wachten tot de kopgroep er is, en door naar het volgende wisselpunt.",
+      "tags": [
+        "Fotografie",
+        "Hardlopen",
+        "Veluweloop"
+      ]
     }
   ]
 }

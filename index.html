@@ -86,7 +86,11 @@ button{font:inherit;color:inherit;cursor:pointer}
   display:flex;flex-direction:column;box-shadow:-20px 0 60px rgba(0,0,0,.5)}
 #panel.open{transform:none}
 .p-photo{position:relative;aspect-ratio:16/10;flex:none;overflow:hidden;background:var(--bg)}
-.p-photo img{width:100%;height:100%;object-fit:cover;display:block}
+.p-photo img{width:100%;height:100%;object-fit:cover;display:block;position:relative;z-index:1}
+/* Staande foto's niet kapot croppen: passend tonen op een uitvergrote, vervaagde versie van zichzelf. */
+.p-photo.tall img{object-fit:contain}
+.p-photo .blur{position:absolute;inset:0;background-size:cover;background-position:center;
+  filter:blur(26px) saturate(1.2) brightness(.55);transform:scale(1.25)}
 .p-ph{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;
   font-weight:700;font-size:1.25rem;line-height:1.25;color:rgba(255,255,255,.92)}
 .p-ph small{display:block;font-weight:400;font-size:.72rem;letter-spacing:.14em;
@@ -227,7 +231,10 @@ function buildChips(){
 
 /* Per groep: niets aan = alles door, behalve dat 'prive' altijd expliciet aan moet. */
 function groupPass(group, value){
-  var on = Object.keys(active[group]).filter(function(k){ return active[group][k]; });
+  var on = Object.keys(active[group]).filter(function(k){
+    /* 'prive' is een aan/uit-schakelaar, geen filter: hij voegt toe, hij beperkt niet. */
+    return active[group][k] && !(group === "context" && k === "prive");
+  });
   if (!on.length) return true;
   return on.indexOf(value) !== -1;
 }
@@ -327,6 +334,14 @@ function tryPhoto(container, list, i){
   var img = new Image();
   img.onload = function(){
     container.textContent = "";
+    container.classList.remove("tall");
+    if (img.naturalHeight > img.naturalWidth * 1.05) {
+      container.classList.add("tall");
+      var bg = document.createElement("div");
+      bg.className = "blur";
+      bg.style.backgroundImage = "url(\"" + img.src.replace(/"/g, "%22") + "\")";
+      container.appendChild(bg);
+    }
     container.appendChild(img);
   };
   img.onerror = function(){ tryPhoto(container, list, i + 1); };
