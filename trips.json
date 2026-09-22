@@ -540,20 +540,115 @@
       ]
     },
     {
-      "id": "eiffel",
-      "title": "De Eiffeltoren vasthouden",
-      "place": "Parijs",
+      "id": "joke-eiffel",
+      "title": "Waar het begon",
+      "place": "Eiffeltoren, Parijs",
       "country": "Frankrijk",
       "lat": 48.8584,
       "lon": 2.2945,
-      "date": "2023",
+      "date": "2024",
       "context": "prive",
       "study": null,
       "abroad": true,
-      "summary": "Ja, die foto.",
-      "body": "Iedereen maakt hem, en toch maakte ik hem ook.",
+      "summary": "De Eiffeltoren tussen duim en wijsvinger, met mijn broertje.",
+      "body": "Bij de Eiffeltoren zag je iedereen hetzelfde doen: net doen of je hem vasthoudt tussen je vingers. Mijn broertje en ik deden het ook.\n\nSindsdien doe ik het in elk nieuw land.",
       "tags": [
-        "Inside joke"
+        "Inside joke",
+        "Broertje"
+      ]
+    },
+    {
+      "id": "joke-louvre",
+      "title": "De piramide van het Louvre",
+      "place": "Louvre, Parijs",
+      "country": "Frankrijk",
+      "lat": 48.8606,
+      "lon": 2.3376,
+      "date": "2024",
+      "context": "prive",
+      "study": null,
+      "abroad": true,
+      "summary": "Bleek dat mensen het bij het Louvre ook deden.",
+      "body": "Bij de glazen piramide van het Louvre stond iedereen precies hetzelfde te doen. Toen was het geen toeval meer maar een traditie, en zijn we het overal gaan doen.",
+      "tags": [
+        "Inside joke",
+        "Parijs"
+      ]
+    },
+    {
+      "id": "joke-valencia",
+      "title": "De Ciutat de les Arts",
+      "place": "CaixaForum, Valencia",
+      "country": "Spanje",
+      "lat": 39.4535,
+      "lon": -0.349,
+      "date": "2024-04",
+      "context": "prive",
+      "study": null,
+      "abroad": true,
+      "summary": "Tijdens de studiereis die ik zelf organiseerde.",
+      "body": "Calatrava's witte skeletten in het oude rivierbed van de Turia. Tijdens de studiereis naar Valencia die ik voor meer dan 25 medestudenten organiseerde, dus ook hier moest het even.",
+      "tags": [
+        "Inside joke",
+        "Spanje",
+        "Studiereis"
+      ]
+    },
+    {
+      "id": "joke-seoul",
+      "title": "Changdeokgung",
+      "place": "Seoul",
+      "country": "Zuid-Korea",
+      "lat": 37.5794,
+      "lon": 126.991,
+      "date": "2025",
+      "context": "prive",
+      "study": null,
+      "abroad": true,
+      "summary": "In hanbok bij het paleis, want dan mag je gratis naar binnen.",
+      "body": "Changdeokgung is het best bewaarde van de vijf grote paleizen van Seoul. Wie in hanbok komt mag gratis naar binnen, dus die trek je aan. En dan houd je alsnog de Injeongjeon-hal tussen je vingers.",
+      "tags": [
+        "Inside joke",
+        "Zuid-Korea",
+        "Azie"
+      ]
+    },
+    {
+      "id": "joke-fuji",
+      "title": "De Chureito-pagode",
+      "place": "Fujiyoshida",
+      "country": "Japan",
+      "lat": 35.4957,
+      "lon": 138.8,
+      "date": "2025",
+      "context": "prive",
+      "study": null,
+      "abroad": true,
+      "summary": "Het bekendste uitzicht van Japan, op een dag zonder Fuji.",
+      "body": "Vanaf de trappen bij de Chureito-pagode kijk je normaal recht op de Fuji. Die dag zat hij volledig achter de wolken. De pagode vasthouden ging gelukkig gewoon door.",
+      "tags": [
+        "Inside joke",
+        "Japan",
+        "Azie"
+      ]
+    },
+    {
+      "id": "joke-dmz",
+      "title": "De grens met Noord-Korea",
+      "place": "DMZ",
+      "country": "Zuid-Korea",
+      "lat": 37.8836,
+      "lon": 126.696,
+      "date": "2025",
+      "context": "prive",
+      "study": null,
+      "abroad": true,
+      "summary": "De verste plek waar het tot nu toe gelukt is.",
+      "body": "Nog aan te vullen: was dit bij de Dora-observatiepost, in de JSA bij Panmunjom, of ergens anders langs de DMZ? En wat hield je daar precies vast?",
+      "tags": [
+        "Inside joke",
+        "Zuid-Korea",
+        "Grens"
       ],
       "todo": true
     },
