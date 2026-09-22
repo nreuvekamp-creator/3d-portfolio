@@ -350,37 +350,56 @@
     },
     {
       "id": "eindhoven-conf",
-      "title": "Start-up conferentie Eindhoven",
+      "title": "LEVEL UP",
       "place": "Evoluon, Eindhoven",
       "country": "Nederland",
       "lat": 51.443511,
       "lon": 5.44686,
-      "date": "2024",
+      "date": "2024-09",
       "context": "extracurriculair",
       "study": null,
       "abroad": false,
-      "summary": "Startup- en scale-up conferentie in het Brainport-ecosysteem.",
-      "body": "Het meest waarschijnlijke evenement is LEVEL UP in het Evoluon, het jaarlijkse startup-event van BOM, Braventure, Brainport en The Gate, met founders, investeerders en matchmaking. Edities: 25 september 2023, 30 september 2024, 29 september 2025.",
+      "summary": "Het startup-event van Brainport, tijdens het start-up traject.",
+      "body": "LEVEL UP is het jaarlijkse startup- en scale-up-event in het Evoluon, waar founders, investeerders en accelerators uit binnen- en buitenland samenkomen. Academy-sessies over je business model, een Investor Cafe waar founders en investeerders de gesprekken voeren die normaal binnenskamers blijven, en matchmaking om je mede-oprichter te vinden.\n\nIk was er tijdens het start-up traject, in de periode dat we aan Blaze werkten. Een conferentie bezoeken terwijl je zelf met een start-up bezig bent leest heel anders dan wanneer je er los naar kijkt.",
       "tags": [
         "Start-ups",
         "Conferentie",
-        "Brainport"
-      ],
-      "todo": true
+        "Brainport",
+        "Evoluon"
+      ]
     },
     {
-      "id": "bitcoin-amsterdam",
-      "title": "Bitcoin Amsterdam",
-      "place": "Westergas, Amsterdam",
+      "id": "bitcoin-2025",
+      "title": "Bitcoin Amsterdam 2025",
+      "place": "SugarCity, Halfweg",
       "country": "Nederland",
-      "lat": 52.386757,
-      "lon": 4.86924,
+      "lat": 52.384739,
+      "lon": 4.746391,
       "date": "2025-11",
       "context": "extracurriculair",
       "study": null,
       "abroad": false,
-      "summary": "Meerdere edities van de Bitcoin-conferentie bezocht.",
-      "body": "De conferentie zat van 2022 tot en met 2024 in de Gashouder op het Westergasterrein (12-14 okt 2022, 12-13 okt 2023, 9-10 okt 2024) en verhuisde in 2025 naar SugarCity in Halfweg (13-14 november). Van die laatste editie ligt het ticket er nog.",
+      "summary": "De meest recente editie, voor het eerst buiten het Westergasterrein.",
+      "body": "Na vier jaar in de Gashouder op het Westergasterrein verhuisde de conferentie naar SugarCity in Halfweg, een oude suikerfabriek. Twee dagen talks over bitcoin, mining, zelfbewaring en regulering.\n\nIk werk bij BTC Direct, dus dit is deels vakgebied en deels gewoon nieuwsgierigheid: nergens anders zie je de hele sector, van hardware-bouwers tot toezichthouders, in een paar zalen bij elkaar.",
+      "tags": [
+        "Bitcoin",
+        "Conferentie",
+        "SugarCity"
+      ]
+    },
+    {
+      "id": "bitcoin-westergas",
+      "title": "Bitcoin Amsterdam, Westergas",
+      "place": "Gashouder, Amsterdam",
+      "country": "Nederland",
+      "lat": 52.386757,
+      "lon": 4.86924,
+      "date": "2023",
+      "context": "extracurriculair",
+      "study": null,
+      "abroad": false,
+      "summary": "Een eerdere editie, toen de conferentie nog in de Gashouder zat.",
+      "body": "Nog aan te vullen: was dit de editie van 2022 (12 tot 14 oktober) of die van 2023 (12 en 13 oktober)?",
       "tags": [
         "Bitcoin",
         "Conferentie",
@@ -415,17 +434,17 @@
       "country": "Nederland",
       "lat": 51.707621,
       "lon": 5.331332,
-      "date": "2024",
+      "date": "2025",
       "context": "studie",
       "study": "bi",
       "abroad": false,
       "summary": "Het magazijn waar alleen online boodschappen vandaan komen.",
-      "body": "Een e-fulfilment centre is een magazijn zonder winkel: hier wordt uitsluitend gepickt en verpakt voor thuisbezorging en pick-up points. Dit was in 2014 het eerste EFC van Jumbo, in het voormalige distributiecentrum van Super de Boer.",
+      "body": "Een e-fulfilment centre is een magazijn zonder winkel: hier wordt uitsluitend gepickt en verpakt voor thuisbezorging en pick-up points. Dit was in 2014 het eerste EFC van Jumbo, in het voormalige distributiecentrum van Super de Boer aan de Balkweg.\n\nEen van de drie opdrachten binnen de keuzemodule Digitale Transformatie, naast ASN Bank en ASML. Drie totaal verschillende organisaties, en steeds dezelfde vraag: waar loopt het proces vast en wat kan digitalisering daar oplossen.",
       "tags": [
         "Logistiek",
-        "Distributiecentrum"
-      ],
-      "todo": true
+        "Distributiecentrum",
+        "Digitale Transformatie"
+      ]
     },
     {
       "id": "den-bosch-meeloop",
