@@ -594,6 +594,120 @@
         "Hardlopen",
         "Veluweloop"
       ]
+    },
+    {
+      "id": "udenhout",
+      "title": "Survivalrun Udenhout",
+      "place": "Udenhout",
+      "country": "Nederland",
+      "lat": 51.6167,
+      "lon": 5.1333,
+      "date": "2023",
+      "context": "extracurriculair",
+      "study": null,
+      "abroad": false,
+      "summary": "Gefotografeerd voor de Survivalrunbond Nederland.",
+      "body": "Ik heb zelf jaren survivalrun getraind, en fotografeer de wedstrijden nu voor de Survivalrunbond Nederland. Dat helpt: je weet waar iemand gaat afzien, dus je staat al klaar voordat het gebeurt. De hindernis waar de handen loslaten, het moment net na de kabelbaan, het gezicht bij de laatste net.\n\nTwee edities vastgelegd, beide op zondag: 2023 en 2024.",
+      "tags": [
+        "Fotografie",
+        "Survivalrun",
+        "Survivalrunbond"
+      ]
+    },
+    {
+      "id": "sr-nijmegen",
+      "title": "Survivalrun Nijmegen",
+      "place": "Nijmegen",
+      "country": "Nederland",
+      "lat": 51.8126,
+      "lon": 5.8372,
+      "date": "2024",
+      "context": "extracurriculair",
+      "study": null,
+      "abroad": false,
+      "summary": "Gefotografeerd voor de Survivalrunbond Nederland.",
+      "body": "Ik heb zelf jaren survivalrun getraind, en fotografeer de wedstrijden nu voor de Survivalrunbond Nederland. Dat helpt: je weet waar iemand gaat afzien, dus je staat al klaar voordat het gebeurt. De hindernis waar de handen loslaten, het moment net na de kabelbaan, het gezicht bij de laatste net.\n\nDe run in eigen stad, editie 2024.",
+      "tags": [
+        "Fotografie",
+        "Survivalrun",
+        "Survivalrunbond"
+      ]
+    },
+    {
+      "id": "sr-eindhoven",
+      "title": "Survivalrun Eindhoven",
+      "place": "Eindhoven",
+      "country": "Nederland",
+      "lat": 51.4416,
+      "lon": 5.4697,
+      "date": "2024",
+      "context": "extracurriculair",
+      "study": null,
+      "abroad": false,
+      "summary": "Gefotografeerd voor de Survivalrunbond Nederland.",
+      "body": "Ik heb zelf jaren survivalrun getraind, en fotografeer de wedstrijden nu voor de Survivalrunbond Nederland. Dat helpt: je weet waar iemand gaat afzien, dus je staat al klaar voordat het gebeurt. De hindernis waar de handen loslaten, het moment net na de kabelbaan, het gezicht bij de laatste net.\n\nEditie 2024.",
+      "tags": [
+        "Fotografie",
+        "Survivalrun",
+        "Survivalrunbond"
+      ]
+    },
+    {
+      "id": "sr-zwolle",
+      "title": "Survivalrun Zwolle, OOrun",
+      "place": "Zwolle",
+      "country": "Nederland",
+      "lat": 52.5168,
+      "lon": 6.083,
+      "date": "2024",
+      "context": "extracurriculair",
+      "study": null,
+      "abroad": false,
+      "summary": "Gefotografeerd voor de Survivalrunbond Nederland.",
+      "body": "Ik heb zelf jaren survivalrun getraind, en fotografeer de wedstrijden nu voor de Survivalrunbond Nederland. Dat helpt: je weet waar iemand gaat afzien, dus je staat al klaar voordat het gebeurt. De hindernis waar de handen loslaten, het moment net na de kabelbaan, het gezicht bij de laatste net.\n\nTwee keer gefotografeerd: de OOrun van 2024 en die van 2026.",
+      "tags": [
+        "Fotografie",
+        "Survivalrun",
+        "Survivalrunbond"
+      ]
+    },
+    {
+      "id": "sr-wapenveld",
+      "title": "Survivalrun Wapenveld",
+      "place": "Wapenveld",
+      "country": "Nederland",
+      "lat": 52.4667,
+      "lon": 6.05,
+      "date": "2024",
+      "context": "extracurriculair",
+      "study": null,
+      "abroad": false,
+      "summary": "Gefotografeerd voor de Survivalrunbond Nederland.",
+      "body": "Ik heb zelf jaren survivalrun getraind, en fotografeer de wedstrijden nu voor de Survivalrunbond Nederland. Dat helpt: je weet waar iemand gaat afzien, dus je staat al klaar voordat het gebeurt. De hindernis waar de handen loslaten, het moment net na de kabelbaan, het gezicht bij de laatste net.\n\nEditie 2024, op de Veluwe.",
+      "tags": [
+        "Fotografie",
+        "Survivalrun",
+        "Survivalrunbond"
+      ]
+    },
+    {
+      "id": "sr-delft",
+      "title": "Survivalrun Delft",
+      "place": "Delft",
+      "country": "Nederland",
+      "lat": 52.0116,
+      "lon": 4.3571,
+      "date": "2025",
+      "context": "extracurriculair",
+      "study": null,
+      "abroad": false,
+      "summary": "Gefotografeerd voor de Survivalrunbond Nederland.",
+      "body": "Ik heb zelf jaren survivalrun getraind, en fotografeer de wedstrijden nu voor de Survivalrunbond Nederland. Dat helpt: je weet waar iemand gaat afzien, dus je staat al klaar voordat het gebeurt. De hindernis waar de handen loslaten, het moment net na de kabelbaan, het gezicht bij de laatste net.\n\nEditie 2025.",
+      "tags": [
+        "Fotografie",
+        "Survivalrun",
+        "Survivalrunbond"
+      ]
     }
   ]
 }
