@@ -398,18 +398,17 @@
       "context": "extracurriculair",
       "study": null,
       "abroad": false,
-      "summary": "Een eerdere editie, toen de conferentie nog in de Gashouder zat.",
-      "body": "Nog aan te vullen: was dit de editie van 2022 (12 tot 14 oktober) of die van 2023 (12 en 13 oktober)?",
+      "summary": "De editie van 2023, toen de conferentie nog in de Gashouder zat.",
+      "body": "Op 12 en 13 oktober 2023 in de Gashouder op het Westergasterrein. Van 2022 tot en met 2024 was dat de vaste plek van de conferentie, voordat ze in 2025 naar SugarCity in Halfweg verhuisde.",
       "tags": [
         "Bitcoin",
         "Conferentie",
         "Westergas"
-      ],
-      "todo": true
+      ]
     },
     {
       "id": "vdl",
-      "title": "VDL Bus & Coach",
+      "title": "VDL Bus & Coach, factory tour",
       "place": "Valkenswaard",
       "country": "Nederland",
       "lat": 51.348877,
@@ -418,14 +417,13 @@
       "context": "studie",
       "study": "wb",
       "abroad": false,
-      "summary": "Bij de bussenbouwer, tijdens Werktuigbouwkunde.",
-      "body": "Op de site in Valkenswaard zit het hoofdkantoor van VDL Bus & Coach, samen met de productie van touringcars (Futura, Jonckheere, Synergy), de nieuwe Citea, VDL Bus Modules en het onderhoudsbedrijf. De volledig elektrische Citea rolt sinds 2023 van de band in Roeselare.",
+      "summary": "Factory tour bij de bussenbouwer, tijdens Werktuigbouwkunde.",
+      "body": "Een rondleiding door de fabriek in Valkenswaard, waar naast het hoofdkantoor van VDL Bus & Coach ook de productie van de touringcars staat: de Futura, de Jonckheere en de Synergy, en de nieuwe Citea.\n\nVoor een student Werktuigbouwkunde is zo'n tour het moment waarop tekeningen en tolerantie-oefeningen ineens ergens over gaan. Een bus wordt niet in een keer gebouwd maar in stations, en je ziet hoe elk station zijn eigen probleem heeft opgelost.",
       "tags": [
         "Werktuigbouwkunde",
         "Maakindustrie",
-        "Excursie"
-      ],
-      "todo": true
+        "Factory tour"
+      ]
     },
     {
       "id": "jumbo-efc",
