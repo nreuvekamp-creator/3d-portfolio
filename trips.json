@@ -1,0 +1,538 @@
+{
+  "_readme": "Dit bestand is de inhoud van de site. Pas hier teksten aan of voeg reizen toe; de site leest het live in. Velden: id (uniek, bepaalt ook de fotonaam photos/<id>.jpg), title, place, country, lat, lon, date (YYYY-MM of YYYY), context (studie | extracurriculair | prive), study (wb | cmd | bi | honours | stage | null), abroad (true/false), summary (1 zin, op de kaart), body (langere tekst in het paneel), tags (vrije labels), todo (true = gegevens nog onzeker, toont een ? op de site).",
+  "profile": {
+    "name": "Niels Reuvekamp",
+    "photo": "photos/niels.png",
+    "title": "Welkom op mijn wereldreis",
+    "intro": "Hi, wat leuk dat je hier bent. Van alle miljarden websites ben je op de juiste beland. Wat je hier vindt zijn de ervaringen die ik heb beleefd, via mijn studie en daarbuiten. Draai aan de bol, klik op een plek en ik vertel je wat daar gebeurde.",
+    "hint": "Sleep om te draaien, scroll om in te zoomen. Punten die dicht bij elkaar liggen bundelen zich als je uitzoomt."
+  },
+  "filters": {
+    "context": [
+      {
+        "id": "studie",
+        "label": "Binnen studie"
+      },
+      {
+        "id": "extracurriculair",
+        "label": "Extracurriculair"
+      },
+      {
+        "id": "prive",
+        "label": "Prive",
+        "default": false
+      }
+    ],
+    "study": [
+      {
+        "id": "bi",
+        "label": "Business Innovation"
+      },
+      {
+        "id": "cmd",
+        "label": "Communication and Multimedia Design"
+      },
+      {
+        "id": "wb",
+        "label": "Werktuigbouwkunde"
+      },
+      {
+        "id": "honours",
+        "label": "Honours"
+      },
+      {
+        "id": "stage",
+        "label": "Stage"
+      }
+    ],
+    "world": [
+      {
+        "id": "abroad",
+        "label": "Buitenland"
+      },
+      {
+        "id": "home",
+        "label": "Nederland"
+      }
+    ]
+  },
+  "trips": [
+    {
+      "id": "naestved",
+      "title": "International Retail Challenge",
+      "place": "Naestved",
+      "country": "Denemarken",
+      "lat": 55.2297,
+      "lon": 11.7608,
+      "date": "2024-03",
+      "context": "studie",
+      "study": "bi",
+      "abroad": true,
+      "summary": "Een bestemming bedenken voor de leegstaande winkels in het centrum.",
+      "body": "In Naestved liep het winkelcentrum leeg, een probleem dat je in veel middelgrote Europese steden ziet. Met een internationaal team keken we naar wat die panden nog wel konden betekenen voor de stad, en presenteerden we voorstellen aan de lokale partijen. De Retail Challenge is een Erasmus+ programma van vijf dagen met design thinking en een jurypitch; de gastinstelling wisselt per jaar.",
+      "tags": [
+        "Retail",
+        "Internationaal team",
+        "Leegstand"
+      ],
+      "todo": true
+    },
+    {
+      "id": "valencia",
+      "title": "Studiereis Valencia",
+      "place": "Valencia",
+      "country": "Spanje",
+      "lat": 39.4699,
+      "lon": -0.3763,
+      "date": "2024-04",
+      "context": "extracurriculair",
+      "study": "bi",
+      "abroad": true,
+      "summary": "Zelf georganiseerd: een reis met educatief programma voor 25+ studenten.",
+      "body": "Ik was organisator van deze reis voor meer dan 25 Business Innovation-studenten. Naast het regelen van de reis zelf heb ik het educatieve deel van het programma opgezet, zodat het meer werd dan alleen een week weg.",
+      "tags": [
+        "Organisator",
+        "25+ studenten",
+        "Educatief programma"
+      ]
+    },
+    {
+      "id": "wenen-1",
+      "title": "Innovatie Expeditie Wenen",
+      "place": "Karlsplatz, Wenen",
+      "country": "Oostenrijk",
+      "lat": 48.19917,
+      "lon": 16.37,
+      "date": "2024-05",
+      "context": "studie",
+      "study": "bi",
+      "abroad": true,
+      "summary": "Innovatieve herinrichting van de Karlsplatz.",
+      "body": "De Karlsplatz is een van de drukste knooppunten van Wenen en tegelijk een plek waar niemand blijft hangen. Tijdens de expeditie werkten we aan voorstellen om die ruimte anders in te richten.",
+      "tags": [
+        "Stedelijke innovatie",
+        "Openbare ruimte"
+      ]
+    },
+    {
+      "id": "wenen-2",
+      "title": "Wenen, tweede bezoek",
+      "place": "Wenen",
+      "country": "Oostenrijk",
+      "lat": 48.2082,
+      "lon": 16.3738,
+      "date": "2024",
+      "context": "studie",
+      "study": "bi",
+      "abroad": true,
+      "summary": "Tweede bezoek in het kader van de Business Innovation Expeditie.",
+      "body": "Nog aan te vullen: wat was hier het onderwerp en de datum?",
+      "tags": [
+        "Business Innovation Expeditie"
+      ],
+      "todo": true
+    },
+    {
+      "id": "wenen-3",
+      "title": "Wenen, derde bezoek",
+      "place": "Wenen",
+      "country": "Oostenrijk",
+      "lat": 48.1951,
+      "lon": 16.365,
+      "date": "2024",
+      "context": "studie",
+      "study": "bi",
+      "abroad": true,
+      "summary": "Derde bezoek in het kader van de Business Innovation Expeditie.",
+      "body": "Nog aan te vullen: wat was hier het onderwerp en de datum?",
+      "tags": [
+        "Business Innovation Expeditie"
+      ],
+      "todo": true
+    },
+    {
+      "id": "madrid",
+      "title": "Start-up Expeditie Madrid",
+      "place": "Madrid",
+      "country": "Spanje",
+      "lat": 40.4168,
+      "lon": -3.7038,
+      "date": "2024-12",
+      "context": "studie",
+      "study": "bi",
+      "abroad": true,
+      "summary": "Innovation center talks en presenteren voor een start-up publiek.",
+      "body": "Een week in de Madrileense start-up scene: gesprekken in innovation centers en zelf presenteren. Vooral leerzaam om te zien hoe anders een ecosysteem werkt dan het Nederlandse.",
+      "tags": [
+        "Start-ups",
+        "Pitchen",
+        "Innovation centers"
+      ]
+    },
+    {
+      "id": "responsible-startup",
+      "title": "Responsible Start-up, winnaar Dragons' Den",
+      "place": "'s-Hertogenbosch",
+      "country": "Nederland",
+      "lat": 51.6978,
+      "lon": 5.3037,
+      "date": "2025-01",
+      "context": "studie",
+      "study": "bi",
+      "abroad": false,
+      "summary": "Gewonnen: beste schaalbare sociale start-up.",
+      "body": "Tijdens het keuzesemester Responsible Start-up bouwden we aan een start-up die zowel maatschappelijk als commercieel moest kloppen. Onze pitch won de Dragons' Den in de categorie beste schaalbare sociale start-up.",
+      "tags": [
+        "Winnaar",
+        "Sociale onderneming",
+        "Dragons' Den"
+      ]
+    },
+    {
+      "id": "volksbank",
+      "title": "Volksbank, Overstap Service",
+      "place": "Utrecht",
+      "country": "Nederland",
+      "lat": 52.0885,
+      "lon": 5.1089,
+      "date": "2025-02",
+      "context": "studie",
+      "study": "bi",
+      "abroad": false,
+      "summary": "Winnend voorstel voor het verbeteren van de customer journey.",
+      "body": "Op het hoofdkantoor in Utrecht keken we naar de Overstap Service, de reis die iemand aflegt bij het overstappen naar een andere bank. We brachten de knelpunten in kaart en ontwierpen een betere route. Ons voorstel werd verkozen.",
+      "tags": [
+        "Winnaar",
+        "Customer journey",
+        "Hoofdkantoor"
+      ]
+    },
+    {
+      "id": "bergen-trade-mission",
+      "title": "Trade Mission Bergen",
+      "place": "Bergen",
+      "country": "Noorwegen",
+      "lat": 60.3913,
+      "lon": 5.3221,
+      "date": "2025-03",
+      "context": "studie",
+      "study": "bi",
+      "abroad": true,
+      "summary": "Een start-up geholpen om voet aan land te krijgen in Noorwegen.",
+      "body": "Mijn eerste keer in Bergen. Tijdens deze handelsmissie hielpen we een start-up de stap naar de Noorse markt te zetten: wie zijn de partijen, wat verwacht de markt, en hoe kom je binnen.",
+      "tags": [
+        "Handelsmissie",
+        "Marktintroductie",
+        "Noorwegen #1"
+      ]
+    },
+    {
+      "id": "asml",
+      "title": "ASML, support afdeling",
+      "place": "Veldhoven",
+      "country": "Nederland",
+      "lat": 51.41,
+      "lon": 5.45,
+      "date": "2025-04",
+      "context": "studie",
+      "study": "bi",
+      "abroad": false,
+      "summary": "Winnend voorstel voor het verbeteren van administratieve taken.",
+      "body": "Op het hoofdkantoor in Veldhoven doken we in de administratieve last op de support afdeling. Waar gaat tijd verloren, en wat kan eruit of anders. Ons voorstel werd gekozen.",
+      "tags": [
+        "Winnaar",
+        "Procesverbetering",
+        "Hoofdkantoor"
+      ]
+    },
+    {
+      "id": "bergen-minor",
+      "title": "Minor Innovatie in Bergen",
+      "place": "Bergen",
+      "country": "Noorwegen",
+      "lat": 60.3728,
+      "lon": 5.348,
+      "date": "2026",
+      "context": "studie",
+      "study": "bi",
+      "abroad": true,
+      "summary": "Een semester aan de Western Norway University of Applied Sciences.",
+      "body": "Terug in Bergen, dit keer om te studeren aan HVL. Vakken rond innovatie en verandermanagement, duurzaamheid, filosofie en economie, en de neurowetenschap achter marketing. Wonen in een land waarvan je de taal nog niet spreekt verandert hoe je naar dingen kijkt.",
+      "tags": [
+        "Minor",
+        "HVL",
+        "Noorwegen #2"
+      ]
+    },
+    {
+      "id": "btc-direct",
+      "title": "Stage bij BTC Direct",
+      "place": "Nijmegen",
+      "country": "Nederland",
+      "lat": 51.8426,
+      "lon": 5.8546,
+      "date": "2025-09",
+      "context": "studie",
+      "study": "stage",
+      "abroad": false,
+      "summary": "Marketingstage rond customer segmentatie.",
+      "body": "Vijf maanden marketingstage. Hoofdopdracht was de customer segmentatie, maar er kwam meer bij: een Lego Serious Play-sessie begeleiden, een videoproductie die uiteindelijk in de bioscoop draaide, en een extensie bouwen die de fee berekent voor de private trading desk.",
+      "tags": [
+        "Stage",
+        "Customer segmentatie",
+        "Video",
+        "Lego Serious Play"
+      ]
+    },
+    {
+      "id": "reggio-emilia",
+      "title": "Erasmus+ INTELLIGENT",
+      "place": "Reggio Emilia",
+      "country": "Italie",
+      "lat": 44.6989,
+      "lon": 10.6297,
+      "date": "2026-05",
+      "context": "studie",
+      "study": "bi",
+      "abroad": true,
+      "summary": "Communication Lead namens Avans in een Europees projectteam.",
+      "body": "INTELLIGENT is een Erasmus+ project over onderwijs voor generatie Z en Alpha, met partners uit Litouwen, Letland, Estland, Nederland, Portugal en Italie. Tijdens de trainingsweek in Reggio Emilia werkten 44 studenten uit zes landen aan een opdracht van het bedrijf ITINERE: het toeristische aanbod van de stad aantrekkelijker maken voor Gen Z. Ik was Communication Lead namens Avans. Onze concepten Neon Road en Exclusive Dining draaiden om de RCF Arena.",
+      "tags": [
+        "Erasmus+",
+        "Communication Lead",
+        "Internationaal team",
+        "Gen Z"
+      ]
+    },
+    {
+      "id": "antwerpen",
+      "title": "Hack de Haven met AI",
+      "place": "Havenhuis, Antwerpen",
+      "country": "Belgie",
+      "lat": 51.2411,
+      "lon": 4.4072,
+      "date": "2026-02",
+      "context": "extracurriculair",
+      "study": null,
+      "abroad": true,
+      "summary": "Hackathon van een dag op echte cases uit de Antwerpse haven.",
+      "body": "In het Havenhuis van Zaha Hadid werkten Vlaamse en Nederlandse studenten in gemengde teams aan echte AI-vraagstukken van havenbedrijven: ontploffingen voorkomen in verbrandingsovens bij Lanxess, gasflessen detecteren op de rontgen bij Indaver, en containerstromen plannen bij CLdN. Georganiseerd binnen het ART-IE-initiatief, met pitches en een prijsuitreiking aan het eind.",
+      "tags": [
+        "Hackathon",
+        "AI",
+        "Haven",
+        "ART-IE"
+      ],
+      "todo": true
+    },
+    {
+      "id": "rotterdam",
+      "title": "City Safari, honoursprogramma",
+      "place": "Rotterdam",
+      "country": "Nederland",
+      "lat": 51.9225,
+      "lon": 4.4792,
+      "date": "2024",
+      "context": "extracurriculair",
+      "study": "honours",
+      "abroad": false,
+      "summary": "Op eigen houtje langs de huiskamers van Rotterdam.",
+      "body": "City Safari is geen rondleiding maar een ontdekkingsreis: je krijgt een routeboekje en gaat zelfstandig langs adressen van Rotterdammers die je verwachten. Particulieren, ondernemers, een moskee, een atelier. Je ziet de stad door de ogen van wie er woont.",
+      "tags": [
+        "Honours",
+        "City Safari"
+      ],
+      "todo": true
+    },
+    {
+      "id": "eindhoven-conf",
+      "title": "Start-up conferentie Eindhoven",
+      "place": "Evoluon, Eindhoven",
+      "country": "Nederland",
+      "lat": 51.443511,
+      "lon": 5.44686,
+      "date": "2024",
+      "context": "extracurriculair",
+      "study": null,
+      "abroad": false,
+      "summary": "Startup- en scale-up conferentie in het Brainport-ecosysteem.",
+      "body": "Het meest waarschijnlijke evenement is LEVEL UP in het Evoluon, het jaarlijkse startup-event van BOM, Braventure, Brainport en The Gate, met founders, investeerders en matchmaking. Edities: 25 september 2023, 30 september 2024, 29 september 2025.",
+      "tags": [
+        "Start-ups",
+        "Conferentie",
+        "Brainport"
+      ],
+      "todo": true
+    },
+    {
+      "id": "bitcoin-amsterdam",
+      "title": "Bitcoin Amsterdam",
+      "place": "Westergas, Amsterdam",
+      "country": "Nederland",
+      "lat": 52.386757,
+      "lon": 4.86924,
+      "date": "2025-11",
+      "context": "extracurriculair",
+      "study": null,
+      "abroad": false,
+      "summary": "Meerdere edities van de Bitcoin-conferentie bezocht.",
+      "body": "De conferentie zat van 2022 tot en met 2024 in de Gashouder op het Westergasterrein (12-14 okt 2022, 12-13 okt 2023, 9-10 okt 2024) en verhuisde in 2025 naar SugarCity in Halfweg (13-14 november). Van die laatste editie ligt het ticket er nog.",
+      "tags": [
+        "Bitcoin",
+        "Conferentie",
+        "Westergas"
+      ],
+      "todo": true
+    },
+    {
+      "id": "vdl",
+      "title": "VDL Bus & Coach",
+      "place": "Valkenswaard",
+      "country": "Nederland",
+      "lat": 51.348877,
+      "lon": 5.490675,
+      "date": "2020",
+      "context": "studie",
+      "study": "wb",
+      "abroad": false,
+      "summary": "Bij de bussenbouwer, tijdens Werktuigbouwkunde.",
+      "body": "Op de site in Valkenswaard zit het hoofdkantoor van VDL Bus & Coach, samen met de productie van touringcars (Futura, Jonckheere, Synergy), de nieuwe Citea, VDL Bus Modules en het onderhoudsbedrijf. De volledig elektrische Citea rolt sinds 2023 van de band in Roeselare.",
+      "tags": [
+        "Werktuigbouwkunde",
+        "Maakindustrie",
+        "Excursie"
+      ],
+      "todo": true
+    },
+    {
+      "id": "jumbo-efc",
+      "title": "Jumbo Online EFC",
+      "place": "Balkweg, 's-Hertogenbosch",
+      "country": "Nederland",
+      "lat": 51.707621,
+      "lon": 5.331332,
+      "date": "2024",
+      "context": "studie",
+      "study": "bi",
+      "abroad": false,
+      "summary": "Het magazijn waar alleen online boodschappen vandaan komen.",
+      "body": "Een e-fulfilment centre is een magazijn zonder winkel: hier wordt uitsluitend gepickt en verpakt voor thuisbezorging en pick-up points. Dit was in 2014 het eerste EFC van Jumbo, in het voormalige distributiecentrum van Super de Boer.",
+      "tags": [
+        "Logistiek",
+        "Distributiecentrum"
+      ],
+      "todo": true
+    },
+    {
+      "id": "den-bosch-meeloop",
+      "title": "Meeloopdag Lott. Gioielli",
+      "place": "'s-Hertogenbosch",
+      "country": "Nederland",
+      "lat": 51.689,
+      "lon": 5.305,
+      "date": "2025-12",
+      "context": "studie",
+      "study": "bi",
+      "abroad": false,
+      "summary": "Een dag meelopen bij een sieradenmerk.",
+      "body": "Op bezoek bij een medestudent die bij dit sieradenmerk werkt: een presentatie over de organisatie, een rondleiding, en samen brainstormen over het marketingmateriaal voor december.",
+      "tags": [
+        "Meeloopdag",
+        "Merk",
+        "Marketing"
+      ]
+    },
+    {
+      "id": "lofoten",
+      "title": "Lofoten via Tromso",
+      "place": "Lofoten",
+      "country": "Noorwegen",
+      "lat": 68.235,
+      "lon": 13.8,
+      "date": "2026-09",
+      "context": "prive",
+      "study": null,
+      "abroad": true,
+      "summary": "Noordwaarts, voorbij de poolcirkel.",
+      "body": "Via Tromso naar de Lofoten. Bergen die recht uit zee omhoog komen.",
+      "tags": [
+        "Reizen",
+        "Noorwegen"
+      ]
+    },
+    {
+      "id": "levi",
+      "title": "Fins Lapland",
+      "place": "Levi",
+      "country": "Finland",
+      "lat": 67.805,
+      "lon": 24.806,
+      "date": "2026-12",
+      "context": "prive",
+      "study": null,
+      "abroad": true,
+      "summary": "Husky's en sneeuwscooters in december.",
+      "body": "Lapland in de donkerste maand van het jaar.",
+      "tags": [
+        "Reizen",
+        "Winter"
+      ]
+    },
+    {
+      "id": "storm-outdoor",
+      "title": "Survivalrun Vereniging Storm Outdoor",
+      "place": "Deest",
+      "country": "Nederland",
+      "lat": 51.88,
+      "lon": 5.68,
+      "date": "2020-07",
+      "context": "prive",
+      "study": null,
+      "abroad": false,
+      "summary": "Drie jaar trainer bij de survivalrunvereniging.",
+      "body": "Van juli 2020 tot september 2023 trainer bij Storm Outdoor. Ik gaf training aan recreanten, het wedstrijdteam en de jeugd, zat in de baancommissie en stond voor groepen van 8 tot ruim 100 mensen, onder andere via Sjors Sportief.",
+      "tags": [
+        "Trainer",
+        "Survivalrun",
+        "Vrijwilliger"
+      ]
+    },
+    {
+      "id": "agora",
+      "title": "Licht en geluid bij Agora",
+      "place": "Nijmegen",
+      "country": "Nederland",
+      "lat": 51.83,
+      "lon": 5.86,
+      "date": "2018-10",
+      "context": "prive",
+      "study": null,
+      "abroad": false,
+      "summary": "Achter de knoppen, van 2018 tot 2022.",
+      "body": "Licht en geluid draaien bij Agora: Midas M32, ChamSys QuickQ 30, Shure en Mipro. Leren dat een avond staat of valt bij de dingen die het publiek nooit opmerkt.",
+      "tags": [
+        "Techniek",
+        "Live",
+        "Vrijwilliger"
+      ]
+    },
+    {
+      "id": "eiffel",
+      "title": "De Eiffeltoren vasthouden",
+      "place": "Parijs",
+      "country": "Frankrijk",
+      "lat": 48.8584,
+      "lon": 2.2945,
+      "date": "2023",
+      "context": "prive",
+      "study": null,
+      "abroad": true,
+      "summary": "Ja, die foto.",
+      "body": "Iedereen maakt hem, en toch maakte ik hem ook.",
+      "tags": [
+        "Inside joke"
+      ],
+      "todo": true
+    }
+  ]
+}

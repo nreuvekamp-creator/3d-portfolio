@@ -1,0 +1,484 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>3D Portfolio — Niels Reuvekamp</title>
+<meta name="description" content="Een wereldbol met de reizen en projecten van Niels Reuvekamp, binnen zijn studie en daarbuiten.">
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.9.0/dist/maplibre-gl.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue:#0066CC; --blue-soft:#4d9fe8; --blue-dark:#004d99;
+  --bg:#080c14; --bg-2:#0e1524; --line:rgba(255,255,255,.12);
+  --txt:#f2f5f9; --dim:#9aa7bb;
+  --ease:cubic-bezier(.16,1,.3,1);
+  --pad-t:env(safe-area-inset-top,0px); --pad-b:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--txt);
+  font-family:"DM Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  overflow:hidden;-webkit-font-smoothing:antialiased}
+[hidden]{display:none!important}
+button{font:inherit;color:inherit;cursor:pointer}
+
+/* ---------- globe ---------- */
+#map{position:fixed;inset:0}
+.maplibregl-ctrl-attrib{font-size:.6rem;background:rgba(8,12,20,.7)!important}
+.maplibregl-ctrl-attrib a{color:var(--dim)!important}
+.maplibregl-ctrl-group{background:rgba(14,21,36,.9)!important;border:1px solid var(--line)!important}
+.maplibregl-ctrl-group button+button{border-top:1px solid var(--line)!important}
+.maplibregl-ctrl-group button .maplibregl-ctrl-icon{filter:invert(1) opacity(.8)}
+
+/* ---------- onboarding ---------- */
+#intro{position:fixed;inset:0;z-index:60;display:grid;place-items:center;
+  background:radial-gradient(1200px 700px at 70% 20%,rgba(0,102,204,.22),transparent 60%),var(--bg);
+  padding:calc(var(--pad-t) + 24px) 20px calc(var(--pad-b) + 24px);overflow-y:auto}
+#intro.out{opacity:0;pointer-events:none;transition:opacity .7s var(--ease)}
+.intro-wrap{display:grid;grid-template-columns:minmax(0,300px) minmax(0,520px);gap:48px;align-items:center;max-width:900px;width:100%}
+.intro-photo{position:relative}
+.intro-photo::after{content:"";position:absolute;inset:-8% -4% -2%;border-radius:50%;
+  background:radial-gradient(closest-side,rgba(0,102,204,.35),transparent 72%);z-index:-1}
+.intro-photo img{width:100%;height:auto;display:block;filter:drop-shadow(0 30px 60px rgba(0,0,0,.6))}
+.eyebrow{font-size:.75rem;letter-spacing:.18em;text-transform:uppercase;color:var(--blue-soft);margin:0 0 14px}
+.intro-wrap h1{font-size:clamp(2rem,5.5vw,3.3rem);line-height:1.05;margin:0 0 20px;font-weight:700;letter-spacing:-.02em}
+.intro-wrap p{color:var(--dim);line-height:1.65;margin:0 0 14px;font-size:1.02rem}
+.intro-wrap .hint{font-size:.85rem;color:#6f7d92}
+.start{margin-top:24px;background:var(--blue);border:0;border-radius:999px;padding:15px 34px;
+  font-weight:700;letter-spacing:.01em;transition:background .25s var(--ease),transform .25s var(--ease)}
+.start:hover{background:var(--blue-dark);transform:translateY(-2px)}
+.fade-up{opacity:0;transform:translateY(22px);animation:up .9s var(--ease) forwards}
+.fade-up:nth-child(2){animation-delay:.12s}
+@keyframes up{to{opacity:1;transform:none}}
+@media (max-width:760px){
+  .intro-wrap{grid-template-columns:1fr;gap:20px;text-align:center}
+  .intro-photo{max-width:190px;margin:0 auto}
+}
+
+/* ---------- top bar ---------- */
+#bar{position:fixed;top:0;left:0;right:0;z-index:30;
+  padding:calc(var(--pad-t) + 14px) 16px 14px;
+  background:linear-gradient(180deg,rgba(8,12,20,.92),rgba(8,12,20,0));
+  display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.brand{font-weight:700;letter-spacing:-.01em;margin-right:6px;white-space:nowrap}
+.brand span{color:var(--blue-soft)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center;min-width:0}
+.sep{width:1px;height:20px;background:var(--line);margin:0 4px}
+.chip{background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:999px;
+  padding:6px 13px;font-size:.8rem;color:var(--dim);white-space:nowrap;
+  transition:all .2s var(--ease)}
+.chip:hover{border-color:var(--blue-soft);color:var(--txt)}
+.chip.on{background:var(--blue);border-color:var(--blue);color:#fff;font-weight:500}
+.chip.priv.on{background:#8b5cf6;border-color:#8b5cf6}
+.count{margin-left:auto;font-size:.78rem;color:var(--dim);white-space:nowrap}
+@media (max-width:640px){
+  #bar{padding-bottom:10px;max-height:44vh;overflow-y:auto}
+  .count{display:none}
+}
+
+/* ---------- detail panel ---------- */
+#panel{position:fixed;z-index:40;top:0;right:0;height:100%;width:min(430px,100%);
+  background:var(--bg-2);border-left:1px solid var(--line);
+  transform:translateX(105%);transition:transform .5s var(--ease);
+  display:flex;flex-direction:column;box-shadow:-20px 0 60px rgba(0,0,0,.5)}
+#panel.open{transform:none}
+.p-photo{position:relative;aspect-ratio:16/10;flex:none;overflow:hidden;background:var(--bg)}
+.p-photo img{width:100%;height:100%;object-fit:cover;display:block}
+.p-ph{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;
+  font-weight:700;font-size:1.25rem;line-height:1.25;color:rgba(255,255,255,.92)}
+.p-ph small{display:block;font-weight:400;font-size:.72rem;letter-spacing:.14em;
+  text-transform:uppercase;opacity:.65;margin-top:8px}
+.p-body{padding:24px 26px calc(var(--pad-b) + 32px);overflow-y:auto}
+.p-meta{font-size:.74rem;letter-spacing:.14em;text-transform:uppercase;color:var(--blue-soft);margin:0 0 10px}
+.p-body h2{margin:0 0 6px;font-size:1.5rem;line-height:1.2;letter-spacing:-.015em}
+.p-where{color:var(--dim);font-size:.92rem;margin:0 0 18px}
+.p-sum{font-size:1.02rem;line-height:1.55;margin:0 0 14px}
+.p-text{color:var(--dim);line-height:1.7;margin:0}
+.p-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:22px}
+.tag{font-size:.72rem;padding:5px 11px;border-radius:999px;background:rgba(255,255,255,.07);
+  border:1px solid var(--line);color:var(--dim)}
+.todo{margin-top:20px;padding:12px 14px;border-radius:10px;font-size:.85rem;line-height:1.5;
+  background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.35);color:#c9b8f5}
+.close{position:absolute;top:14px;right:14px;z-index:2;width:36px;height:36px;border-radius:50%;
+  border:1px solid var(--line);background:rgba(8,12,20,.75);font-size:1.1rem;line-height:1;
+  display:grid;place-items:center;backdrop-filter:blur(6px)}
+.close:hover{background:var(--blue)}
+@media (max-width:640px){
+  #panel{top:auto;bottom:0;height:min(76vh,100%);width:100%;border-left:0;border-top:1px solid var(--line);
+    border-radius:18px 18px 0 0;transform:translateY(105%)}
+  #panel.open{transform:none}
+  .p-photo{aspect-ratio:2/1}
+}
+
+#err{position:fixed;inset:0;z-index:80;display:grid;place-items:center;padding:24px;
+  background:var(--bg);text-align:center;color:var(--dim);line-height:1.6}
+</style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<div id="bar" hidden>
+  <div class="brand">3D <span>Portfolio</span></div>
+  <div class="chips" id="chips"></div>
+  <div class="count" id="count"></div>
+</div>
+
+<aside id="panel" aria-live="polite">
+  <button class="close" id="closeBtn" aria-label="Sluiten">&times;</button>
+  <div class="p-photo" id="pPhoto"></div>
+  <div class="p-body">
+    <p class="p-meta" id="pMeta"></p>
+    <h2 id="pTitle"></h2>
+    <p class="p-where" id="pWhere"></p>
+    <p class="p-sum" id="pSum"></p>
+    <p class="p-text" id="pText"></p>
+    <div class="p-tags" id="pTags"></div>
+    <div class="todo" id="pTodo" hidden></div>
+  </div>
+</aside>
+
+<div id="intro" hidden>
+  <div class="intro-wrap">
+    <div class="intro-photo fade-up"><img id="meImg" alt="" ></div>
+    <div class="fade-up">
+      <p class="eyebrow" id="iEyebrow">3D Portfolio</p>
+      <h1 id="iTitle"></h1>
+      <p id="iIntro"></p>
+      <p class="hint" id="iHint"></p>
+      <button class="start" id="startBtn">Begin de reis</button>
+    </div>
+  </div>
+</div>
+
+<div id="err" hidden></div>
+
+<script src="https://unpkg.com/maplibre-gl@5.9.0/dist/maplibre-gl.js"></script>
+<script>
+(function(){
+"use strict";
+
+var ESRI  = "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/";
+var TILES = ESRI + "World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}";
+var LABELS_TILES = ESRI + "World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}";
+var ATTR  = 'Tiles &copy; <a href="https://www.esri.com/">Esri</a> &mdash; Esri, DeLorme, NAVTEQ';
+
+/* Palet voor de placeholder-tegels, per context. */
+var PH = {
+  studie:          ["#0066CC","#004d99"],
+  extracurriculair:["#0e7c86","#0a5058"],
+  prive:           ["#7c4dbd","#4c2d78"]
+};
+var STUDY_LABEL = {bi:"Business Innovation", cmd:"Communication and Multimedia Design",
+                   wb:"Werktuigbouwkunde", honours:"Honours", stage:"Stage"};
+var CONTEXT_LABEL = {studie:"Binnen studie", extracurriculair:"Extracurriculair", prive:"Prive"};
+var MONTHS = ["januari","februari","maart","april","mei","juni",
+              "juli","augustus","september","oktober","november","december"];
+
+var data, trips, map, panel, active = {context:{}, study:{}, world:{}};
+
+function fail(msg){
+  var e = document.getElementById("err");
+  e.textContent = msg;
+  e.hidden = false;
+}
+
+function esc(s){ return String(s == null ? "" : s); }
+
+function dateLabel(d){
+  if (!d) return "";
+  var p = String(d).split("-");
+  if (p.length > 1) {
+    var m = parseInt(p[1], 10);
+    if (m >= 1 && m <= 12) return MONTHS[m-1] + " " + p[0];
+  }
+  return p[0];
+}
+
+/* ---------- filters ---------- */
+
+function buildChips(){
+  var box = document.getElementById("chips");
+  box.textContent = "";
+  ["context","study","world"].forEach(function(group, gi){
+    if (gi) box.appendChild(Object.assign(document.createElement("div"), {className:"sep"}));
+    (data.filters[group] || []).forEach(function(f){
+      var b = document.createElement("button");
+      b.className = "chip" + (f.id === "prive" ? " priv" : "");
+      b.textContent = f.label;
+      b.type = "button";
+      b.setAttribute("aria-pressed", "false");
+      b.addEventListener("click", function(){
+        active[group][f.id] = !active[group][f.id];
+        b.classList.toggle("on", !!active[group][f.id]);
+        b.setAttribute("aria-pressed", active[group][f.id] ? "true" : "false");
+        refresh();
+      });
+      box.appendChild(b);
+    });
+  });
+}
+
+/* Per groep: niets aan = alles door, behalve dat 'prive' altijd expliciet aan moet. */
+function groupPass(group, value){
+  var on = Object.keys(active[group]).filter(function(k){ return active[group][k]; });
+  if (!on.length) return true;
+  return on.indexOf(value) !== -1;
+}
+
+function visible(t){
+  if (t.context === "prive" && !active.context.prive) return false;
+  if (!groupPass("context", t.context)) return false;
+  if (!groupPass("study", t.study)) return false;
+  if (!groupPass("world", t.abroad ? "abroad" : "home")) return false;
+  return true;
+}
+
+function features(){
+  return trips.filter(visible).map(function(t){
+    return {
+      type: "Feature",
+      geometry: {type: "Point", coordinates: [t.lon, t.lat]},
+      properties: {id: t.id, title: t.title, todo: t.todo ? 1 : 0, context: t.context}
+    };
+  });
+}
+
+function refresh(){
+  var feats = features();
+  var src = map && map.getSource("trips");
+  if (src) src.setData({type: "FeatureCollection", features: feats});
+  var c = document.getElementById("count");
+  c.textContent = feats.length + (feats.length === 1 ? " plek" : " plekken");
+}
+
+/* ---------- detail panel ---------- */
+
+function openTrip(id){
+  var t = trips.filter(function(x){ return x.id === id; })[0];
+  if (!t) return;
+
+  var photo = document.getElementById("pPhoto");
+  photo.textContent = "";
+  var pair = PH[t.context] || PH.studie;
+  var ph = document.createElement("div");
+  ph.className = "p-ph";
+  ph.style.background = "linear-gradient(135deg," + pair[0] + "," + pair[1] + ")";
+  ph.innerHTML = "";
+  ph.appendChild(document.createTextNode(t.title));
+  var small = document.createElement("small");
+  small.textContent = t.place + (t.country ? " · " + t.country : "");
+  ph.appendChild(small);
+  photo.appendChild(ph);
+
+  /* Zodra photos/<id>.jpg (of .png) bestaat, vervangt die automatisch de placeholder. */
+  tryPhoto(photo, ["photos/" + t.id + ".jpg", "photos/" + t.id + ".png",
+                   "photos/" + t.id + ".jpeg", "photos/" + t.id + ".webp"], 0);
+
+  var bits = [];
+  if (t.date) bits.push(dateLabel(t.date));
+  if (CONTEXT_LABEL[t.context]) bits.push(CONTEXT_LABEL[t.context]);
+  if (t.study && STUDY_LABEL[t.study]) bits.push(STUDY_LABEL[t.study]);
+  document.getElementById("pMeta").textContent = bits.join(" · ");
+  document.getElementById("pTitle").textContent = t.title;
+  document.getElementById("pWhere").textContent = t.place + (t.country ? ", " + t.country : "");
+  document.getElementById("pSum").textContent = esc(t.summary);
+  document.getElementById("pText").textContent = t.todo ? "" : esc(t.body);
+
+  var tags = document.getElementById("pTags");
+  tags.textContent = "";
+  (t.tags || []).forEach(function(x){
+    var s = document.createElement("span");
+    s.className = "tag";
+    s.textContent = x;
+    tags.appendChild(s);
+  });
+
+  var todo = document.getElementById("pTodo");
+  if (t.todo) {
+    todo.textContent = "? " + (t.body || "Deze gegevens moeten nog worden aangevuld.");
+    todo.hidden = false;
+  } else {
+    todo.hidden = true;
+  }
+
+  panel.classList.add("open");
+  map.easeTo({center: [t.lon, t.lat], zoom: Math.max(map.getZoom(), 4.5), duration: 1400});
+}
+
+function tryPhoto(container, list, i){
+  if (i >= list.length) return;
+  var img = new Image();
+  img.onload = function(){
+    container.textContent = "";
+    container.appendChild(img);
+  };
+  img.onerror = function(){ tryPhoto(container, list, i + 1); };
+  img.alt = "";
+  img.src = list[i];
+}
+
+function closePanel(){ panel.classList.remove("open"); }
+
+/* ---------- map ---------- */
+
+function initMap(){
+  map = new maplibregl.Map({
+    container: "map",
+    style: {
+      version: 8,
+      glyphs: "https://fonts.openmaptiles.org/{fontstack}/{range}.pbf",
+      sources: {
+        base: {type: "raster", tiles: [TILES], tileSize: 256, attribution: ATTR, maxzoom: 16},
+        reference: {type: "raster", tiles: [LABELS_TILES], tileSize: 256, maxzoom: 16}
+      },
+      layers: [
+        {id: "bg", type: "background", paint: {"background-color": "#080c14"}},
+        {id: "base", type: "raster", source: "base"},
+        {id: "reference", type: "raster", source: "reference", minzoom: 3,
+         paint: {"raster-opacity": ["interpolate", ["linear"], ["zoom"], 3, 0, 5, .75]}}
+      ]
+
+    },
+    center: [8, 48],
+    zoom: 1.6,
+    minZoom: 0.6,
+    maxZoom: 16,
+    attributionControl: {compact: true}
+  });
+  window.__map = map;
+  map.addControl(new maplibregl.NavigationControl({visualizePitch: false}), "bottom-right");
+
+  map.on("style.load", function(){
+    map.setProjection({type: "globe"});
+
+    map.addSource("trips", {
+      type: "geojson",
+      data: {type: "FeatureCollection", features: features()},
+      cluster: true,
+      clusterRadius: 38,
+      clusterMaxZoom: 8
+    });
+
+    /* clusters */
+    map.addLayer({
+      id: "clusters", type: "circle", source: "trips",
+      filter: ["has", "point_count"],
+      paint: {
+        "circle-color": "#0066CC",
+        "circle-opacity": .9,
+        "circle-radius": ["step", ["get", "point_count"], 17, 3, 22, 6, 27],
+        "circle-stroke-width": 3,
+        "circle-stroke-color": "rgba(77,159,232,.45)"
+      }
+    });
+    map.addLayer({
+      id: "cluster-count", type: "symbol", source: "trips",
+      filter: ["has", "point_count"],
+      layout: {"text-field": ["get", "point_count_abbreviated"], "text-size": 13,
+               "text-font": ["Open Sans Bold"], "text-allow-overlap": true},
+      paint: {"text-color": "#ffffff"}
+    });
+
+    /* losse punten: gloed + kern */
+    map.addLayer({
+      id: "glow", type: "circle", source: "trips",
+      filter: ["!", ["has", "point_count"]],
+      paint: {"circle-color": ["case", ["==", ["get", "context"], "prive"], "#8b5cf6", "#4d9fe8"],
+              "circle-radius": 15, "circle-opacity": .18}
+    });
+    map.addLayer({
+      id: "dots", type: "circle", source: "trips",
+      filter: ["!", ["has", "point_count"]],
+      paint: {
+        "circle-color": ["case", ["==", ["get", "context"], "prive"], "#8b5cf6", "#0066CC"],
+        "circle-radius": 7,
+        "circle-stroke-width": 2.5,
+        "circle-stroke-color": "#ffffff",
+        "circle-stroke-opacity": ["case", ["==", ["get", "todo"], 1], .45, 1]
+      }
+    });
+    map.addLayer({
+      id: "labels", type: "symbol", source: "trips",
+      filter: ["!", ["has", "point_count"]],
+      minzoom: 3.2,
+      layout: {"text-field": ["get", "title"], "text-size": 12, "text-offset": [0, 1.4],
+               "text-anchor": "top", "text-font": ["Open Sans Regular"],
+               "text-max-width": 11},
+      paint: {"text-color": "#dbe4f0", "text-halo-color": "#080c14", "text-halo-width": 1.6}
+    });
+
+    map.on("click", "clusters", function(e){
+      var f = e.features[0];
+      map.getSource("trips").getClusterExpansionZoom(f.properties.cluster_id).then(function(z){
+        map.easeTo({center: f.geometry.coordinates, zoom: z + .3, duration: 900});
+      }).catch(function(){
+        map.easeTo({center: f.geometry.coordinates, zoom: map.getZoom() + 2, duration: 900});
+      });
+    });
+    map.on("click", "dots", function(e){ openTrip(e.features[0].properties.id); });
+
+    ["clusters", "dots", "glow"].forEach(function(l){
+      map.on("mouseenter", l, function(){ map.getCanvas().style.cursor = "pointer"; });
+      map.on("mouseleave", l, function(){ map.getCanvas().style.cursor = ""; });
+    });
+
+    refresh();
+  });
+}
+
+/* ---------- onboarding ---------- */
+
+function initIntro(){
+  var p = data.profile || {};
+  document.getElementById("iTitle").textContent = p.title || "Welkom";
+  document.getElementById("iIntro").textContent = p.intro || "";
+  document.getElementById("iHint").textContent = p.hint || "";
+  var img = document.getElementById("meImg");
+  if (p.photo) { img.src = p.photo; img.alt = p.name || ""; }
+  else { img.remove(); }
+
+  var intro = document.getElementById("intro");
+  intro.hidden = false;
+
+  document.getElementById("startBtn").addEventListener("click", function(){
+    intro.classList.add("out");
+    setTimeout(function(){ intro.hidden = true; }, 750);
+    document.getElementById("bar").hidden = false;
+    map.easeTo({center: [8, 48], zoom: 3, duration: 2600});
+  });
+}
+
+/* ---------- start ---------- */
+
+panel = document.getElementById("panel");
+document.getElementById("closeBtn").addEventListener("click", closePanel);
+document.addEventListener("keydown", function(e){ if (e.key === "Escape") closePanel(); });
+
+fetch("trips.json", {cache: "no-store"})
+  .then(function(r){
+    if (!r.ok) throw new Error("trips.json: " + r.status);
+    return r.json();
+  })
+  .then(function(json){
+    data = json;
+    trips = (json.trips || []).filter(function(t){
+      return typeof t.lat === "number" && typeof t.lon === "number";
+    });
+    if (!trips.length) throw new Error("Geen reizen met coordinaten in trips.json.");
+    buildChips();
+    initMap();
+    initIntro();
+  })
+  .catch(function(e){
+    fail("Kon de gegevens niet laden. " + e.message +
+         "  Open deze pagina via een webserver, niet als bestand (file://).");
+  });
+
+})();
+</script>
+</body>
+</html>
