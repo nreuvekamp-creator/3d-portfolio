@@ -633,22 +633,21 @@
     {
       "id": "joke-dmz",
       "title": "De grens met Noord-Korea",
-      "place": "DMZ",
+      "place": "Dora Observatory, DMZ",
       "country": "Zuid-Korea",
-      "lat": 37.8836,
-      "lon": 126.696,
+      "lat": 37.8845,
+      "lon": 126.6906,
       "date": "2025",
       "context": "prive",
       "study": null,
       "abroad": true,
-      "summary": "De verste plek waar het tot nu toe gelukt is.",
-      "body": "Nog aan te vullen: was dit bij de Dora-observatiepost, in de JSA bij Panmunjom, of ergens anders langs de DMZ? En wat hield je daar precies vast?",
+      "summary": "De verste plek waar de grap tot nu toe is gelukt.",
+      "body": "Vanaf de Dora-observatiepost kijk je over de gedemilitariseerde zone heen Noord-Korea in: het dorp Kijong-dong met zijn enorme vlaggenmast, en bij helder weer de industriezone van Kaesong. Vier kilometer niemandsland, aan weerszijden zwaar bewaakt, en toeristen met verrekijkers aan deze kant.\n\nEen rare plek om een grapje te maken, en tegelijk precies waarom hij werkt: je kunt een heel land tussen je vingers houden zonder er ooit binnen te komen.",
       "tags": [
         "Inside joke",
         "Zuid-Korea",
         "Grens"
-      ],
-      "todo": true
+      ]
     },
     {
       "id": "honours-impact",
