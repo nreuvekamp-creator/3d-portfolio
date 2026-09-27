@@ -193,6 +193,7 @@ function citaatStap(t){
   citaatEl.textContent = CITATEN[citaatIdx];
   /* Iets andere hoogte per citaat, zodat het niet als een banner voelt. */
   if (window.innerWidth >= 641) citaatEl.style.top = (14 + Math.random() * 24).toFixed(1) + "vh";
+  else citaatEl.style.top = "";
   void citaatEl.offsetWidth;
   citaatEl.classList.add("op");
   citaatFase = "op";

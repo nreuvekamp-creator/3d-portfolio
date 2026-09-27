@@ -10,6 +10,7 @@
 <link rel="stylesheet" href="intro.css">
 <link rel="stylesheet" href="globe.css">
 <link rel="stylesheet" href="zaal.css">
+<link rel="stylesheet" href="sterren.css">
 </head>
 <body>
 
@@ -32,8 +33,8 @@
     </button>
     <p class="fluister hand" id="fluister">als je me echt<br>wil stalken,<br>klik hier</p>
   </div>
-  <p class="count label" id="count"></p>
 </div>
+<p class="count label" id="count"></p>
 
 <aside id="panel" aria-live="polite">
   <button class="close" id="closeBtn" aria-label="Sluiten">&times;</button>
@@ -117,6 +118,7 @@
 <script src="fidget.js"></script>
 <script src="globe.js"></script>
 <script src="zaal.js"></script>
+<script src="sterren.js"></script>
 <script src="intro.js"></script>
 <script>
 /* Opstarten: eerst de gegevens, dan de bol klaarzetten, dan het verhaal. */
@@ -129,6 +131,7 @@ fetch("trips.json", {cache: "no-store"})
     Intro.start(data, function(){
       Globe.reveal();
       Fidget.kalmeer();
+      if (window.Sterren && window.__map) Sterren.init(window.__map);
     });
   })
   .catch(function(e){

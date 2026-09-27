@@ -309,7 +309,10 @@ window.Zaal = (function(){
 
     stage.addEventListener("pointerdown", function(e){
       start(e.clientX, e.clientY);
-      stage.setPointerCapture(e.pointerId);
+      /* Begint de druk op een knop, dan geen pointer capture: anders
+         landt de klik op het toneel en nooit op de knop zelf. */
+      var opKnop = e.target && e.target.closest && e.target.closest("button");
+      if(!opKnop) stage.setPointerCapture(e.pointerId);
     });
     stage.addEventListener("pointermove", function(e){ move(e.clientX, e.clientY); });
     stage.addEventListener("pointerup", end);

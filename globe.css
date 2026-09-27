@@ -176,7 +176,7 @@
   100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(.75) rotate(var(--tol,220deg))}
 }
 
-.count{position:fixed;right:20px;bottom:calc(var(--pad-b) + 16px);margin:0;font-size:.6rem;z-index:31;opacity:.75}
+.count{position:fixed;right:22px;bottom:calc(var(--pad-b) + 44px);margin:0;font-size:.58rem;z-index:31;opacity:.6;pointer-events:none}
 
 @media (max-width:640px){
   #bar{padding:calc(var(--pad-t) + 12px) 16px 12px}
@@ -302,3 +302,6 @@
   #map{transition:none}
   #bar{animation:none}
 }
+
+/* In de ruimte moet de teller ook leesbaar blijven. */
+body.ruimte .count{color:rgba(246,240,226,.7)}

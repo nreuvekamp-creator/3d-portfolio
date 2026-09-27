@@ -346,8 +346,8 @@
   position:absolute;
   left:50%;
   bottom:58px;
-  width:560px;
-  height:690px;
+  width:600px;
+  height:710px;
   padding:0;
   border:0;
   background:none;
@@ -393,7 +393,7 @@
     radial-gradient(38% 42% at 32% 34%,rgba(10,163,194,.85),rgba(0,0,0,0) 66%),
     radial-gradient(40% 38% at 70% 44%,rgba(214,51,126,.6),rgba(0,0,0,0) 66%),
     radial-gradient(46% 44% at 50% 76%,rgba(240,180,41,.7),rgba(0,0,0,0) 68%);
-  filter:blur(26px);
+  filter:blur(22px);
   animation:z-draai 42s linear infinite;
 }
 .z-portal-swirl{
@@ -408,20 +408,25 @@
   animation:z-draai 68s linear infinite reverse;
 }
 
-/* De scheur: het papier laat los langs een grillige rand. */
+/* De scheur: het papier laat los, met een rafelige, zachte rand. */
 .z-portal-scheur{
   position:absolute;
-  inset:-2px;
+  inset:-4%;
   pointer-events:none;
-  background:linear-gradient(200deg,var(--paper),var(--paper-2) 60%,var(--paper-deep));
-  clip-path:polygon(
-    0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%,
-    30% 3%, 24% 16%, 33% 27%, 25% 39%, 31% 52%,
-    23% 64%, 30% 77%, 26% 92%, 74% 92%, 70% 78%,
-    77% 66%, 69% 53%, 75% 40%, 67% 28%, 74% 16%,
-    68% 4%, 30% 3%);
-  filter:drop-shadow(0 0 10px rgba(36,31,28,.3));
-  animation:z-adem 9s var(--ease-soft) infinite;
+  background:
+    radial-gradient(66% 70% at 47% 45%,rgba(0,0,0,0) 72%,var(--paper-2) 90%,var(--paper) 100%),
+    radial-gradient(58% 62% at 57% 62%,rgba(0,0,0,0) 74%,var(--paper-2) 94%,rgba(0,0,0,0) 100%);
+  filter:blur(7px);
+  animation:z-adem 11s var(--ease-soft) infinite;
+}
+/* En de rafel zelf: een dunne inktrand langs de opening. */
+.z-portal-eye::after{
+  content:"";
+  position:absolute;inset:14%;
+  pointer-events:none;
+  border-radius:48% 52% 44% 56% / 46% 54% 42% 58%;
+  box-shadow:0 0 26px 10px rgba(36,31,28,.14) inset;
+  animation:z-rafel 17s var(--ease-soft) infinite;
 }
 
 /* Vezel over het hele vlak; zacht, geen raster. */
@@ -470,6 +475,10 @@
 @keyframes z-draai{
   from{transform:rotate(0deg) scale(1.04)}
   to{transform:rotate(360deg) scale(1.04)}
+}
+@keyframes z-rafel{
+  0%,100%{border-radius:48% 52% 44% 56% / 46% 54% 42% 58%}
+  50%{border-radius:54% 46% 52% 48% / 52% 48% 54% 46%}
 }
 @keyframes z-adem{
   0%,100%{transform:scale(1)}
@@ -536,14 +545,14 @@
 
 /* Plat vel: dezelfde doorgang, liggend onder de werken. */
 #zaal[data-mode="flat"] .z-portal{
-  position:static;
+  position:relative;
+  left:auto;bottom:auto;
   transform:none;
-  width:auto;
-  height:340px;
+  width:min(330px,100%);
+  height:420px;
   grid-column:1 / -1;
-  margin-top:10px;
+  margin:16px auto 84px;
 }
-#zaal[data-mode="flat"] .z-portal-plaque{position:static;transform:none;margin:14px auto 0}
 
 @media (max-width:640px){
   .z-warp-veld{width:min(64vw,300px)}
