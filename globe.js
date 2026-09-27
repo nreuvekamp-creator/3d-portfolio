@@ -53,27 +53,54 @@ function dateLabel(d){
 
 /* ---------- filters ---------- */
 
-function buildChips(){
-  var box = document.getElementById("chips");
-  if (!box) return;
-  box.textContent = "";
-  ["context","study","world"].forEach(function(group, gi){
-    if (gi) box.appendChild(Object.assign(document.createElement("div"), {className:"sep"}));
-    (data.filters[group] || []).forEach(function(f){
-      var b = document.createElement("button");
-      b.className = "chip" + (f.id === "prive" ? " priv" : "");
-      b.textContent = f.label;
-      b.type = "button";
-      b.setAttribute("aria-pressed", "false");
-      b.addEventListener("click", function(){
-        active[group][f.id] = !active[group][f.id];
-        b.classList.toggle("on", !!active[group][f.id]);
-        b.setAttribute("aria-pressed", active[group][f.id] ? "true" : "false");
-        refresh();
-      });
-      box.appendChild(b);
-    });
+/* Er is nog maar een onderscheid: wat je zomaar mag zien, en wat niet.
+   De rest van de filters is eruit; ze werkten niet. */
+function bouwMappen(){
+  var knop = document.getElementById("tabGeheim");
+  var fluister = document.getElementById("fluister");
+  if (!knop) return;
+
+  knop.addEventListener("click", function(){
+    if (active.context.prive) return;      /* eenmalig: hij gaat niet meer dicht */
+    active.context.prive = true;
+    knop.setAttribute("aria-pressed", "true");
+    knop.classList.add("open");
+    if (fluister) fluister.textContent = "nu weet je alles";
+    vliegNaarBuiten();
   });
+}
+
+/* De privestukken vliegen vanuit het mapje naar hun plek op de wereld. */
+function vliegNaarBuiten(){
+  var knop = document.getElementById("tabGeheim");
+  if (!knop || !map) { refresh(); return; }
+  if (stil()) { refresh(); return; }
+
+  var start = knop.getBoundingClientRect();
+  var x0 = start.left + start.width / 2;
+  var y0 = start.top + start.height / 2;
+
+  var stukken = trips.filter(function(t){ return t.context === "prive"; });
+  var laag = document.createElement("div");
+  laag.className = "vlucht";
+  document.body.appendChild(laag);
+
+  stukken.forEach(function(t, i){
+    var doel = map.project([t.lon, t.lat]);
+    var el = document.createElement("div");
+    el.className = "brief";
+    el.style.left = x0 + "px";
+    el.style.top = y0 + "px";
+    el.style.setProperty("--dx", (doel.x - x0).toFixed(0) + "px");
+    el.style.setProperty("--dy", (doel.y - y0).toFixed(0) + "px");
+    el.style.setProperty("--del", (i * 70) + "ms");
+    el.style.setProperty("--tol", ((Math.random() - 0.5) * 520).toFixed(0) + "deg");
+    laag.appendChild(el);
+  });
+
+  /* Pas als ze geland zijn, verschijnen de echte pins eronder. */
+  setTimeout(function(){ refresh(); }, 900);
+  setTimeout(function(){ laag.remove(); }, 2600 + stukken.length * 70);
 }
 
 /* Per groep: niets aan = alles door, behalve dat 'prive' altijd expliciet aan moet. */
@@ -117,6 +144,9 @@ function refresh(){
 function openTrip(id){
   var t = trips.filter(function(x){ return x.id === id; })[0];
   if (!t) return;
+
+  /* Deze pin is geen kaartje maar een deur: je loopt de zaal binnen. */
+  if (t.zaal && window.Zaal) { closePanel(); Zaal.open(); return; }
 
   var photo = document.getElementById("pPhoto");
   photo.textContent = "";
@@ -339,7 +369,7 @@ return {
     var close = document.getElementById("closeBtn");
     if (close) close.addEventListener("click", closePanel);
     document.addEventListener("keydown", function(e){ if (e.key === "Escape") closePanel(); });
-    buildChips();
+    bouwMappen();
     initMap();
     if (revealWacht) { revealWacht = false; Globe.reveal(); }
   },
@@ -350,6 +380,9 @@ return {
     if (el) el.classList.add("zichtbaar");
     var bar = document.getElementById("bar");
     if (bar) bar.hidden = false;
+    var mp = document.getElementById("mappen");
+    if (mp) mp.hidden = false;
+    document.body.classList.add("bol");
     if (!map) { revealWacht = true; return; }
     if (stil()) map.jumpTo({center: [8, 48], zoom: 3});
     else map.easeTo({center: [8, 48], zoom: 3, duration: 1800});

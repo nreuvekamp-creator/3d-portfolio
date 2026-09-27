@@ -36,7 +36,7 @@ window.Intro = (function(){
     {tekst: "Elk idee kwam ergens vandaan.", wacht: 2200},
     {tekst: "Dus elk idee heeft een plek op de wereld.", wacht: 2600},
 
-    {scene: "land", tekst: "", wacht: 800}
+    {scene: "wacht", tekst: "Kom maar kijken.", klasse: "hand", wacht: 999999}
   ];
 
   /* De drie dingen die langsvliegen. De derde is de grap: dit is het. */
@@ -137,7 +137,12 @@ window.Intro = (function(){
       intro.classList.add("open", "goud");
       zwermEnveloppen(22);
     }
-    if (naam === "land") eindig();
+    if (naam === "wacht"){
+      /* Vanaf hier loopt het verhaal niet verder: je moet zelf de doos opendoen. */
+      intro.classList.add("wacht");
+      var k = document.getElementById("chest");
+      if (k) { k.disabled = false; k.addEventListener("click", eindig); k.focus({preventScroll:true}); }
+    }
   }
 
   function speel(i){

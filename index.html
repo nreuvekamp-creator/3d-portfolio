@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="intro.css">
 <link rel="stylesheet" href="globe.css">
+<link rel="stylesheet" href="zaal.css">
 </head>
 <body>
 
@@ -17,8 +18,17 @@
 
 <div id="bar" hidden>
   <div class="brand"><span class="label">de ideeëndoos van</span><strong>Niels Reuvekamp</strong></div>
-  <div class="chips" id="chips"></div>
-  <div class="count label" id="count"></div>
+</div>
+
+<!-- Linksonder: een map met een opschrift dat je niet hoort te lezen. -->
+<div id="mappen" hidden>
+  <div class="dossier">
+    <button class="tab-confidential" id="tabGeheim" aria-pressed="false">
+      <span class="stempel">Confidential</span>
+    </button>
+    <p class="fluister hand" id="fluister">als je me echt wil stalken, klik hier</p>
+  </div>
+  <p class="count label" id="count"></p>
 </div>
 
 <aside id="panel" aria-live="polite">
@@ -38,7 +48,7 @@
 <!-- ============ het verhaal ============ -->
 <div id="intro" aria-label="Introductie">
 
-  <div class="void"></div>
+  <div class="void cmyk"></div>
 
   <!-- jij in de leegte -->
   <figure class="me" id="me"><img id="meImg" alt=""></figure>
@@ -50,7 +60,7 @@
   <div class="examples" id="examples"></div>
 
   <!-- de kist, achterin -->
-  <div class="chest" id="chest" aria-hidden="true">
+  <button class="chest" id="chest" aria-label="Open de doos en ga naar de wereld">
     <div class="glow"></div>
     <svg viewBox="0 0 200 152" class="box" aria-hidden="true">
       <defs>
@@ -67,7 +77,8 @@
         <rect x="92" y="90" width="16" height="21" rx="2" fill="#c9962c" stroke="#3d2c1a" stroke-width="2"/>
       </g>
     </svg>
-  </div>
+    <span class="chest-cue label">open de doos</span>
+  </button>
 
   <!-- wat er uit de kist komt -->
   <div class="envelopes" id="envelopes" aria-hidden="true"></div>
@@ -85,7 +96,6 @@
 
 <!-- ============ over alles heen ============ -->
 <div id="fidget"></div>
-<div class="halftone"></div>
 <div class="paper-grain"></div>
 <div class="vignette"></div>
 
@@ -94,6 +104,7 @@
 <script src="https://unpkg.com/maplibre-gl@5.9.0/dist/maplibre-gl.js"></script>
 <script src="fidget.js"></script>
 <script src="globe.js"></script>
+<script src="zaal.js"></script>
 <script src="intro.js"></script>
 <script>
 /* Opstarten: eerst de gegevens, dan de bol klaarzetten, dan het verhaal. */
@@ -101,6 +112,7 @@ fetch("trips.json", {cache: "no-store"})
   .then(function(r){ if (!r.ok) throw new Error("trips.json: " + r.status); return r.json(); })
   .then(function(data){
     Globe.init(data);
+    if (window.Zaal) Zaal.init(data);
     Fidget.start();
     Intro.start(data, function(){
       Globe.reveal();

@@ -1,0 +1,333 @@
+/* ============================================================
+   De zaal: een museumzaal van papier, gevouwen met CSS 3D.
+   Geen tweede WebGL-laag; vier wanden, een vloer en een plafond.
+   Kleuren komen uitsluitend uit style.css.
+   ============================================================ */
+
+#zaal{
+  position:fixed;
+  inset:0;
+  z-index:950;
+  background:var(--paper-deep);
+  color:var(--ink);
+  overflow:hidden;
+  touch-action:none;
+  opacity:0;
+  transition:opacity .6s var(--ease);
+}
+#zaal.is-open{opacity:1}
+
+/* ------------------------------------------------------------
+   Camera
+   ------------------------------------------------------------ */
+
+.z-stage{
+  position:absolute;
+  inset:0;
+  perspective:var(--z-persp,900px);
+  perspective-origin:50% 50%;
+  cursor:grab;
+}
+.z-stage.is-dragging{cursor:grabbing}
+
+.z-room{
+  position:absolute;
+  left:50%;top:50%;
+  width:0;height:0;
+  transform-style:preserve-3d;
+  transform:
+    translateZ(var(--z-dist,0px))
+    rotateX(var(--z-pitch,0deg))
+    rotateY(var(--z-yaw,0deg));
+}
+.z-room.is-gliding{transition:transform .9s var(--ease)}
+
+/* ------------------------------------------------------------
+   De zes vlakken. Het papier krijgt vezel per vlak, niet als
+   laag over het hele beeld.
+   ------------------------------------------------------------ */
+
+.z-face{
+  position:absolute;
+  left:50%;top:50%;
+  transform-style:preserve-3d;
+  backface-visibility:visible;
+}
+
+.z-wall{
+  width:var(--z-w);height:var(--z-h);
+  margin-left:calc(var(--z-w) / -2);
+  margin-top:calc(var(--z-h) / -2);
+  background:
+    linear-gradient(180deg,
+      rgba(255,255,255,.55) 0%,
+      rgba(255,255,255,.12) 16%,
+      rgba(0,0,0,0) 42%,
+      rgba(36,31,28,.10) 100%),
+    linear-gradient(180deg,var(--paper-2),var(--paper-deep));
+  box-shadow:inset 0 0 160px rgba(36,31,28,.18);
+}
+
+/* Vezel in het behang zelf. */
+.z-wall::before{
+  content:"";
+  position:absolute;inset:0;
+  pointer-events:none;
+  opacity:.34;
+  mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' width='260' height='260'>\
+<filter id='f'><feTurbulence type='fractalNoise' baseFrequency='.7 .04' numOctaves='3' stitchTiles='stitch'/>\
+<feColorMatrix type='saturate' values='0'/></filter>\
+<rect width='260' height='260' filter='url(%23f)' opacity='.38'/></svg>");
+}
+
+/* Plint langs de onderkant. */
+.z-wall::after{
+  content:"";
+  position:absolute;left:0;right:0;bottom:0;
+  height:58px;
+  border-top:1px solid var(--line);
+  background:linear-gradient(180deg,rgba(36,31,28,.05),rgba(36,31,28,.14));
+  pointer-events:none;
+}
+
+.z-floor,.z-ceil{
+  width:var(--z-w);height:var(--z-w);
+  margin-left:calc(var(--z-w) / -2);
+  margin-top:calc(var(--z-w) / -2);
+}
+.z-floor{
+  background:
+    radial-gradient(70% 70% at 50% 50%,rgba(255,255,255,.35),rgba(0,0,0,0) 70%),
+    linear-gradient(180deg,var(--paper-deep),#d8c9a9);
+  box-shadow:inset 0 0 200px rgba(36,31,28,.3);
+}
+.z-ceil{
+  background:
+    radial-gradient(60% 60% at 50% 50%,var(--gold-glow),rgba(0,0,0,0) 72%),
+    linear-gradient(180deg,var(--paper),var(--paper-2));
+}
+
+/* ------------------------------------------------------------
+   Een werk aan de muur: lijst, passe-partout, bordje.
+   ------------------------------------------------------------ */
+
+.z-art{
+  position:absolute;
+  display:block;
+  padding:0;
+  margin:0;
+  border:0;
+  background:none;
+  text-align:center;
+  transform-style:preserve-3d;
+}
+
+.z-frame{
+  position:relative;
+  background:linear-gradient(150deg,var(--paper),var(--paper-2));
+  border:2px solid var(--key);
+  padding:14px;
+  box-shadow:
+    0 14px 30px rgba(70,55,35,.28),
+    0 3px 8px rgba(70,55,35,.2);
+  transition:box-shadow .4s var(--ease),transform .4s var(--ease);
+}
+.z-mat{
+  position:relative;
+  overflow:hidden;
+  background:#fdfaf2;
+  padding:16px;
+  box-shadow:inset 0 0 0 1px var(--line-soft),inset 0 2px 10px rgba(36,31,28,.12);
+}
+.z-plate{
+  position:relative;
+  width:100%;
+  aspect-ratio:4 / 3;
+  overflow:hidden;
+  background:var(--paper-deep);
+}
+.z-plate img{
+  display:block;width:100%;height:100%;
+  object-fit:cover;
+  filter:sepia(.3) saturate(.8) contrast(1.05) brightness(1.02);
+}
+
+/* Geen foto: een geschept vlak met de titel erin. */
+.z-plate.is-blank{
+  display:flex;align-items:center;justify-content:center;
+  padding:10px 14px;
+  background:
+    linear-gradient(135deg,rgba(10,163,194,.1),rgba(214,51,126,.08)),
+    linear-gradient(180deg,var(--paper),var(--paper-2));
+}
+.z-plate.is-blank span{
+  font-family:var(--serif);
+  font-size:1.5rem;
+  line-height:1.12;
+  color:var(--ink);
+}
+
+/* Museumbordje onder het werk. */
+.z-plaque{
+  margin-top:12px;
+  padding:8px 10px;
+  background:var(--paper);
+  border:1px solid var(--line);
+  box-shadow:0 3px 8px rgba(70,55,35,.18);
+}
+.z-plaque .z-t{
+  display:block;
+  font-family:var(--serif);
+  font-size:1.05rem;
+  line-height:1.15;
+  color:var(--ink);
+}
+.z-plaque .z-m{
+  display:block;
+  margin-top:4px;
+  font-family:var(--mono);
+  font-size:.58rem;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:var(--ink-soft);
+}
+
+.z-art:hover .z-frame,
+.z-art:focus-visible .z-frame{
+  box-shadow:
+    0 0 0 3px var(--gold),
+    0 18px 38px rgba(70,55,35,.34);
+}
+.z-art:focus-visible{outline:none}
+.z-art:focus-visible .z-plaque{border-color:var(--cyan)}
+
+/* ------------------------------------------------------------
+   Randmeubilair: zaaltekst en knoppen
+   ------------------------------------------------------------ */
+
+.z-ui{position:absolute;inset:0;pointer-events:none;z-index:5}
+.z-ui > *{pointer-events:auto}
+
+.z-title{
+  position:absolute;
+  left:24px;
+  top:calc(20px + var(--pad-t));
+  max-width:60vw;
+}
+.z-title .label{display:block}
+.z-title strong{
+  display:block;
+  font-family:var(--serif);
+  font-weight:400;
+  font-size:1.7rem;
+  line-height:1.1;
+}
+.z-title .hand{display:block;margin-top:2px;font-size:1.15rem}
+
+.z-back{
+  position:absolute;
+  right:20px;
+  top:calc(20px + var(--pad-t));
+  background:var(--paper);
+}
+.z-hint{
+  position:absolute;
+  padding:6px 0;
+  left:0;right:0;
+  bottom:calc(16px + var(--pad-b));
+  text-align:center;
+  font-family:var(--mono);
+  font-size:.62rem;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:var(--ink-soft);
+}
+
+/* ------------------------------------------------------------
+   Leesvenster
+   ------------------------------------------------------------ */
+
+.z-read{
+  position:absolute;
+  z-index:10;
+  right:0;top:0;bottom:0;
+  width:min(440px,100%);
+  background:var(--paper);
+  border-left:1px solid var(--line);
+  box-shadow:-24px 0 60px rgba(70,55,35,.3);
+  overflow-y:auto;
+  padding:calc(30px + var(--pad-t)) 30px calc(40px + var(--pad-b));
+  transform:translateX(102%);
+  transition:transform .6s var(--ease);
+}
+.z-read.is-open{transform:none}
+/* Met het leesvenster open schuift het kijkpunt op, zodat het werk vrij blijft. */
+@media (min-width:900px){
+  #zaal.has-read .z-stage{perspective-origin:30% 50%}
+}
+.z-stage{transition:perspective-origin .6s var(--ease)}
+.z-read .z-close{
+  position:absolute;right:14px;top:calc(14px + var(--pad-t));
+  font-family:var(--mono);font-size:1.4rem;line-height:1;
+  color:var(--ink-soft);padding:6px 10px;
+}
+.z-read .z-close:focus-visible{outline:2.5px solid var(--cyan);outline-offset:2px}
+.z-read h3{
+  font-family:var(--serif);font-weight:400;
+  font-size:2rem;line-height:1.08;margin:6px 0 4px;
+}
+.z-read .z-rmeta{
+  font-family:var(--mono);font-size:.64rem;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--ink-soft);margin:0;
+}
+.z-read .z-rsum{font-style:italic;color:var(--ink-soft);margin:.6em 0 1em}
+.z-read .z-rfig{margin:0 0 18px}
+.z-read .z-rfig img{display:block;width:100%;filter:sepia(.28) saturate(.82) contrast(1.05)}
+.z-read p{margin:0 0 1em}
+.z-read .z-rtags{
+  margin-top:18px;display:flex;flex-wrap:wrap;gap:8px;
+}
+.z-read .z-rtags span{
+  font-family:var(--mono);font-size:.6rem;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--ink-soft);
+  border:1px solid var(--line);padding:4px 9px;
+}
+
+/* ------------------------------------------------------------
+   Klein scherm
+   ------------------------------------------------------------ */
+
+@media (max-width:640px){
+  .z-title strong{font-size:1.25rem}
+  .z-title .hand{display:none}
+  .z-back{padding:9px 14px;font-size:.66rem}
+  .z-read{width:100%;border-left:0}
+  .z-read h3{font-size:1.6rem}
+}
+
+/* ------------------------------------------------------------
+   Minder beweging: dezelfde werken, plat op een vel.
+   ------------------------------------------------------------ */
+
+.z-grid{
+  position:absolute;inset:0;
+  overflow-y:auto;
+  padding:calc(96px + var(--pad-t)) 24px calc(40px + var(--pad-b));
+  display:grid;
+  gap:26px;
+  grid-template-columns:repeat(auto-fill,minmax(230px,1fr));
+  background:var(--paper);
+}
+.z-grid .z-art{position:static;width:auto}
+
+#zaal[data-mode="flat"] .z-stage{display:none}
+#zaal[data-mode="flat"] .z-hint{background:var(--paper);border-top:1px solid var(--line-soft)}
+#zaal[data-mode="flat"] .z-grid{padding-bottom:calc(80px + var(--pad-b))}
+#zaal[data-mode="room"] .z-grid{display:none}
+#zaal[data-mode="room"] .z-hint.z-hint--flat{display:none}
+
+@media (prefers-reduced-motion:reduce){
+  #zaal,.z-room,.z-read,.z-frame{transition:none}
+}

@@ -839,6 +839,25 @@
         "Koningsdag",
         "Reddit"
       ]
+    },
+    {
+      "id": "de-zaal",
+      "title": "De ideeënzaal",
+      "place": "Louvre, Parijs",
+      "country": "Frankrijk",
+      "lat": 48.8606,
+      "lon": 2.3376,
+      "date": "",
+      "context": "extracurriculair",
+      "study": null,
+      "abroad": true,
+      "summary": "Alles bij elkaar, aan de muur.",
+      "body": "Niet elk idee heeft een plek op de wereld. Die hangen hier.",
+      "tags": [
+        "Museum",
+        "Alles bij elkaar"
+      ],
+      "zaal": true
     }
   ]
 }

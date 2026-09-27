@@ -57,8 +57,7 @@ button{font:inherit;color:inherit;cursor:pointer;background:none;border:0}
    Twee lagen over alles heen, allebei klikdoorlatend.
    ------------------------------------------------------------ */
 
-.paper-grain,
-.halftone{
+.paper-grain{
   position:fixed;
   inset:0;
   pointer-events:none;
@@ -67,7 +66,8 @@ button{font:inherit;color:inherit;cursor:pointer;background:none;border:0}
 
 /* Korrel: ruis uit een SVG-filter, geen afbeelding nodig. */
 .paper-grain{
-  opacity:.5;
+  opacity:.34;
+  transition:opacity 1.6s var(--ease-soft);
   mix-blend-mode:multiply;
   background-image:url("data:image/svg+xml;utf8,\
 <svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'>\
@@ -76,12 +76,23 @@ button{font:inherit;color:inherit;cursor:pointer;background:none;border:0}
 <rect width='220' height='220' filter='url(%23n)' opacity='.42'/></svg>");
 }
 
-/* Rasterpunten, zoals een ingezoomde stripdruk. */
-.halftone{
-  opacity:.16;
+body.bol .paper-grain{opacity:.12}
+
+/* ------------------------------------------------------------
+   Vierkleurendruk. Geen zwart puntraster (dat was lelijk bij het
+   inzoomen) maar drie zachte inktwolken die net niet op elkaar
+   liggen, zoals cyaan, magenta en geel op een echte pers.
+   Zet .cmyk op een papiervlak; nooit over de kaart heen.
+   ------------------------------------------------------------ */
+
+.cmyk::before{
+  content:"";position:absolute;inset:0;pointer-events:none;
   mix-blend-mode:multiply;
-  background-image:radial-gradient(var(--key) 0.9px,transparent 1px);
-  background-size:4px 4px;
+  opacity:.16;
+  background:
+    radial-gradient(38% 46% at 22% 28%, rgba(10,163,194,.55), transparent 62%),
+    radial-gradient(42% 40% at 76% 34%, rgba(214,51,126,.42), transparent 64%),
+    radial-gradient(52% 50% at 46% 82%, rgba(240,180,41,.5),  transparent 66%);
 }
 
 /* Vignet in papierkleur, zodat de randen wegvallen in het vel. */
@@ -156,11 +167,9 @@ h2{font-size:clamp(1.6rem,3.4vw,2.4rem)}
 }
 .print .shot::after{
   content:"";position:absolute;inset:0;pointer-events:none;
-  background:
-    radial-gradient(var(--key) .8px,transparent 1px) 0 0/3px 3px,
-    linear-gradient(180deg,rgba(240,180,41,.13),rgba(10,163,194,.11));
+  background:linear-gradient(180deg,rgba(240,180,41,.14),rgba(10,163,194,.12));
   mix-blend-mode:multiply;
-  opacity:.5;
+  opacity:.55;
 }
 .print .caption{
   position:absolute;left:12px;right:12px;bottom:8px;

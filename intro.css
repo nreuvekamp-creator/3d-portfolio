@@ -15,6 +15,7 @@
 /* De leegte zelf: warm wit, geen kader, niets. */
 .void{
   position:absolute;inset:0;
+  isolation:isolate;
   background:
     radial-gradient(90% 70% at 50% 42%, #fffdf7 0%, var(--paper) 62%, var(--paper-2) 100%);
   transition:background 2.4s var(--ease-soft),opacity 1.4s var(--ease-soft);
@@ -130,6 +131,9 @@
 
 .chest{
   position:absolute;
+  border:0;padding:0;background:none;
+  pointer-events:none;
+  cursor:default;
   left:50%;top:52%;
   width:min(210px,36vw);
   transform:translate(-50%,-50%) translateZ(-560px) scale(.9);
@@ -139,8 +143,36 @@
 }
 #intro.kist .chest{opacity:1;transform:translate(-50%,-50%) translateZ(-300px) scale(1)}
 #intro.open .chest{transform:translate(-50%,-46%) translateZ(-60px) scale(1.18);z-index:5}
-.chest .box{width:100%;height:auto;display:block;position:relative;z-index:2;
-  filter:drop-shadow(0 16px 22px rgba(80,58,28,.3))}
+.chest{perspective:760px}
+/* Het aanzicht op de kist volgt je muis; --mx en --my komen uit fidget.js. */
+.chest .box{
+  width:100%;height:auto;display:block;position:relative;z-index:2;
+  transform-style:preserve-3d;
+  transform:
+    rotateY(calc((var(--mx,.5) - .5) * -36deg))
+    rotateX(calc((var(--my,.5) - .5) * 22deg));
+  transition:transform .35s var(--ease-soft);
+  filter:drop-shadow(0 16px 22px rgba(80,58,28,.3));
+}
+
+/* Zodra het verhaal klaar is, is de kist de deur naar de wereld. */
+#intro.wacht .chest{pointer-events:auto;cursor:pointer}
+#intro.wacht .chest:hover,
+#intro.wacht .chest:focus-visible{transform:translate(-50%,-49%) translateZ(-20px) scale(1.24)}
+#intro.wacht .chest:focus-visible{outline:none}
+#intro.wacht .chest:focus-visible .box{filter:drop-shadow(0 0 0 3px var(--cyan)) drop-shadow(0 16px 22px rgba(80,58,28,.3))}
+.chest-cue{
+  position:absolute;left:50%;bottom:-40px;
+  transform:translateX(-50%);
+  white-space:nowrap;font-size:.64rem;
+  opacity:0;transition:opacity .9s var(--ease-soft) .4s;
+}
+#intro.wacht .chest-cue{opacity:1}
+#intro.wacht .chest .glow{animation:adem 3.2s ease-in-out infinite}
+@keyframes adem{
+  0%,100%{opacity:.85;transform:translate(-50%,-50%) scale(2.0)}
+  50%    {opacity:1;transform:translate(-50%,-50%) scale(2.35)}
+}
 
 /* Het deksel klapt open. */
 .chest .deksel{transform-origin:24px 76px;transition:transform 1.5s var(--ease)}

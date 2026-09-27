@@ -52,57 +52,106 @@
 
 #bar{
   position:fixed;
-  top:0;left:0;right:0;
+  top:0;left:0;
   z-index:30;
-  padding:calc(var(--pad-t) + 14px) 16px 16px;
-  display:flex;
-  flex-wrap:wrap;
-  gap:10px 12px;
-  align-items:center;
-  background:linear-gradient(180deg,var(--paper) 18%,rgba(246,240,226,.82) 62%,rgba(246,240,226,0));
+  padding:calc(var(--pad-t) + 16px) 20px 16px;
   animation:bar-in .9s var(--ease) both;
 }
 @keyframes bar-in{from{opacity:0;transform:translateY(-14px)}to{opacity:1;transform:none}}
 
-.brand{display:flex;flex-direction:column;line-height:1.05;margin-right:4px;white-space:nowrap}
+.brand{display:flex;flex-direction:column;line-height:1.05;white-space:nowrap}
 .brand .label{font-size:.58rem;letter-spacing:.24em}
-.brand strong{font-family:var(--serif);font-weight:400;font-size:1.25rem;letter-spacing:.01em}
+.brand strong{font-family:var(--serif);font-weight:400;font-size:1.3rem;letter-spacing:.01em}
 
-.chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center;min-width:0}
-.sep{width:1px;height:18px;background:var(--line);margin:0 3px}
+/* ------------------------------------------------------------
+   Linksonder: een stapeltje mappen.
+   De brede map houdt de filters; de smalle heeft geen opschrift.
+   ------------------------------------------------------------ */
 
-/* Compacte variant van .stamp-btn uit style.css. */
-.chip{
+#mappen{
+  position:fixed;
+  left:24px;bottom:calc(var(--pad-b) + 22px);
+  z-index:32;
+  display:flex;flex-direction:column;align-items:flex-start;gap:8px;
+  animation:bar-in 1.1s var(--ease) .3s both;
+}
+
+/* Een dossiermap met een stempel erop. */
+.tab-confidential{
   position:relative;
-  font-family:var(--mono);
-  font-size:.64rem;
-  letter-spacing:.14em;
-  text-transform:uppercase;
-  padding:6px 12px;
-  border:1.2px solid var(--line);
-  border-radius:2px;
-  color:var(--ink-soft);
-  background:rgba(246,240,226,.72);
-  white-space:nowrap;
-  transition:color .25s var(--ease),border-color .25s var(--ease),background .25s var(--ease);
+  width:132px;height:88px;
+  background:linear-gradient(170deg,#d9c79b,#c9b184);
+  border:1px solid rgba(60,45,26,.42);
+  border-radius:3px 12px 3px 3px;
+  box-shadow:0 8px 20px rgba(70,55,35,.26);
+  transform:rotate(-2.2deg);
+  transition:transform .45s var(--ease),box-shadow .45s var(--ease);
 }
-.chip:hover{border-color:var(--ink);color:var(--ink)}
-.chip:focus-visible{outline:2.5px solid var(--cyan);outline-offset:2px}
-.chip.on{
-  border-color:var(--key);
-  color:var(--key);
-  background:var(--yellow);
-  box-shadow:1.5px 1.5px 0 var(--key);
+/* Het tabje rechtsboven. */
+.tab-confidential::before{
+  content:"";position:absolute;top:-11px;right:10px;
+  width:52px;height:13px;
+  background:linear-gradient(170deg,#ddcda4,#cdb689);
+  border:1px solid rgba(60,45,26,.42);border-bottom:0;
+  border-radius:4px 4px 0 0;
 }
-.chip.priv.on{background:var(--magenta);color:var(--paper);border-color:var(--key)}
+/* Het velletje dat er net uitsteekt. */
+.tab-confidential::after{
+  content:"";position:absolute;left:8px;top:-5px;right:22px;height:10px;
+  background:var(--paper);
+  border:1px solid rgba(60,45,26,.3);border-bottom:0;
+  border-radius:2px 2px 0 0;
+  transition:top .5s var(--ease);
+}
+.tab-confidential:hover{transform:rotate(-1deg) translateY(-4px);box-shadow:0 14px 28px rgba(70,55,35,.3)}
+.tab-confidential:hover::after{top:-11px}
+.tab-confidential:focus-visible{outline:2.5px solid var(--cyan);outline-offset:4px}
 
-.count{margin-left:auto;white-space:nowrap;font-size:.64rem}
+.stempel{
+  position:absolute;left:50%;top:52%;
+  transform:translate(-50%,-50%) rotate(-9deg);
+  font-family:var(--mono);font-size:.74rem;letter-spacing:.14em;text-transform:uppercase;
+  color:#a4243d;
+  border:2.5px solid #a4243d;border-radius:3px;
+  padding:5px 10px;
+  opacity:.82;
+  white-space:nowrap;
+}
+.tab-confidential.open{transform:rotate(-1deg)}
+.tab-confidential.open .stempel{color:var(--ink-soft);border-color:var(--ink-soft);opacity:.5}
+
+.fluister{margin:0;font-size:1.05rem;color:var(--ink-soft);max-width:190px;line-height:1.15}
+
+/* De brieven die uit het mapje de wereld in vliegen. */
+.vlucht{position:fixed;inset:0;pointer-events:none;z-index:33}
+.brief{
+  position:absolute;width:26px;height:18px;margin:-9px 0 0 -13px;
+  background:#fdf8ec;
+  border:1px solid rgba(60,45,26,.5);
+  box-shadow:0 4px 10px rgba(70,55,35,.28);
+  animation:brief-vliegt 1.5s var(--ease) var(--del,0s) both;
+}
+.brief::before{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(135deg,transparent 48.6%,rgba(60,45,26,.4) 49.4%,transparent 50.4%),
+             linear-gradient(225deg,transparent 48.6%,rgba(60,45,26,.4) 49.4%,transparent 50.4%);
+}
+@keyframes brief-vliegt{
+  0%  {opacity:0;transform:translate(0,0) scale(.4) rotate(0deg)}
+  12% {opacity:1}
+  70% {opacity:1}
+  100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(.75) rotate(var(--tol,220deg))}
+}
+
+.count{position:fixed;right:20px;bottom:calc(var(--pad-b) + 16px);margin:0;font-size:.6rem;z-index:31;opacity:.75}
 
 @media (max-width:640px){
-  #bar{padding-bottom:10px;max-height:40vh;overflow-y:auto;gap:8px}
-  .chip{font-size:.58rem;padding:5px 9px;letter-spacing:.1em}
+  #bar{padding:calc(var(--pad-t) + 12px) 16px 12px}
   .brand strong{font-size:1.05rem}
-  .count{display:none}
+  .chip{font-size:.58rem;padding:5px 9px;letter-spacing:.1em}
+  #mappen{left:16px;bottom:calc(var(--pad-b) + 16px)}
+  .tab-confidential{width:108px;height:72px}
+  .fluister{font-size:.95rem;max-width:150px}
 }
 
 /* ------------------------------------------------------------

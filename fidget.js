@@ -15,7 +15,8 @@ window.Fidget = (function(){
 
   var INKTEN = ["--cyan", "--magenta", "--yellow"];
   var MAX_VLEKKEN = 60;     /* daarna ruimen we de oudste op */
-  var MAX_BLAADJES = 26;
+  var MAX_BLAADJES = 54;     /* bloesem mag rijk zijn */
+  var MAX_EXTRA   = 130;    /* wat je er zelf bij klikt */
 
   var laag, aan = false, blaadjes = [], vlekken = [];
   var muisX = 0.5, muisY = 0.5, doelX = 0.5, doelY = 0.5;
@@ -48,6 +49,19 @@ window.Fidget = (function(){
     };
   }
 
+  /* Een blaadje dat uit een klik ontstaat, begint bij je vinger. */
+  function strooiBlaadje(x, y){
+    var b = maakBlaadje();
+    b.x = x + (Math.random() - 0.5) * 60;
+    b.y = y + (Math.random() - 0.5) * 40;
+    b.vy = 0.3 + Math.random() * 0.7;
+    b.maat = 0.5 + Math.random() * 1.0;
+    b.el.style.opacity = "0";
+    b.el.style.transition = "opacity .6s linear";
+    requestAnimationFrame(function(){ b.el.style.opacity = ""; });
+    blaadjes.push(b);
+  }
+
   function beweegBlaadjes(t){
     for (var i = 0; i < blaadjes.length; i++) {
       var b = blaadjes[i];
@@ -72,6 +86,7 @@ window.Fidget = (function(){
   /* ---------- inktvlekken ---------- */
 
   function laatVlekVallen(x, y){
+    if (!aan) return;
     var nu = Date.now();
     /* Snel achter elkaar klikken maakt het drukker, niet netter. */
     if (nu - laatsteKlik < 900) klikken++; else klikken = 1;
@@ -79,6 +94,10 @@ window.Fidget = (function(){
 
     var aantal = Math.min(1 + Math.floor(klikken / 3), 4);
     for (var i = 0; i < aantal; i++) zetVlek(x, y, i);
+
+    /* En er dwarrelt bloesem bij: klikken maakt het voller, niet viezer. */
+    var bloei = Math.min(3 + klikken, 9);
+    for (var j = 0; j < bloei && blaadjes.length < MAX_EXTRA; j++) strooiBlaadje(x, y);
 
     /* Oudste opruimen zodat het nooit echt vol loopt. */
     while (vlekken.length > MAX_VLEKKEN) {
@@ -158,14 +177,23 @@ window.Fidget = (function(){
       requestAnimationFrame(tik);
     },
 
-    /* Minder blaadjes zodra de bol er is: daar moet de aandacht heen. */
+    /* Bij de bol gaat alles weg: bloesem en inkt horen bij het verhaal, niet bij de kaart. */
     kalmeer: function(){
-      var weg = blaadjes.splice(10);
+      vlekken.forEach(function(v){
+        v.style.transition = "opacity 1s linear";
+        v.style.opacity = "0";
+        setTimeout(function(){ v.remove(); }, 1100);
+      });
+      vlekken.length = 0;
+      aan = false;
+      var weg = blaadjes.splice(0);
       weg.forEach(function(b){
         b.el.style.transition = "opacity 1.2s linear";
         b.el.style.opacity = "0";
         setTimeout(function(){ b.el.remove(); }, 1300);
       });
+      /* Laatste veegbeurt: wat de klik van zojuist nog achterliet, gaat ook mee. */
+      setTimeout(function(){ if (laag) laag.textContent = ""; }, 1400);
     },
 
     stop: function(){ aan = false; }
