@@ -4,7 +4,7 @@
    De losse schermen staan in intro.css en globe.css.
    ============================================================ */
 
-@import url("https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,400&family=Courier+Prime:wght@400;700&family=Caveat:wght@400;600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Courier+Prime:wght@400;700&family=Caveat:wght@400;600&display=swap");
 
 :root{
   /* Inkten. Geen RGB-scherm maar een drukpers: cyaan, magenta, geel, zwart. */
@@ -31,8 +31,10 @@
   --pad-t:env(safe-area-inset-top,0px);
   --pad-b:env(safe-area-inset-bottom,0px);
 
-  --serif:"Instrument Serif",Georgia,"Times New Roman",serif;
-  --body:"Newsreader",Georgia,serif;
+  /* Letters die met een pen op papier zijn gezet, niet op een scherm getekend:
+     Cormorant heeft de dunne opgaande en dikke neergaande halen van een kroontjespen. */
+  --serif:"Cormorant Garamond",Garamond,Georgia,"Times New Roman",serif;
+  --body:"EB Garamond",Garamond,Georgia,serif;
   --mono:"Courier Prime","Courier New",monospace;
   --hand:"Caveat","Bradley Hand",cursive;
 }
@@ -44,8 +46,8 @@ body{
   background:var(--paper);
   color:var(--ink);
   font-family:var(--body);
-  font-size:17px;
-  line-height:1.6;
+  font-size:18px;
+  line-height:1.62;
   overflow:hidden;
   -webkit-font-smoothing:antialiased;
 }
@@ -125,7 +127,7 @@ body.bol .paper-grain{opacity:.12}
    Typografie
    ------------------------------------------------------------ */
 
-h1,h2,h3{font-family:var(--serif);font-weight:400;letter-spacing:.005em;line-height:1.08;margin:0}
+h1,h2,h3{font-family:var(--serif);font-weight:400;letter-spacing:.008em;line-height:1.1;margin:0}
 h1{font-size:clamp(2.6rem,7vw,5rem)}
 h2{font-size:clamp(1.6rem,3.4vw,2.4rem)}
 
