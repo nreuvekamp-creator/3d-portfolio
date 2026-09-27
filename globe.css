@@ -207,6 +207,89 @@
 }
 #panel.open{transform:none}
 
+/* ------------------------------------------------------------
+   De brief die zich ontvouwt.
+   Hij begint als een dichtgevouwen vlakje op de plek van de envelop
+   en gaat in drie slagen open tot het volle paneel. Alles met
+   transform; met width of height hapert het.
+   ------------------------------------------------------------ */
+
+#panel.ontvouwt{
+  transform-origin:50% 50%;
+  animation:brief-ontvouwt 1.05s var(--ease) both;
+}
+@keyframes brief-ontvouwt{
+  0%{
+    opacity:0;
+    transform:translate(var(--fx,0px),var(--fy,0px)) rotate(-7deg) scale(.055,.038);
+  }
+  14%{opacity:1}
+  /* eerste vouw: het kaartje strekt zich in de breedte */
+  40%{
+    opacity:1;
+    transform:translate(calc(var(--fx,0px) * .52),calc(var(--fy,0px) * .52))
+              rotate(-4deg) scale(.30,.085);
+  }
+  /* tweede vouw: de brief klapt open in de hoogte */
+  68%{
+    transform:translate(calc(var(--fx,0px) * .20),calc(var(--fy,0px) * .20))
+              rotate(-1.6deg) scale(.66,.50);
+  }
+  /* derde vouw: het laatste blad valt op zijn plek */
+  86%{transform:translate(calc(var(--fx,0px) * .05),calc(var(--fy,0px) * .05)) rotate(-.4deg) scale(1.02,.94)}
+  100%{opacity:1;transform:none}
+}
+
+/* De vouwnaden lopen mee: ze zijn te zien terwijl hij opengaat en
+   verdwijnen als de brief plat ligt. */
+#panel.ontvouwt::after{
+  content:"";
+  position:absolute;inset:0;
+  pointer-events:none;z-index:2;
+  background:
+    linear-gradient(180deg,transparent 31.4%,rgba(70,55,35,.30) 33%,transparent 34.6%),
+    linear-gradient(180deg,transparent 65.4%,rgba(70,55,35,.22) 67%,transparent 68.6%);
+  animation:vouw-weg 1.05s var(--ease) both;
+}
+@keyframes vouw-weg{0%,60%{opacity:1}100%{opacity:0}}
+
+/* Het envelopje op de kaart dat opengaat en een kaartje loslaat. */
+.klep-laag{position:fixed;width:0;height:0;pointer-events:none;z-index:39}
+.klep-laag span{position:absolute;display:block}
+.klep-bak{
+  left:-21px;top:-14px;width:42px;height:28px;
+  background:#fdf8ec;
+  border:1.3px solid rgba(36,31,28,.78);
+  box-shadow:0 5px 14px rgba(70,55,35,.3);
+  animation:klep-bak-weg 1s var(--ease) both;
+}
+@keyframes klep-bak-weg{0%,45%{opacity:1;transform:none}100%{opacity:0;transform:scale(.8) translateY(6px)}}
+.klep-flap{
+  left:-21px;top:-14px;width:42px;height:17px;
+  background:linear-gradient(180deg,#fbf4e4,#f2e9d2);
+  border:1.3px solid rgba(60,45,26,.6);
+  clip-path:polygon(0 0,100% 0,50% 100%);
+  transform-origin:50% 0;
+  animation:klep-wipt .95s var(--ease) both;
+}
+@keyframes klep-wipt{
+  0%{transform:rotateX(0deg)}
+  38%{transform:rotateX(168deg)}
+  100%{transform:rotateX(168deg);opacity:0}
+}
+.klep-kaart{
+  left:-17px;top:-11px;width:34px;height:22px;
+  background:var(--paper);
+  border:1px solid rgba(60,45,26,.45);
+  box-shadow:0 6px 16px rgba(70,55,35,.3);
+  animation:kaart-vliegt 1s var(--ease) .16s both;
+}
+@keyframes kaart-vliegt{
+  0%{opacity:0;transform:translate(0,0) scale(.5) rotate(-6deg)}
+  20%{opacity:1}
+  100%{opacity:0;transform:translate(0,-46px) scale(1.5) rotate(9deg)}
+}
+
 /* De vouwlijn langs de linkerrand. */
 #panel::before{
   content:"";
@@ -305,3 +388,80 @@
 
 /* In de ruimte moet de teller ook leesbaar blijven. */
 body.ruimte .count{color:rgba(246,240,226,.7)}
+
+
+/* ------------------------------------------------------------
+   De foto op tafel: hij komt los uit het paneel, draait recht en
+   ligt op het volle scherm, met lijst en onderschrift.
+   ------------------------------------------------------------ */
+
+.tafel{
+  position:fixed;inset:0;z-index:70;
+  display:none;
+  place-items:center;
+  padding:clamp(16px,5vh,56px) clamp(16px,5vw,64px);
+  background:rgba(52,40,26,.74);
+  opacity:0;
+  transition:opacity .4s var(--ease-soft);
+  cursor:zoom-out;
+}
+.tafel.aan{display:grid}
+.tafel.neer{opacity:1}
+
+/* De lijst hoort om de foto heen te sluiten, niet om een leeg vlak. */
+.tafel .print.op-tafel{
+  --tilt:0deg;
+  width:fit-content;
+  max-width:min(94vw,1180px);
+  padding:clamp(10px,1.6vw,20px) clamp(10px,1.6vw,20px) clamp(44px,6vw,72px);
+  box-shadow:0 30px 90px rgba(20,14,8,.5),0 4px 12px rgba(20,14,8,.4);
+  transform:translate(var(--tx,0px),var(--ty,0px)) scale(var(--ts,.3)) rotate(-1.3deg);
+  transition:transform .52s var(--ease);
+}
+.tafel.neer .print.op-tafel{transform:none}
+.tafel .print.op-tafel:hover{transform:none}
+.tafel .print.op-tafel .shot{
+  aspect-ratio:auto;
+  display:block;
+  width:fit-content;
+  max-width:100%;
+}
+.tafel .print.op-tafel .shot img{
+  display:block;
+  width:auto;height:auto;
+  max-width:min(90vw,1140px);
+  max-height:calc(88vh - 130px);
+  object-fit:contain;
+}
+/* De vervaagde achtergrond hoort bij het krappe paneel, niet bij de tafel. */
+.tafel .print.op-tafel .shot .blur{display:none}
+.tafel .print.op-tafel .caption{
+  font-size:clamp(1.1rem,2.2vw,1.7rem);
+  bottom:clamp(10px,1.6vw,22px);
+}
+
+/* Een hint dat je hem weer weg kunt leggen. */
+.tafel::after{
+  content:"klik of Escape om terug te leggen";
+  position:absolute;left:0;right:0;bottom:calc(var(--pad-b) + 12px);
+  text-align:center;
+  font-family:var(--mono);font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;
+  color:rgba(246,240,226,.7);
+  pointer-events:none;
+}
+
+.p-photo .print{cursor:zoom-in}
+.p-photo .print:focus-visible{outline:2.5px solid var(--cyan);outline-offset:4px}
+
+@media (max-width:640px){
+  .tafel{padding:14px}
+  .tafel .print.op-tafel{max-width:96vw}
+  .tafel .print.op-tafel .shot img{max-width:92vw;max-height:calc(80vh - 100px)}
+}
+
+@media (prefers-reduced-motion:reduce){
+  #panel.ontvouwt{animation:none}
+  #panel.ontvouwt::after{display:none}
+  .klep-laag{display:none}
+  .tafel,.tafel .print.op-tafel{transition:none}
+}

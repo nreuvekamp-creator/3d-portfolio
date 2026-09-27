@@ -48,7 +48,7 @@
 
 /* Zodra de kist het midden inneemt schuift de tekst omhoog. */
 #intro.kist .lines{margin-bottom:46vh}
-#intro.open .lines{margin-bottom:52vh}
+#intro.open .lines{margin-bottom:58vh}
 
 /* ------------------------------------------------------------
    De tekst die naar je toe komt zweven
@@ -126,7 +126,13 @@
 }
 
 /* ------------------------------------------------------------
-   De kist, achterin de leegte
+   De kist, achterin de leegte.
+
+   Een echte doos van losse vlakken in CSS 3D: bodem, vier wanden en
+   een deksel dat om de achterrand scharniert. Elk vlak heeft een
+   buitenkant en, via ::after, een donkere binnenkant.
+   Alle maten in em; 1em is --u, zodat de hele kist met een getal
+   meeschaalt op een klein scherm.
    ------------------------------------------------------------ */
 
 .chest{
@@ -135,33 +141,175 @@
   pointer-events:none;
   cursor:default;
   left:50%;top:52%;
-  width:min(210px,36vw);
+  --u:calc(min(210px,36vw) / 20);
+  width:calc(var(--u) * 20);
+  height:calc(var(--u) * 20);
   transform:translate(-50%,-50%) translateZ(-560px) scale(.9);
   opacity:0;
   transition:opacity 2.2s var(--ease-soft),transform 2.6s var(--ease-soft);
   z-index:2;
+  perspective:760px;
+  overflow:visible;
 }
 #intro.kist .chest{opacity:1;transform:translate(-50%,-50%) translateZ(-300px) scale(1)}
-#intro.open .chest{transform:translate(-50%,-46%) translateZ(-60px) scale(1.18);z-index:5}
-.chest{perspective:760px;overflow:visible}
-/* Het aanzicht op de kist volgt je muis; --mx en --my komen uit fidget.js. */
+#intro.open .chest{transform:translate(-50%,-28%) translateZ(-60px) scale(1.12);z-index:5}
+
 .chest .box{
+  position:absolute;inset:0;
   overflow:visible;
-  width:100%;height:auto;display:block;position:relative;z-index:2;
+  z-index:2;
   transform-style:preserve-3d;
-  transform:
-    rotateY(calc((var(--mx,.5) - .5) * -36deg))
-    rotateX(calc((var(--my,.5) - .5) * 22deg));
-  transition:transform .35s var(--ease-soft);
-  filter:drop-shadow(0 16px 22px rgba(80,58,28,.3));
 }
 
-/* Zodra het verhaal klaar is, is de kist de deur naar de wereld. */
+/* Het aanzicht op de kist volgt je muis; --mx en --my komen uit fidget.js. */
+.chest .kist{
+  position:absolute;left:50%;top:50%;
+  width:0;height:0;
+  font-size:var(--u);
+  transform-style:preserve-3d;
+  transform:
+    rotateX(calc(-23deg + (var(--my,.5) - .5) * -20deg))
+    rotateY(calc((var(--mx,.5) - .5) * -52deg));
+  transition:transform .35s var(--ease-soft);
+}
+
+/* Een vlak is standaard een blad karton; de binnenkant zit op ::after. */
+.chest .vlak{
+  position:absolute;left:0;top:0;
+  transform-style:preserve-3d;
+  backface-visibility:hidden;
+  background-color:var(--gold);
+  background-image:
+    linear-gradient(rgba(74,46,16,.42),rgba(44,26,8,.62)),
+    repeating-linear-gradient(93deg,rgba(255,255,255,.06) 0 1px,transparent 1px 4px),
+    repeating-linear-gradient(1deg,rgba(40,26,10,.10) 0 2px,transparent 2px 7px);
+  box-shadow:inset 0 0 0 .06em rgba(36,31,28,.45);
+}
+/* De binnenkant: donkerder, en zonder vezel want daar zit stof op. */
+.chest .vlak::after{
+  content:"";
+  position:absolute;inset:0;
+  transform:translateZ(-.01em) rotateY(180deg);
+  backface-visibility:hidden;
+  background-color:var(--gold);
+  background-image:linear-gradient(rgba(30,18,6,.86),rgba(18,10,3,.93));
+  box-shadow:inset 0 0 .6em rgba(0,0,0,.55);
+}
+
+.chest .bodem{
+  width:20em;height:13em;
+  transform:translate(-50%,-50%) rotateX(-90deg) translateZ(5em);
+}
+.chest .voor  {width:20em;height:10em;transform:translate(-50%,-50%) translateZ(6.5em)}
+.chest .achter{width:20em;height:10em;transform:translate(-50%,-50%) rotateY(180deg) translateZ(6.5em)}
+.chest .links {width:13em;height:10em;transform:translate(-50%,-50%) rotateY(-90deg) translateZ(10em)}
+.chest .rechts{width:13em;height:10em;transform:translate(-50%,-50%) rotateY(90deg) translateZ(10em)}
+
+/* Het slotje op de voorkant. */
+.chest .slot{
+  position:absolute;left:50%;top:-.9em;
+  width:2em;height:2.6em;
+  transform:translateX(-50%);
+  background:var(--gold);
+  box-shadow:inset 0 0 0 .1em rgba(36,31,28,.7),0 .1em .2em rgba(36,31,28,.45);
+  border-radius:.2em;
+}
+.chest .slot::before{
+  content:"";position:absolute;left:50%;top:1.1em;
+  width:.45em;height:.45em;border-radius:50%;
+  transform:translateX(-50%);
+  background:var(--key);
+}
+
+/* De mond van de kist: hier komt het licht uit. */
+.chest .mond{
+  position:absolute;left:0;top:0;
+  width:18.6em;height:11.6em;
+  transform:translate(-50%,-50%) rotateX(90deg) translateZ(2.6em);
+  background:radial-gradient(64% 64% at 50% 45%,var(--gold-glow) 0%,var(--gold) 42%,rgba(201,150,44,.12) 100%);
+  filter:blur(.5em);
+  opacity:0;
+  transition:opacity 1.4s var(--ease-soft);
+}
+#intro.open .chest .mond{opacity:1}
+
+/* De schaduw op het papier onder de kist. */
+.chest .grond{
+  position:absolute;left:0;top:0;
+  width:26em;height:15em;
+  transform:translate(-50%,-50%) rotateX(-90deg) translateZ(5.2em);
+  background:radial-gradient(closest-side,rgba(70,50,22,.42),transparent 74%);
+  filter:blur(.3em);
+}
+
+/* ------------------------------------------------------------
+   Het deksel: scharniert om de achterste bovenrand.
+   ------------------------------------------------------------ */
+
+.chest .deksel{
+  position:absolute;left:0;top:0;width:0;height:0;
+  transform-style:preserve-3d;
+  transform:translate3d(0,-5em,-6.5em) rotateX(var(--klap,0deg));
+  transition:transform 1.5s var(--ease);
+}
+#intro.open .chest .deksel{--klap:116deg}
+
+.chest .plaat{
+  position:absolute;left:0;top:0;width:0;height:0;
+  transform-style:preserve-3d;
+  transform:translate3d(0,-.8em,6.8em);
+}
+.chest .d-boven,
+.chest .d-onder {width:21em;height:13.6em}
+.chest .d-voor,
+.chest .d-achter{width:21em;height:1.6em}
+.chest .d-links,
+.chest .d-rechts{width:13.6em;height:1.6em}
+
+.chest .d-boven {transform:translate(-50%,-50%) rotateX(90deg) translateZ(.8em)}
+.chest .d-onder {transform:translate(-50%,-50%) rotateX(-90deg) translateZ(.8em)}
+.chest .d-voor  {transform:translate(-50%,-50%) translateZ(6.8em)}
+.chest .d-achter{transform:translate(-50%,-50%) rotateY(180deg) translateZ(6.8em)}
+.chest .d-links {transform:translate(-50%,-50%) rotateY(-90deg) translateZ(10.5em)}
+.chest .d-rechts{transform:translate(-50%,-50%) rotateY(90deg) translateZ(10.5em)}
+
+/* De bovenkant van het deksel heeft iets van een boekband. */
+.chest .d-boven{
+  background-image:
+    linear-gradient(rgba(74,46,16,.28),rgba(44,26,8,.54)),
+    repeating-linear-gradient(90deg,rgba(255,255,255,.05) 0 1px,transparent 1px 3px);
+  box-shadow:inset 0 0 0 .14em rgba(201,150,44,.38),inset 0 0 0 .06em rgba(36,31,28,.5);
+}
+.chest .band{
+  position:absolute;left:50%;top:0;bottom:0;width:3.4em;
+  transform:translateX(-50%);
+  background:linear-gradient(90deg,rgba(36,31,28,.22),rgba(201,150,44,.30),rgba(36,31,28,.22));
+  box-shadow:inset .06em 0 0 rgba(255,255,255,.12),inset -.06em 0 0 rgba(36,31,28,.4);
+}
+
+/* De onderkant van het deksel is de voering: donker, en hij vangt
+   het licht op dat uit de kist omhoog schijnt. */
+.chest .d-onder{
+  background-color:var(--gold);
+  background-image:linear-gradient(rgba(30,18,6,.86),rgba(18,10,3,.93));
+  box-shadow:inset 0 0 .6em rgba(0,0,0,.55);
+}
+.chest .d-onder::before{
+  content:"";position:absolute;inset:0;
+  background:radial-gradient(90% 120% at 50% 100%,var(--gold-glow) 0%,rgba(245,217,139,.45) 36%,transparent 72%);
+  opacity:0;
+  transition:opacity 1.4s var(--ease-soft);
+}
+#intro.open .chest .d-onder::before{opacity:.9}
+
+/* ------------------------------------------------------------
+   Zodra het verhaal klaar is, is de kist de deur naar de wereld.
+   ------------------------------------------------------------ */
+
 #intro.wacht .chest{pointer-events:auto;cursor:pointer}
-#intro.wacht .chest:hover,
-#intro.wacht .chest:focus-visible{transform:translate(-50%,-49%) translateZ(-20px) scale(1.24)}
-#intro.wacht .chest:focus-visible{outline:none}
-#intro.wacht .chest:focus-visible .box{filter:drop-shadow(0 0 0 3px var(--cyan)) drop-shadow(0 16px 22px rgba(80,58,28,.3))}
+#intro.wacht .chest:hover{transform:translate(-50%,-31%) translateZ(-20px) scale(1.18)}
+#intro.wacht .chest:focus-visible{transform:translate(-50%,-31%) translateZ(-20px) scale(1.18)}
+#intro.wacht .chest:focus-visible{outline:2.5px solid var(--cyan);outline-offset:8px}
 .chest-cue{
   position:absolute;left:50%;bottom:-40px;
   transform:translateX(-50%);
@@ -171,26 +319,23 @@
 #intro.wacht .chest-cue{opacity:1}
 #intro.wacht .chest .glow{animation:adem 3.2s ease-in-out infinite}
 @keyframes adem{
-  0%,100%{opacity:.85;transform:translate(-50%,-50%) scale(2.0)}
-  50%    {opacity:1;transform:translate(-50%,-50%) scale(2.35)}
+  0%,100%{opacity:.85;transform:translate(-50%,-50%) scale(1.5)}
+  50%    {opacity:1;transform:translate(-50%,-50%) scale(1.8)}
 }
 
-/* Het deksel klapt open. */
-.chest .deksel{transform-origin:24px 76px;transition:transform 1.5s var(--ease)}
-#intro.open .chest .deksel{transform:rotate(-104deg)}
-
-/* De gouden gloed die eruit komt. */
+/* De gouden gloed die uit de kist omhoog schijnt. */
 .chest .glow{
-  position:absolute;left:50%;top:44%;
-  width:140%;aspect-ratio:1;
+  position:absolute;left:50%;top:38%;
+  width:150%;aspect-ratio:1;
   transform:translate(-50%,-50%) scale(.2);
-  background:radial-gradient(closest-side,var(--gold-glow) 0%,rgba(245,217,139,.55) 38%,transparent 72%);
+  background:radial-gradient(closest-side,var(--gold-glow) 0%,rgba(245,217,139,.55) 34%,transparent 70%);
   opacity:0;
   transition:opacity 1.4s var(--ease-soft),transform 2s var(--ease-soft);
   z-index:1;
+  pointer-events:none;
 }
-#intro.kist .chest .glow{opacity:.35;transform:translate(-50%,-50%) scale(.7)}
-#intro.open .chest .glow{opacity:1;transform:translate(-50%,-50%) scale(2.1)}
+#intro.kist .chest .glow{opacity:.3;transform:translate(-50%,-50%) scale(.55)}
+#intro.open .chest .glow{opacity:1;transform:translate(-50%,-50%) scale(1.6)}
 
 /* ------------------------------------------------------------
    De enveloppen die eruit zwermen
@@ -290,7 +435,7 @@
 @media (max-width:640px){
   .lines{margin-bottom:26vh}
   .me{width:min(210px,54vw)}
-  .chest{width:min(160px,48vw)}
+  .chest{--u:calc(min(160px,48vw) / 20)}
 }
 
 /* Wie minder beweging wil, krijgt het verhaal niet. */

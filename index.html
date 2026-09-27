@@ -68,26 +68,28 @@
   <!-- de kist, achterin -->
   <button class="chest" id="chest" aria-label="Open de doos en ga naar de wereld">
     <div class="glow"></div>
-    <svg viewBox="-70 -80 340 250" class="box" aria-hidden="true" overflow="visible">
-      <defs>
-        <linearGradient id="hout" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stop-color="#9a7748"/><stop offset="1" stop-color="#5e4529"/>
-        </linearGradient>
-      </defs>
-      <g class="deksel">
-        <path d="M20 76 Q100 14 180 76 Z" fill="url(#hout)" stroke="#3d2c1a" stroke-width="2.5" stroke-linejoin="round"/>
-        <path d="M20 76 Q100 26 180 76" fill="none" stroke="#3d2c1a" stroke-width="1.4" opacity=".45"/>
-      </g>
-      <g class="bak">
-        <path d="M20 74 L180 74 L172 140 L28 140 Z" fill="url(#hout)" stroke="#3d2c1a" stroke-width="2.5" stroke-linejoin="round"/>
-        <path d="M20 74 L180 74 L176 84 L24 84 Z" fill="#000" opacity=".22"/>
-        <path d="M28 140 L172 140 L170 147 L30 147 Z" fill="#3d2c1a" opacity=".5"/>
-        <path d="M54 74 L58 140" stroke="#3d2c1a" stroke-width="1.2" opacity=".3"/>
-        <path d="M146 74 L142 140" stroke="#3d2c1a" stroke-width="1.2" opacity=".3"/>
-        <rect x="92" y="90" width="16" height="21" rx="2" fill="#c9962c" stroke="#3d2c1a" stroke-width="2"/>
-        <circle cx="100" cy="100" r="2.4" fill="#3d2c1a"/>
-      </g>
-    </svg>
+    <div class="box" aria-hidden="true">
+      <div class="kist">
+        <div class="grond"></div>
+        <div class="vlak bodem"></div>
+        <div class="vlak wand achter"></div>
+        <div class="vlak wand links"></div>
+        <div class="vlak wand rechts"></div>
+        <div class="vlak wand voor"><span class="slot"></span></div>
+        <div class="mond"></div>
+        <!-- het deksel scharniert om de achterrand en valt achterover -->
+        <div class="deksel">
+          <div class="plaat">
+            <div class="vlak d-boven"><span class="band"></span></div>
+            <div class="vlak d-onder"></div>
+            <div class="vlak d-voor"></div>
+            <div class="vlak d-achter"></div>
+            <div class="vlak d-links"></div>
+            <div class="vlak d-rechts"></div>
+          </div>
+        </div>
+      </div>
+    </div>
     <span class="chest-cue label">open de doos</span>
   </button>
 

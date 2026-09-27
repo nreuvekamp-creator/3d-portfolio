@@ -1,0 +1,367 @@
+/* ============================================================
+   Papier per land.
+   Elk vel is ergens geschept: Zaansch bord uit Westzaan, washi
+   uit Yamanashi, hanji uit Korea. Zet data-papier="<land>" op
+   een papiervlak en het krijgt die soort.
+   Alles zit in de background-lagen van het element zelf, dus
+   ::before en ::after blijven vrij voor de bouwers.
+   ============================================================ */
+
+:root{
+  /* --------------------------------------------------------
+     De pulp. Turbulentie uit een SVG-filter, geen afbeelding.
+     Lage baseFrequency = wolken, hoge = korrel.
+     Een uitgerekte baseFrequency ('.004 .7') geeft strepen:
+     dat leest als vezel.
+     -------------------------------------------------------- */
+
+  /* wolkigheid, zacht */
+  --t-wolk:url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' width='420' height='420'>\
+<filter id='f'><feTurbulence type='fractalNoise' baseFrequency='.013' numOctaves='4' stitchTiles='stitch'/>\
+<feColorMatrix type='matrix' values='0 0 0 0 .40 0 0 0 0 .33 0 0 0 0 .21 0 0 0 .9 0'/></filter>\
+<rect width='420' height='420' filter='url(%23f)' opacity='.20'/></svg>");
+
+  /* wolkigheid, sterk: het vel in tegenlicht */
+  --t-wolk-sterk:url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' width='460' height='460'>\
+<filter id='f'><feTurbulence type='fractalNoise' baseFrequency='.007' numOctaves='5' stitchTiles='stitch'/>\
+<feColorMatrix type='matrix' values='0 0 0 0 .40 0 0 0 0 .33 0 0 0 0 .21 0 0 0 .9 0'/>\
+<feComponentTransfer><feFuncA type='linear' slope='1.5'/></feComponentTransfer></filter>\
+<rect width='460' height='460' filter='url(%23f)' opacity='.26'/></svg>");
+
+  /* korrel, fijn: gladde vellen */
+  --t-korrel-fijn:url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'>\
+<filter id='f'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/>\
+<feColorMatrix type='matrix' values='0 0 0 0 .40 0 0 0 0 .33 0 0 0 0 .21 0 0 0 .9 0'/></filter>\
+<rect width='180' height='180' filter='url(%23f)' opacity='.14'/></svg>");
+
+  /* korrel, grof: bord en klonters */
+  --t-korrel-grof:url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'>\
+<filter id='f'><feTurbulence type='fractalNoise' baseFrequency='.32' numOctaves='4' stitchTiles='stitch'/>\
+<feColorMatrix type='matrix' values='0 0 0 0 .40 0 0 0 0 .33 0 0 0 0 .21 0 0 0 .9 0'/>\
+<feComponentTransfer><feFuncA type='linear' slope='1.4'/></feComponentTransfer></filter>\
+<rect width='240' height='240' filter='url(%23f)' opacity='.30'/></svg>");
+
+  /* korte vezels, liggend */
+  --t-vezel-kort:url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'>\
+<filter id='f'><feTurbulence type='fractalNoise' baseFrequency='.01 .62' numOctaves='2' stitchTiles='stitch'/>\
+<feColorMatrix type='matrix' values='0 0 0 0 .40 0 0 0 0 .33 0 0 0 0 .21 0 0 0 .9 0'/></filter>\
+<rect width='300' height='300' filter='url(%23f)' opacity='.16'/></svg>");
+
+  /* lange bastvezels: washi */
+  --t-vezel-lang:url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' width='520' height='320'>\
+<filter id='f'><feTurbulence type='fractalNoise' baseFrequency='.0016 .55' numOctaves='1' stitchTiles='stitch'/>\
+<feColorMatrix type='matrix' values='0 0 0 0 .40 0 0 0 0 .33 0 0 0 0 .21 0 0 0 .9 0'/>\
+<feComponentTransfer><feFuncA type='linear' slope='1.7' intercept='-.25'/></feComponentTransfer></filter>\
+<rect width='520' height='320' filter='url(%23f)' opacity='.26'/>\
+<g stroke='%23a89468' fill='none' stroke-width='.5' opacity='.3'>\
+<path d='M12 40 C120 34 240 52 508 44'/><path d='M4 148 C140 158 300 132 516 146'/>\
+<path d='M20 246 C160 238 320 262 512 250'/><path d='M0 96 C180 104 340 88 520 100'/></g></svg>");
+
+  /* kruislaags: hanji wordt in twee richtingen geschept */
+  --t-vezel-kruis:url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' width='340' height='340'>\
+<filter id='a'><feTurbulence type='fractalNoise' baseFrequency='.006 .5' numOctaves='2' stitchTiles='stitch'/>\
+<feColorMatrix type='matrix' values='0 0 0 0 .40 0 0 0 0 .33 0 0 0 0 .21 0 0 0 .9 0'/></filter>\
+<filter id='b'><feTurbulence type='fractalNoise' baseFrequency='.5 .006' numOctaves='2' stitchTiles='stitch'/>\
+<feColorMatrix type='matrix' values='0 0 0 0 .40 0 0 0 0 .33 0 0 0 0 .21 0 0 0 .9 0'/></filter>\
+<rect width='340' height='340' filter='url(%23a)' opacity='.15'/>\
+<rect width='340' height='340' filter='url(%23b)' opacity='.15'/></svg>");
+
+  /* vezels alle kanten op: Capellades mengt katoen, linnen, abaca en sisal */
+  --t-vezel-wild:url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' width='320' height='320'>\
+<filter id='f'><feTurbulence type='fractalNoise' baseFrequency='.03 .45' numOctaves='2' stitchTiles='stitch'/>\
+<feColorMatrix type='matrix' values='0 0 0 0 .40 0 0 0 0 .33 0 0 0 0 .21 0 0 0 .9 0'/></filter>\
+<rect width='320' height='320' filter='url(%23f)' opacity='.13'/>\
+<g stroke='%23a2916f' fill='none' stroke-width='.5' opacity='.3' stroke-linecap='round'>\
+<path d='M18 26 l14 6'/><path d='M210 12 l-8 13'/><path d='M96 140 l13 -8'/>\
+<path d='M260 190 l-6 -13'/><path d='M40 250 l16 4'/><path d='M170 290 l10 -9'/>\
+<path d='M290 90 l-13 5'/><path d='M120 60 l4 15'/><path d='M60 180 l-11 7'/>\
+<path d='M230 240 l12 6'/><path d='M150 200 l-9 -11'/></g></svg>");
+
+  /* strorestjes: Moulin du Verger, linnen en hennep */
+  --t-stro:url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' width='360' height='360'>\
+<filter id='f'><feTurbulence type='fractalNoise' baseFrequency='.02 .3' numOctaves='2' stitchTiles='stitch'/>\
+<feColorMatrix type='matrix' values='0 0 0 0 .40 0 0 0 0 .33 0 0 0 0 .21 0 0 0 .9 0'/></filter>\
+<rect width='360' height='360' filter='url(%23f)' opacity='.12'/>\
+<g stroke='%239b8659' stroke-linecap='round' fill='none' opacity='.62'>\
+<path d='M30 48 l17 -4' stroke-width='1.1' opacity='.45'/>\
+<path d='M150 30 l-14 18' stroke-width='.9' opacity='.4'/>\
+<path d='M268 84 l15 5' stroke-width='1.2' opacity='.42'/>\
+<path d='M74 176 l-20 12' stroke-width='.9' opacity='.4'/>\
+<path d='M212 158 l12 -9' stroke-width='1.1' opacity='.45'/>\
+<path d='M320 222 l-24 4' stroke-width='.9' opacity='.4'/>\
+<path d='M110 268 l16 16' stroke-width='1.2' opacity='.42'/>\
+<path d='M244 312 l-17 -5' stroke-width='1' opacity='.4'/>\
+<path d='M46 330 l20 -10' stroke-width='.9' opacity='.38'/></g></svg>");
+
+  /* gedroogde bloemblaadjes in de pulp: Waldviertel */
+  --t-bloem:url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'>\
+<filter id='f'><feTurbulence type='fractalNoise' baseFrequency='.02' numOctaves='3' stitchTiles='stitch'/>\
+<feColorMatrix type='matrix' values='0 0 0 0 .40 0 0 0 0 .33 0 0 0 0 .21 0 0 0 .9 0'/></filter>\
+<rect width='300' height='300' filter='url(%23f)' opacity='.14'/>\
+<g opacity='.4'>\
+<ellipse cx='52' cy='66' rx='4.5' ry='2.4' fill='%23c2a07c' transform='rotate(24 52 66)'/>\
+<ellipse cx='188' cy='38' rx='3.6' ry='1.9' fill='%23b98f8a' transform='rotate(-38 188 38)'/>\
+<ellipse cx='246' cy='150' rx='5' ry='2.2' fill='%23bfa079' transform='rotate(12 246 150)'/>\
+<ellipse cx='96' cy='198' rx='3.2' ry='1.8' fill='%23b0917f' transform='rotate(62 96 198)'/>\
+<ellipse cx='162' cy='262' rx='4.2' ry='2.1' fill='%23c3a583' transform='rotate(-14 162 262)'/>\
+<ellipse cx='28' cy='240' rx='3' ry='1.6' fill='%23b4937c' transform='rotate(44 28 240)'/></g></svg>");
+
+  /* textielvlekjes: kludepapir houdt stukjes stof vast */
+  --t-textiel:url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' width='280' height='280'>\
+<filter id='f'><feTurbulence type='fractalNoise' baseFrequency='.05' numOctaves='3' stitchTiles='stitch'/>\
+<feColorMatrix type='matrix' values='0 0 0 0 .40 0 0 0 0 .33 0 0 0 0 .21 0 0 0 .9 0'/></filter>\
+<rect width='280' height='280' filter='url(%23f)' opacity='.12'/>\
+<g fill='%23968a70' opacity='.35'>\
+<rect x='44' y='58' width='5' height='2' transform='rotate(18 44 58)'/>\
+<rect x='196' y='92' width='4' height='2' transform='rotate(-52 196 92)'/>\
+<rect x='120' y='186' width='6' height='2' transform='rotate(8 120 186)'/>\
+<rect x='240' y='228' width='4' height='2' transform='rotate(70 240 228)'/>\
+<rect x='62' y='246' width='5' height='2' transform='rotate(-24 62 246)'/></g></svg>");
+
+  /* deckle: de rafelige rand van een geschept vel, als masker */
+  --deckle-h:url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' width='72' height='9' preserveAspectRatio='none'>\
+<path d='M0 9 H72 V3.4 C64 1.6 58 4.8 50 2.6 C42 .6 36 4.2 28 2.2 C21 .5 14 4.4 7 2.4 C4 1.7 2 2.8 0 2.2 Z' fill='%23000'/></svg>");
+  --deckle-v:url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' width='9' height='72' preserveAspectRatio='none'>\
+<path d='M9 0 V72 H3.4 C1.6 64 4.8 58 2.6 50 C.6 42 4.2 36 2.2 28 C.5 21 4.4 14 2.4 7 C1.7 4 2.8 2 2.2 0 Z' fill='%23000'/></svg>");
+}
+
+/* ------------------------------------------------------------
+   Het basisvel. Wie geen land heeft, of een land dat hier niet
+   staat, krijgt gewoon warm papier.
+   ------------------------------------------------------------ */
+
+[data-papier]{
+  /* per land bij te stellen */
+  --pap-bg:var(--paper);
+  --verge-a:.045;          /* de fijne raamlijntjes */
+  --verge-gap:4px;
+  --ketting-a:.05;         /* de dikkere kettinglijnen haaks erop */
+  --ketting-gap:28px;
+  --pap-vezel:var(--t-vezel-kort);
+  --pap-vezel-size:300px 300px;
+  --pap-pulp:var(--t-wolk);
+  --pap-pulp-size:420px 420px;
+
+  --pap-merk:linear-gradient(transparent,transparent),linear-gradient(transparent,transparent);
+  --pap-merk-blend:normal,normal;
+
+  background-color:var(--pap-bg);
+  background-image:
+    var(--pap-merk),
+    repeating-linear-gradient(90deg,
+      rgba(36,31,28,var(--verge-a)) 0 .7px, transparent .7px var(--verge-gap)),
+    repeating-linear-gradient(0deg,
+      rgba(36,31,28,var(--ketting-a)) 0 1.2px, transparent 1.2px var(--ketting-gap)),
+    var(--pap-vezel),
+    var(--pap-pulp);
+  background-size:
+    auto auto, auto auto,
+    auto auto, auto auto,
+    var(--pap-vezel-size),
+    var(--pap-pulp-size);
+  background-blend-mode:var(--pap-merk-blend),multiply,multiply,multiply,multiply;
+  color:var(--ink);
+}
+
+/* ------------------------------------------------------------
+   De elf soorten
+   ------------------------------------------------------------ */
+
+/* Zaansch Bord, molen De Schoolmeester in Westzaan.
+   Katoenen lompen met hennep: donker, grof, kartonachtig. */
+[data-papier="Nederland"]{
+  --pap-bg:#ddc9a4;
+  --verge-a:.075;
+  --verge-gap:5px;
+  --ketting-a:.085;
+  --ketting-gap:34px;
+  --pap-vezel:var(--t-korrel-grof);
+  --pap-vezel-size:240px 240px;
+  --pap-pulp:var(--t-wolk-sterk);
+  --pap-pulp-size:300px 300px;
+}
+
+/* Alvøens Papirfabrik bij Bergen, 1797. Bankbiljetpapier:
+   fijn, glad, bijna geen insluitsels. */
+[data-papier="Noorwegen"]{
+  --pap-bg:#f2ead8;
+  --verge-a:.03;
+  --verge-gap:3.4px;
+  --ketting-a:.032;
+  --ketting-gap:30px;
+  --pap-vezel:var(--t-korrel-fijn);
+  --pap-vezel-size:180px 180px;
+  --pap-pulp:var(--t-wolk);
+  --pap-pulp-size:520px 520px;
+}
+
+/* Kludepapir uit Silkeborg: wolkig in tegenlicht, textielvlekjes. */
+[data-papier="Denemarken"]{
+  --pap-bg:#ece2ca;
+  --verge-a:.042;
+  --verge-gap:4.4px;
+  --ketting-a:.05;
+  --ketting-gap:26px;
+  --pap-vezel:var(--t-textiel);
+  --pap-vezel-size:280px 280px;
+  --pap-pulp:var(--t-wolk-sterk);
+  --pap-pulp-size:300px 260px;
+}
+
+/* Molí Paperer de Capellades: katoen, linnen, abaca en sisal
+   door elkaar, en een deckle-rand aan alle vier de zijden. */
+[data-papier="Spanje"]{
+  --pap-bg:#f0e8d5;
+  --verge-a:.026;
+  --verge-gap:6px;
+  --ketting-a:.03;
+  --ketting-gap:44px;
+  --pap-vezel:var(--t-vezel-wild);
+  --pap-vezel-size:320px 320px;
+  --pap-pulp:var(--t-wolk);
+  --pap-pulp-size:380px 380px;
+}
+
+/* Hadern-Büttenpapier uit het Waldviertel: wisselende dikte,
+   gedroogde bloemblaadjes in de pulp. */
+[data-papier="Oostenrijk"]{
+  --pap-bg:#f3eddc;
+  --verge-a:0;
+  --ketting-a:0;
+  --pap-vezel:var(--t-bloem);
+  --pap-vezel-size:300px 300px;
+  --pap-pulp:var(--t-wolk);
+  --pap-pulp-size:280px 360px;
+}
+
+/* Fabriano, sinds 1264: vergé, kettinglijnen en een watermerk.
+   Het watermerk ligt als lichte plek in het vel. */
+[data-papier="Italië"]{
+  --pap-bg:#f2e9d8;
+  --verge-a:.05;
+  --verge-gap:3.2px;
+  --ketting-a:.07;
+  --ketting-gap:24px;
+  --pap-vezel:var(--t-korrel-fijn);
+  --pap-vezel-size:180px 180px;
+  --pap-pulp:var(--t-wolk);
+  --pap-pulp-size:440px 440px;
+}
+/* Het ingeperste watermerk: daar is het vel dunner, dus lichter. */
+[data-papier="Italië"]{
+  --pap-merk:
+    radial-gradient(38% 22% at 30% 34%, rgba(255,252,242,.55), transparent 70%),
+    radial-gradient(26% 16% at 72% 68%, rgba(255,252,242,.42), transparent 72%);
+  --pap-merk-blend:screen,screen;
+}
+
+/* Papiermolen Herisem in Alsemberg: lompen, vlas en katoen,
+   licht ruw, vezels alle kanten op. */
+[data-papier="België"]{
+  --pap-bg:#eae2cd;
+  --verge-a:.018;
+  --verge-gap:7px;
+  --ketting-a:.02;
+  --ketting-gap:52px;
+  --pap-vezel:var(--t-vezel-wild);
+  --pap-vezel-size:250px 250px;
+  --pap-pulp:var(--t-korrel-grof);
+  --pap-pulp-size:200px 200px;
+}
+
+/* Moulin du Verger, Charente, 1539: linnen en hennep,
+   met strorestjes die je zo kunt aanwijzen. */
+[data-papier="Frankrijk"]{
+  --pap-bg:#efe6d2;
+  --verge-a:.045;
+  --verge-gap:4.6px;
+  --ketting-a:.06;
+  --ketting-gap:30px;
+  --pap-vezel:var(--t-stro);
+  --pap-vezel-size:360px 360px;
+  --pap-pulp:var(--t-wolk-sterk);
+  --pap-pulp-size:300px 420px;
+}
+
+/* Tervakoski: dicht, glad, grauwig, nauwelijks insluitsels. */
+[data-papier="Finland"]{
+  --pap-bg:#ebe5d7;
+  --verge-a:.035;
+  --verge-gap:3.8px;
+  --ketting-a:.038;
+  --ketting-gap:32px;
+  --pap-vezel:var(--t-korrel-fijn);
+  --pap-vezel-size:150px 150px;
+  --pap-pulp:var(--t-wolk);
+  --pap-pulp-size:600px 600px;
+}
+
+/* Nishijima-washi uit Yamanashi, mitsumata-bast:
+   dun, glanzend, lange vezels, wolkige nijimi. Geen schepraam-lijnen. */
+[data-papier="Japan"]{
+  --pap-bg:#f6f0e4;
+  --verge-a:0;
+  --ketting-a:0;
+  --pap-vezel:var(--t-vezel-lang);
+  --pap-vezel-size:520px 320px;
+  --pap-pulp:var(--t-wolk-sterk);
+  --pap-pulp-size:560px 380px;
+}
+
+/* Hanji: bast van de papiermoerbei, kruislaags geschept. */
+[data-papier="Zuid-Korea"]{
+  --pap-bg:#efe6d3;
+  --verge-a:0;
+  --ketting-a:0;
+  --pap-vezel:var(--t-vezel-kruis);
+  --pap-vezel-size:340px 340px;
+  --pap-pulp:var(--t-wolk);
+  --pap-pulp-size:400px 400px;
+}
+
+/* ------------------------------------------------------------
+   Deckle-rand. Alleen bij de soorten die met de hand uit de
+   kuip komen; de machinale vellen houden een rechte snee.
+   ------------------------------------------------------------ */
+
+[data-papier="Nederland"],
+[data-papier="Spanje"],
+[data-papier="België"],
+[data-papier="Frankrijk"],
+[data-papier="Japan"],
+[data-papier="Zuid-Korea"]{
+  -webkit-mask-image:
+    linear-gradient(#000,#000),
+    var(--deckle-h), var(--deckle-h),
+    var(--deckle-v), var(--deckle-v);
+  mask-image:
+    linear-gradient(#000,#000),
+    var(--deckle-h), var(--deckle-h),
+    var(--deckle-v), var(--deckle-v);
+  -webkit-mask-repeat:no-repeat,repeat-x,repeat-x,repeat-y,repeat-y;
+  mask-repeat:no-repeat,repeat-x,repeat-x,repeat-y,repeat-y;
+  -webkit-mask-position:center,top left,bottom left,left top,right top;
+  mask-position:center,top left,bottom left,left top,right top;
+  -webkit-mask-size:calc(100% - 12px) calc(100% - 12px),100% 8px,100% 8px,8px 100%,8px 100%;
+  mask-size:calc(100% - 12px) calc(100% - 12px),100% 8px,100% 8px,8px 100%,8px 100%;
+}
+
+/* Japan en Zuid-Korea scheuren ruwer af: iets diepere rand. */
+[data-papier="Japan"],
+[data-papier="Zuid-Korea"]{
+  -webkit-mask-size:calc(100% - 18px) calc(100% - 18px),100% 11px,100% 11px,11px 100%,11px 100%;
+  mask-size:calc(100% - 18px) calc(100% - 18px),100% 11px,100% 11px,11px 100%,11px 100%;
+}
