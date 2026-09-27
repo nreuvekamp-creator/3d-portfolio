@@ -20,21 +20,21 @@ window.Intro = (function(){
      -------------------------------------------------------- */
 
   var SCRIPT = [
-    {scene: "leegte", tekst: "Hi, ik ben Niels.", wacht: 1900},
-    {tekst: "Welkom op mijn plekje op het internet.", wacht: 2300},
-    {tekst: "Het is hier groot, en toch ben je op de juiste plek beland.", klasse: "small", wacht: 2100},
+    {scene: "leegte", tekst: "Hi, ik ben Niels.", wacht: 2259},
+    {tekst: "Welkom op mijn plekje op het internet.", wacht: 2734},
+    {tekst: "Het is hier groot, en toch ben je op de juiste plek beland.", klasse: "small", wacht: 2496},
 
-    {scene: "breed", tekst: "Mijn interesses lopen alle kanten op.", wacht: 2100},
-    {voorbeelden: true, wacht: 3600},
+    {scene: "breed", tekst: "Mijn interesses lopen alle kanten op.", wacht: 2496},
+    {voorbeelden: true, wacht: 4280},
 
-    {scene: "kist", tekst: "Dat komt omdat ik iemand van ideeën ben.", wacht: 2200},
-    {tekst: "Mijn hoofd ontploft er soms van.", wacht: 2100},
-    {tekst: "Dus ik verzamel ze.", klasse: "hand", wacht: 1900},
-    {tekst: "In een doos.", wacht: 2100},
+    {scene: "kist", tekst: "Dat komt omdat ik iemand van ideeën ben.", wacht: 2615},
+    {tekst: "Mijn hoofd ontploft er soms van.", wacht: 2496},
+    {tekst: "Dus ik verzamel ze.", klasse: "hand", wacht: 2259},
+    {tekst: "In een doos.", wacht: 2496},
 
-    {scene: "open", tekst: "", wacht: 1200},
-    {tekst: "Elk idee kwam ergens vandaan.", wacht: 2200},
-    {tekst: "Dus elk idee heeft een plek op de wereld.", wacht: 2600},
+    {scene: "open", tekst: "", wacht: 1426},
+    {tekst: "Elk idee kwam ergens vandaan.", wacht: 2615},
+    {tekst: "Dus elk idee heeft een plek op de wereld.", wacht: 3091},
 
     {scene: "wacht", tekst: "Kom maar kijken.", klasse: "hand", wacht: 999999}
   ];
@@ -52,6 +52,36 @@ window.Intro = (function(){
 
   var rustig = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+  /* ------------------------------------------------------------
+     De stem. Voorlopig die van de browser, laag en langzaam gezet,
+     zodat je hoort hoe het loopt. Zodra er echte opnamen zijn,
+     krijgt elke regel in SCRIPT een veld `stem` met een bestandsnaam
+     en vervangt `zeg()` de spraaksynthese door een audio-element.
+     ------------------------------------------------------------ */
+  var geluid = false;
+
+  function stem(){
+    if (!window.speechSynthesis) return null;
+    var lijst = speechSynthesis.getVoices() || [];
+    var nl = lijst.filter(function(v){ return /^nl/i.test(v.lang); });
+    /* Liefst een mannenstem; anders de eerste Nederlandse; anders wat er is. */
+    var diep = nl.filter(function(v){ return /(man|male|xander|ruben|frank|daan)/i.test(v.name); });
+    return diep[0] || nl[0] || lijst[0] || null;
+  }
+
+  function zeg(tekst){
+    if (!geluid || !tekst || !window.speechSynthesis) return;
+    speechSynthesis.cancel();
+    var u = new SpeechSynthesisUtterance(tekst);
+    var v = stem();
+    if (v) u.voice = v;
+    u.lang = (v && v.lang) || "nl-NL";
+    u.pitch = 0.55;   /* zo laag als het mag: een verteller, geen assistent */
+    u.rate = 0.86;
+    u.volume = 0.95;
+    speechSynthesis.speak(u);
+  }
+
   /* --------------------------------------------------------
      Regels tonen
      -------------------------------------------------------- */
@@ -65,6 +95,7 @@ window.Intro = (function(){
       opruimen(oud[i], 1600);
     }
     if (!stap.tekst) return;
+    zeg(stap.tekst);
 
     var el = document.createElement("span");
     el.className = "line" + (stap.klasse ? " " + stap.klasse : "");
@@ -160,6 +191,7 @@ window.Intro = (function(){
   function eindig(){
     if (klaar) return;
     klaar = true;
+    if (window.speechSynthesis) speechSynthesis.cancel();
     clearTimeout(timer);
     intro.classList.add("gone");
     /* Pas na de uitfade echt uit de weg halen, anders knippert het. */
@@ -192,7 +224,12 @@ window.Intro = (function(){
     }
 
     window.addEventListener("keydown", function(e){
-      if (e.code === "Space" && !e.repeat) { e.preventDefault(); pak(); }
+      if (e.code === "Space" && !e.repeat) {
+        e.preventDefault();
+        /* De overslaanknop bestaat pas zodra je de spatiebalk aanraakt. */
+        intro.classList.add("spatie");
+        pak();
+      }
       if (e.key === "Escape") eindig();
     });
     window.addEventListener("keyup", function(e){ if (e.code === "Space") los(); });
@@ -221,6 +258,18 @@ window.Intro = (function(){
       var foto = (data && data.profile && data.profile.photo) || "photos/niels.png";
       var img = document.getElementById("meImg");
       if (img) { img.src = foto; img.alt = (data.profile && data.profile.name) || ""; }
+
+      var gknop = document.getElementById("geluidBtn");
+      if (gknop) {
+        if (!window.speechSynthesis) gknop.hidden = true;
+        gknop.addEventListener("click", function(){
+          geluid = !geluid;
+          gknop.setAttribute("aria-pressed", geluid ? "true" : "false");
+          gknop.textContent = geluid ? "geluid uit" : "geluid aan";
+          if (!geluid) speechSynthesis.cancel();
+          else zeg("Hi, ik ben Niels.");
+        });
+      }
 
       document.getElementById("skipBtn").addEventListener("click", eindig);
       houdVast(document.getElementById("skipRing"));

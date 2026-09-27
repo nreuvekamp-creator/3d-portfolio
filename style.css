@@ -85,14 +85,16 @@ body.bol .paper-grain{opacity:.12}
    Zet .cmyk op een papiervlak; nooit over de kaart heen.
    ------------------------------------------------------------ */
 
-.cmyk::before{
-  content:"";position:absolute;inset:0;pointer-events:none;
+/* Vierkleurendruk op de fotos: de drie inkten liggen net naast elkaar,
+   zoals een pers die niet helemaal zuiver staat. Alleen hier, niet over
+   de kaart en niet over de hele pagina. */
+.print .shot .cyaan,
+.print .shot .magenta{
+  position:absolute;inset:0;
+  background:inherit;
+  background-size:cover;background-position:center;
   mix-blend-mode:multiply;
-  opacity:.16;
-  background:
-    radial-gradient(38% 46% at 22% 28%, rgba(10,163,194,.55), transparent 62%),
-    radial-gradient(42% 40% at 76% 34%, rgba(214,51,126,.42), transparent 64%),
-    radial-gradient(52% 50% at 46% 82%, rgba(240,180,41,.5),  transparent 66%);
+  pointer-events:none;
 }
 
 /* Vignet in papierkleur, zodat de randen wegvallen in het vel. */
@@ -163,13 +165,26 @@ h2{font-size:clamp(1.6rem,3.4vw,2.4rem)}
   background:var(--paper-deep);
 }
 .print .shot img{
-  filter:sepia(.28) saturate(.82) contrast(1.06) brightness(1.02);
+  filter:sepia(.34) saturate(.78) contrast(1.09) brightness(1.03);
 }
+/* De inktwolken over de foto: geel bovenin, cyaan onderin, magenta in de hoek. */
 .print .shot::after{
   content:"";position:absolute;inset:0;pointer-events:none;
-  background:linear-gradient(180deg,rgba(240,180,41,.14),rgba(10,163,194,.12));
   mix-blend-mode:multiply;
-  opacity:.55;
+  opacity:.5;
+  background:
+    radial-gradient(70% 60% at 18% 12%, rgba(240,180,41,.55), transparent 68%),
+    radial-gradient(64% 56% at 84% 26%, rgba(214,51,126,.38), transparent 66%),
+    radial-gradient(90% 70% at 50% 100%, rgba(10,163,194,.42), transparent 70%);
+}
+/* En een verschoven kleurkanaal eroverheen, de misregistratie. */
+.print .shot::before{
+  content:"";position:absolute;inset:0;z-index:2;pointer-events:none;
+  mix-blend-mode:screen;
+  opacity:.16;
+  background:
+    linear-gradient(90deg, rgba(10,163,194,.9) 0 2px, transparent 2px) 0 0/100% 100%,
+    linear-gradient(270deg, rgba(214,51,126,.9) 0 2px, transparent 2px) 0 0/100% 100%;
 }
 .print .caption{
   position:absolute;left:12px;right:12px;bottom:8px;

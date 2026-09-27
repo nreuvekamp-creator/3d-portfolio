@@ -25,8 +25,12 @@
   <div class="dossier">
     <button class="tab-confidential" id="tabGeheim" aria-pressed="false">
       <span class="stempel">Confidential</span>
+      <span class="inhoud" aria-hidden="true">
+        <span class="vel v1"></span><span class="vel v2"></span><span class="vel v3"></span>
+        <span class="pen"></span>
+      </span>
     </button>
-    <p class="fluister hand" id="fluister">als je me echt wil stalken, klik hier</p>
+    <p class="fluister hand" id="fluister">als je me echt<br>wil stalken,<br>klik hier</p>
   </div>
   <p class="count label" id="count"></p>
 </div>
@@ -48,7 +52,7 @@
 <!-- ============ het verhaal ============ -->
 <div id="intro" aria-label="Introductie">
 
-  <div class="void cmyk"></div>
+  <div class="void"></div>
 
   <!-- jij in de leegte -->
   <figure class="me" id="me"><img id="meImg" alt=""></figure>
@@ -62,7 +66,7 @@
   <!-- de kist, achterin -->
   <button class="chest" id="chest" aria-label="Open de doos en ga naar de wereld">
     <div class="glow"></div>
-    <svg viewBox="0 0 200 152" class="box" aria-hidden="true">
+    <svg viewBox="-70 -80 340 250" class="box" aria-hidden="true" overflow="visible">
       <defs>
         <linearGradient id="hout" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0" stop-color="#9a7748"/><stop offset="1" stop-color="#5e4529"/>
@@ -74,7 +78,12 @@
       </g>
       <g class="bak">
         <path d="M20 74 L180 74 L172 140 L28 140 Z" fill="url(#hout)" stroke="#3d2c1a" stroke-width="2.5" stroke-linejoin="round"/>
+        <path d="M20 74 L180 74 L176 84 L24 84 Z" fill="#000" opacity=".22"/>
+        <path d="M28 140 L172 140 L170 147 L30 147 Z" fill="#3d2c1a" opacity=".5"/>
+        <path d="M54 74 L58 140" stroke="#3d2c1a" stroke-width="1.2" opacity=".3"/>
+        <path d="M146 74 L142 140" stroke="#3d2c1a" stroke-width="1.2" opacity=".3"/>
         <rect x="92" y="90" width="16" height="21" rx="2" fill="#c9962c" stroke="#3d2c1a" stroke-width="2"/>
+        <circle cx="100" cy="100" r="2.4" fill="#3d2c1a"/>
       </g>
     </svg>
     <span class="chest-cue label">open de doos</span>
@@ -82,6 +91,9 @@
 
   <!-- wat er uit de kist komt -->
   <div class="envelopes" id="envelopes" aria-hidden="true"></div>
+
+  <!-- geluid: voorlopig de stem van de browser, laag gezet -->
+  <button class="geluid label" id="geluidBtn" aria-pressed="false">geluid aan</button>
 
   <!-- overslaan -->
   <div class="skip">

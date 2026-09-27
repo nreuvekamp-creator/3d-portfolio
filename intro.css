@@ -143,9 +143,10 @@
 }
 #intro.kist .chest{opacity:1;transform:translate(-50%,-50%) translateZ(-300px) scale(1)}
 #intro.open .chest{transform:translate(-50%,-46%) translateZ(-60px) scale(1.18);z-index:5}
-.chest{perspective:760px}
+.chest{perspective:760px;overflow:visible}
 /* Het aanzicht op de kist volgt je muis; --mx en --my komen uit fidget.js. */
 .chest .box{
+  overflow:visible;
   width:100%;height:auto;display:block;position:relative;z-index:2;
   transform-style:preserve-3d;
   transform:
@@ -233,13 +234,33 @@
    Overslaan
    ------------------------------------------------------------ */
 
+.geluid{
+  position:absolute;
+  left:calc(18px + env(safe-area-inset-left,0px));
+  bottom:calc(var(--pad-b) + 18px);
+  z-index:10;
+  font-size:.62rem;
+  padding:9px 16px;
+  border:1.2px solid var(--line);
+  border-radius:2px;
+  background:rgba(255,253,247,.72);
+  transition:color .3s var(--ease),border-color .3s var(--ease),background .3s var(--ease);
+}
+.geluid:hover{border-color:var(--ink);color:var(--ink)}
+.geluid[aria-pressed="true"]{background:var(--cyan);border-color:var(--key);color:var(--paper)}
+.geluid:focus-visible{outline:2.5px solid var(--cyan);outline-offset:3px}
+
 .skip{
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .5s var(--ease-soft);
   position:absolute;
   right:calc(18px + env(safe-area-inset-right,0px));
   bottom:calc(var(--pad-b) + 18px);
   z-index:10;
   display:flex;align-items:center;gap:12px;
 }
+#intro.spatie .skip{opacity:1;pointer-events:auto}
 .skip-btn{padding:10px 20px;font-size:.7rem;background:rgba(255,253,247,.72)}
 .skip-hint{margin:0;font-size:.62rem;opacity:.7}
 @media (max-width:560px){.skip-hint{display:none}}

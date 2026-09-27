@@ -11,10 +11,15 @@ window.Zaal = (function(){
   var EXTS = ["jpg","png","jpeg","webp"];
 
   var root = null, stage = null, room = null, readEl = null;
+  var warp = null, portalBtn = null;
   var arts = [];
   var closeCbs = [];
   var flat = false;
   var open = false;
+  var porting = false;
+  var portTimers = [];
+
+  var PORTAL_YAW = 180;   /* de wand waar de doorgang in staat */
 
   var yaw = 0, pitch = 0, dist = 0;
   var yawTarget = 0, pitchTarget = 0, distTarget = 0;
@@ -89,15 +94,76 @@ window.Zaal = (function(){
     return btn;
   }
 
+  /* De doorgang: een deurpost van inkt met een aquarelvlak erin
+     dat langzaam draait, alsof er een andere wereld doorheen schijnt. */
+  function maakPortal(){
+    var btn = el("button", "z-portal");
+    btn.type = "button";
+    btn.setAttribute("aria-label", "Stap door de doorgang, terug naar de wereldbol");
+
+    var post = el("span", "z-portal-post");
+    var eye = el("span", "z-portal-eye");
+    eye.appendChild(el("span", "z-portal-wash"));
+    eye.appendChild(el("span", "z-portal-swirl"));
+    eye.appendChild(el("span", "z-portal-scheur"));
+    eye.appendChild(el("span", "z-portal-haze"));
+    post.appendChild(eye);
+    btn.appendChild(post);
+
+    var plaq = el("span", "z-portal-plaque");
+    plaq.appendChild(el("span", "label", "doorgang"));
+    plaq.appendChild(el("span", "z-portal-naam", "terug naar de wereld"));
+    btn.appendChild(plaq);
+
+    btn.addEventListener("click", stapDoor);
+    portalBtn = btn;
+    return btn;
+  }
+
+  function wisTimers(){
+    portTimers.forEach(clearTimeout);
+    portTimers = [];
+  }
+
+  /* Erdoorheen: camera naar de opening, de opening vult het scherm,
+     daarna pas de gewone sluitroutine. */
+  function stapDoor(){
+    if(!open || porting) return;
+    if(flat){ api.close(); return; }
+
+    porting = true;
+    root.classList.add("is-porting");
+    if(readEl.classList.contains("is-open")) sluitLezer();
+
+    var y = PORTAL_YAW;
+    while(y - yawTarget > 180) y -= 360;
+    while(y - yawTarget < -180) y += 360;
+    yawTarget = y;
+    pitchTarget = 0;
+    distTarget = 420;
+    loop();
+
+    portTimers.push(setTimeout(function(){
+      distTarget = 2100;          /* de laatste stap door de opening */
+      loop();
+      warp.classList.add("is-flying");
+    }, 460));
+
+    portTimers.push(setTimeout(function(){
+      api.close();
+    }, 1240));
+  }
+
   function bouwZaal(items){
     var faces = [
       {cls:"z-wall", tf:"translateZ(" + (-W/2) + "px)", yaw:0},
       {cls:"z-wall", tf:"translateX(" + (W/2) + "px) rotateY(-90deg)", yaw:90},
-      {cls:"z-wall", tf:"translateZ(" + (W/2) + "px) rotateY(180deg)", yaw:180},
+      /* De achterwand hangt niet vol; daar staat de doorgang. */
+      {cls:"z-wall z-wall--portal", tf:"translateZ(" + (W/2) + "px) rotateY(180deg)", yaw:180, portal:true},
       {cls:"z-wall", tf:"translateX(" + (-W/2) + "px) rotateY(90deg)", yaw:270}
     ];
 
-    var perWall = Math.max(1, Math.ceil(items.length / 4));
+    var perWall = Math.max(1, Math.ceil(items.length / 3));
     if(perWall > PER_WALL) perWall = perWall;
 
     var idx = 0;
@@ -105,6 +171,8 @@ window.Zaal = (function(){
       var wall = el("div", "z-face " + f.cls);
       wall.style.transform = f.tf;
       room.appendChild(wall);
+
+      if(f.portal){ wall.appendChild(maakPortal()); return; }
 
       var deel = items.slice(idx, idx + perWall);
       deel.forEach(function(item, i){
@@ -141,6 +209,7 @@ window.Zaal = (function(){
       grid.appendChild(node);
       arts.push({node:node, item:item, yaw:0});
     });
+    grid.appendChild(maakPortal());
     root.appendChild(grid);
   }
 
@@ -313,14 +382,16 @@ window.Zaal = (function(){
       titel.appendChild(el("span", "hand", "ook wat al een plek op de wereld had"));
       ui.appendChild(titel);
 
-      var back = el("button", "stamp-btn z-back", "Terug naar de bol");
+      /* Bescheiden uitgang voor wie de doorgang niet vindt; met Tab bereikbaar. */
+      var back = el("button", "z-back", "terug");
       back.type = "button";
+      back.setAttribute("aria-label", "Sluit de zaal en ga terug naar de wereldbol");
       back.addEventListener("click", function(){ api.close(); });
       ui.appendChild(back);
 
       ui.appendChild(el("p", "z-hint", flat
-        ? "Kies een werk om het verhaal te lezen"
-        : "Sleep om rond te kijken, scroll om in te zoomen, klik een werk aan"));
+        ? "Kies een werk om het verhaal te lezen; onderaan staat de doorgang terug"
+        : "Sleep om rond te kijken, scroll om in te zoomen; achter je staat de doorgang terug"));
       root.appendChild(ui);
 
       readEl = el("aside", "z-read");
@@ -332,6 +403,12 @@ window.Zaal = (function(){
       readEl.appendChild(cl);
       readEl.appendChild(el("div", "z-rbody"));
       root.appendChild(readEl);
+
+      /* Het vlak dat bij het doorstappen het scherm vult. */
+      warp = el("div", "z-warp");
+      warp.setAttribute("aria-hidden", "true");
+      warp.appendChild(el("span", "z-warp-veld"));
+      root.appendChild(warp);
 
       root.style.setProperty("--z-w", W + "px");
       root.style.setProperty("--z-h", H + "px");
@@ -359,8 +436,12 @@ window.Zaal = (function(){
     close: function(){
       if(!root || !open) return;
       open = false;
+      wisTimers();
+      porting = false;
       sluitLezer();
       root.classList.remove("is-open");
+      root.classList.remove("is-porting");
+      if(warp) warp.classList.remove("is-flying");
       setTimeout(function(){ if(!open) root.hidden = true; }, flat ? 0 : 500);
       closeCbs.forEach(function(fn){ try{ fn(); }catch(err){} });
     },

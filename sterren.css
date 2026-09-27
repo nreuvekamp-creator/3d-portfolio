@@ -1,0 +1,95 @@
+/* ============================================================
+   sterren.css - de ruimte achter de bol.
+   Alleen zichtbaar als je ver uitzoomt; kleuren uit style.css.
+   ============================================================ */
+
+/* De hele laag ligt ONDER de kaart (#map heeft z-index 1).
+   Zolang er geen sterren zijn, blijft de kaart gewoon papierkleurig;
+   zodra ze opkomen maakt sterren.js de kaart doorzichtig zodat je
+   hier doorheen kijkt, buiten de bol om. */
+#sterren{
+  position:fixed;
+  inset:0;
+  z-index:0;
+  pointer-events:none;
+  overflow:hidden;
+  opacity:0;
+  transition:opacity .9s var(--ease-soft);
+  /* Donker, warm papier; geen zwart scherm. */
+  background:
+    radial-gradient(58% 58% at 50% 46%, rgba(52,44,38,.55), transparent 70%),
+    radial-gradient(90% 80% at 18% 12%, rgba(10,163,194,.10), transparent 68%),
+    radial-gradient(80% 70% at 86% 82%, rgba(214,51,126,.09), transparent 66%),
+    linear-gradient(170deg,#241f1c,#2e2622 52%,#1d1916);
+}
+#sterren.aan{opacity:1}
+
+#sterren canvas{
+  display:block;
+  width:100%;
+  height:100%;
+}
+
+/* Zolang de sterren aan staan mag de kaart geen dekvel meer zijn. */
+body.ruimte #map{background:transparent}
+
+/* ------------------------------------------------------------
+   Het citaat: een regel die in de leegte naast de bol opkomt.
+   Ligt boven de kaart, want anders kijkt de bol er overheen.
+   ------------------------------------------------------------ */
+
+#citaat{
+  position:fixed;
+  z-index:20;
+  left:4vw;
+  top:16vh;
+  width:min(30ch,34vw);
+  margin:0;
+  pointer-events:none;
+  font-family:var(--serif);
+  font-weight:400;
+  font-size:clamp(1.5rem,2.6vw,2.5rem);
+  line-height:1.16;
+  color:var(--paper);
+  text-shadow:0 2px 18px rgba(20,16,14,.65);
+  opacity:0;
+  transform:translateY(14px);
+  transition:opacity 2s var(--ease-soft), transform 2s var(--ease-soft);
+}
+#citaat.op{opacity:1;transform:none}
+
+/* Een dun cyaan streepje ervoor, uit de inktdoos. */
+#citaat::before{
+  content:"";
+  display:block;
+  width:44px;height:2px;
+  margin:0 0 14px;
+  background:var(--cyan);
+  opacity:.8;
+}
+
+/* ------------------------------------------------------------
+   Smal scherm: het citaat onderin, kleiner.
+   ------------------------------------------------------------ */
+
+@media (max-width:640px){
+  #citaat{
+    left:22px;right:22px;width:auto;
+    top:auto;
+    bottom:calc(var(--pad-b) + 128px);
+    font-size:1.2rem;
+    line-height:1.22;
+  }
+  #citaat::before{width:32px;margin-bottom:10px}
+}
+
+/* ------------------------------------------------------------
+   Minder beweging: geen pulseren, geen vallende sterren
+   (dat regelt sterren.js), en het citaat wisselt zonder overgang.
+   ------------------------------------------------------------ */
+
+@media (prefers-reduced-motion:reduce){
+  #sterren{transition:none}
+  #citaat{transition:none;transform:none}
+  #citaat.op{transform:none}
+}

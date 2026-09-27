@@ -5,20 +5,19 @@
    Deze laag reageert altijd, ook als het verhaal gewoon doorloopt,
    en hij houdt nooit het verhaal tegen.
 
-   - muis bewegen  -> blaadjes drijven mee, het papier deint zacht
-   - klikken       -> er valt een inktvlek die blijft liggen
-   - blijven klikken -> het wordt drukker, het spoor van je ongeduld
+   - muis bewegen  -> de bloesem merkt je op en wijkt uit
+   - klikken       -> er dwarrelt bloesem bij
+   - blijven klikken -> het wordt voller
    ============================================================ */
 
 window.Fidget = (function(){
   "use strict";
 
   var INKTEN = ["--cyan", "--magenta", "--yellow"];
-  var MAX_VLEKKEN = 60;     /* daarna ruimen we de oudste op */
   var MAX_BLAADJES = 54;     /* bloesem mag rijk zijn */
   var MAX_EXTRA   = 130;    /* wat je er zelf bij klikt */
 
-  var laag, aan = false, blaadjes = [], vlekken = [];
+  var laag, aan = false, blaadjes = [];
   var muisX = 0.5, muisY = 0.5, doelX = 0.5, doelY = 0.5;
   var klikken = 0, laatsteKlik = 0;
   var rustigAan = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -83,54 +82,18 @@ window.Fidget = (function(){
     }
   }
 
-  /* ---------- inktvlekken ---------- */
+  /* ---------- klikken ---------- */
 
-  function laatVlekVallen(x, y){
+  /* Een klik laat geen inkt meer achter; er dwarrelt alleen bloesem bij.
+     De vlekken bleven staan en dat vond hij niet mooi. */
+  function bijKlik(x, y){
     if (!aan) return;
     var nu = Date.now();
-    /* Snel achter elkaar klikken maakt het drukker, niet netter. */
     if (nu - laatsteKlik < 900) klikken++; else klikken = 1;
     laatsteKlik = nu;
 
-    var aantal = Math.min(1 + Math.floor(klikken / 3), 4);
-    for (var i = 0; i < aantal; i++) zetVlek(x, y, i);
-
-    /* En er dwarrelt bloesem bij: klikken maakt het voller, niet viezer. */
-    var bloei = Math.min(3 + klikken, 9);
+    var bloei = Math.min(4 + klikken, 12);
     for (var j = 0; j < bloei && blaadjes.length < MAX_EXTRA; j++) strooiBlaadje(x, y);
-
-    /* Oudste opruimen zodat het nooit echt vol loopt. */
-    while (vlekken.length > MAX_VLEKKEN) {
-      var oud = vlekken.shift();
-      oud.style.transition = "opacity .9s linear";
-      oud.style.opacity = "0";
-      setTimeout(function(e){ return function(){ e.remove(); }; }(oud), 950);
-    }
-  }
-
-  function zetVlek(x, y, i){
-    var el = document.createElement("div");
-    el.className = "blot";
-    var maat = 9 + Math.random() * (i ? 12 : 26);
-    var sprong = i ? (Math.random() - 0.5) * 70 : 0;
-    var sprongY = i ? (Math.random() - 0.5) * 70 : 0;
-    el.style.cssText =
-      "left:" + (x + sprong - maat / 2) + "px;" +
-      "top:" + (y + sprongY - maat / 2) + "px;" +
-      "width:" + maat + "px;height:" + maat + "px;" +
-      "background:" + inkt() + ";" +
-      "transform:scale(.1) rotate(" + (Math.random() * 360) + "deg)";
-    laag.appendChild(el);
-    vlekken.push(el);
-
-    /* Twee frames wachten zodat de browser de starttoestand echt ziet. */
-    requestAnimationFrame(function(){
-      requestAnimationFrame(function(){
-        el.style.transition = "transform .55s " + "cubic-bezier(.16,1,.3,1)" + ",opacity .4s linear";
-        el.style.transform = "scale(1) rotate(" + (Math.random() * 360) + "deg)";
-        el.style.opacity = (0.16 + Math.random() * 0.2).toFixed(2);
-      });
-    });
   }
 
   /* ---------- het papier laten deinen ---------- */
@@ -171,7 +134,7 @@ window.Fidget = (function(){
       }, {passive: true});
 
       window.addEventListener("pointerdown", function(e){
-        laatVlekVallen(e.clientX, e.clientY);
+        bijKlik(e.clientX, e.clientY);
       }, {passive: true});
 
       requestAnimationFrame(tik);
@@ -179,12 +142,6 @@ window.Fidget = (function(){
 
     /* Bij de bol gaat alles weg: bloesem en inkt horen bij het verhaal, niet bij de kaart. */
     kalmeer: function(){
-      vlekken.forEach(function(v){
-        v.style.transition = "opacity 1s linear";
-        v.style.opacity = "0";
-        setTimeout(function(){ v.remove(); }, 1100);
-      });
-      vlekken.length = 0;
       aan = false;
       var weg = blaadjes.splice(0);
       weg.forEach(function(b){
