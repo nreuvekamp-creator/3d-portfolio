@@ -53,3 +53,23 @@ Ga dan naar http://localhost:8777
 Een los `index.html` met MapLibre GL 5.9 in globe-projectie, Esri Dark Gray als kaartlaag,
 en clustering zodat plekken die dicht bij elkaar liggen samenvallen als je uitzoomt.
 Geen build, geen dependencies.
+
+## Hoe de site is opgebouwd
+
+| bestand | wat het doet |
+|---|---|
+| `index.html` | de structuur, meer niet |
+| `style.css` | de drukkerij: papier, inkten, korrel, halftoon, fotolijsten |
+| `intro.css` + `intro.js` | het verhaal; **de teksten staan bovenaan `intro.js` in `SCRIPT`** |
+| `globe.css` + `globe.js` | de wereldbol, de filters en het paneel |
+| `fidget.js` | de laag die op je muis en je klikken reageert |
+| `tiles/watercolor/` | de aquarelkaart, zoom 0 tot 5, in deze repo zelf |
+
+Het verhaal aanpassen doe je in `SCRIPT` bovenaan `intro.js`: elke regel heeft een
+tekst en een `wacht` in milliseconden. Elke regel kan later een geluidsfragment
+krijgen zonder dat er iets anders verandert.
+
+De aquareltegels staan in de repo omdat het archief waar ze vandaan komen geen
+CORS-kop meestuurt, waardoor de browser ze niet in een WebGL-kaart mag gebruiken.
+Vanaf zoom 6 schuift er een lichte kaart van Esri overheen zodat je tot
+straatniveau kunt blijven zoomen.

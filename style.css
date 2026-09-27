@@ -1,0 +1,229 @@
+/* ============================================================
+   3D Portfolio - papier, inkt en aquarel
+   Alles hier is de "drukkerij": kleuren, texturen, letters.
+   De losse schermen staan in intro.css en globe.css.
+   ============================================================ */
+
+@import url("https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,400&family=Courier+Prime:wght@400;700&family=Caveat:wght@400;600&display=swap");
+
+:root{
+  /* Inkten. Geen RGB-scherm maar een drukpers: cyaan, magenta, geel, zwart. */
+  --cyan:#0aa3c2;
+  --magenta:#d6337e;
+  --yellow:#f0b429;
+  --key:#241f1c;
+
+  /* Papier. Warm, nooit wit. */
+  --paper:#f6f0e2;
+  --paper-2:#efe6d2;
+  --paper-deep:#e5d9bf;
+  --ink:#241f1c;
+  --ink-soft:#6b5f52;
+  --ink-faint:#a2927f;
+  --gold:#c9962c;
+  --gold-glow:#f5d98b;
+
+  --line:rgba(36,31,28,.18);
+  --line-soft:rgba(36,31,28,.09);
+
+  --ease:cubic-bezier(.16,1,.3,1);
+  --ease-soft:cubic-bezier(.33,1,.68,1);
+  --pad-t:env(safe-area-inset-top,0px);
+  --pad-b:env(safe-area-inset-bottom,0px);
+
+  --serif:"Instrument Serif",Georgia,"Times New Roman",serif;
+  --body:"Newsreader",Georgia,serif;
+  --mono:"Courier Prime","Courier New",monospace;
+  --hand:"Caveat","Bradley Hand",cursive;
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--body);
+  font-size:17px;
+  line-height:1.6;
+  overflow:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+[hidden]{display:none!important}
+button{font:inherit;color:inherit;cursor:pointer;background:none;border:0}
+
+/* ------------------------------------------------------------
+   Papier: korrel, vezel en een vlek in de hoek.
+   Twee lagen over alles heen, allebei klikdoorlatend.
+   ------------------------------------------------------------ */
+
+.paper-grain,
+.halftone{
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:900;
+}
+
+/* Korrel: ruis uit een SVG-filter, geen afbeelding nodig. */
+.paper-grain{
+  opacity:.5;
+  mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'>\
+<filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/>\
+<feColorMatrix type='saturate' values='0'/></filter>\
+<rect width='220' height='220' filter='url(%23n)' opacity='.42'/></svg>");
+}
+
+/* Rasterpunten, zoals een ingezoomde stripdruk. */
+.halftone{
+  opacity:.16;
+  mix-blend-mode:multiply;
+  background-image:radial-gradient(var(--key) 0.9px,transparent 1px);
+  background-size:4px 4px;
+}
+
+/* Vignet in papierkleur, zodat de randen wegvallen in het vel. */
+.vignette{
+  position:fixed;inset:0;pointer-events:none;z-index:899;
+  background:radial-gradient(120% 90% at 50% 45%,transparent 48%,rgba(160,140,105,.22) 100%);
+}
+
+/* ------------------------------------------------------------
+   Misregistratie: de drukpers stond niet helemaal goed afgesteld.
+   Zet .offset op een element en het krijgt een cyaan en magenta
+   schaduw ernaast, zoals een 3D-strip zonder bril.
+   ------------------------------------------------------------ */
+
+.offset{position:relative;isolation:isolate}
+.offset::before,
+.offset::after{
+  content:attr(data-text);
+  position:absolute;inset:0;
+  pointer-events:none;
+  mix-blend-mode:multiply;
+  z-index:-1;
+}
+.offset::before{color:var(--cyan);transform:translate(-2.5px,1.5px)}
+.offset::after{color:var(--magenta);transform:translate(2.5px,-1.5px)}
+
+/* ------------------------------------------------------------
+   Typografie
+   ------------------------------------------------------------ */
+
+h1,h2,h3{font-family:var(--serif);font-weight:400;letter-spacing:.005em;line-height:1.08;margin:0}
+h1{font-size:clamp(2.6rem,7vw,5rem)}
+h2{font-size:clamp(1.6rem,3.4vw,2.4rem)}
+
+.label{
+  font-family:var(--mono);
+  font-size:.7rem;
+  letter-spacing:.22em;
+  text-transform:uppercase;
+  color:var(--ink-soft);
+}
+.hand{font-family:var(--hand);font-size:1.35em;line-height:1.25;color:var(--cyan)}
+.italic{font-style:italic}
+
+/* ------------------------------------------------------------
+   Foto's: altijd ingelijst, altijd gedrukt.
+   Witte rand als een polaroid, korrel eroverheen, licht scheef.
+   ------------------------------------------------------------ */
+
+.print{
+  position:relative;
+  display:block;
+  background:#fdfaf2;
+  padding:10px 10px 34px;
+  box-shadow:0 1px 0 rgba(255,255,255,.9) inset,
+             0 10px 26px rgba(70,55,35,.22),
+             0 2px 5px rgba(70,55,35,.14);
+  transform:rotate(var(--tilt,-1.1deg));
+  transition:transform .45s var(--ease),box-shadow .45s var(--ease);
+}
+.print:hover{transform:rotate(calc(var(--tilt,-1.1deg) * .3)) translateY(-3px)}
+.print img{display:block;width:100%;height:100%;object-fit:cover}
+
+/* De inkt-filter over elke foto: minder rood, meer papier. */
+.print .shot{
+  position:relative;
+  overflow:hidden;
+  background:var(--paper-deep);
+}
+.print .shot img{
+  filter:sepia(.28) saturate(.82) contrast(1.06) brightness(1.02);
+}
+.print .shot::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:
+    radial-gradient(var(--key) .8px,transparent 1px) 0 0/3px 3px,
+    linear-gradient(180deg,rgba(240,180,41,.13),rgba(10,163,194,.11));
+  mix-blend-mode:multiply;
+  opacity:.5;
+}
+.print .caption{
+  position:absolute;left:12px;right:12px;bottom:8px;
+  font-family:var(--hand);font-size:1.05rem;color:var(--ink-soft);
+  text-align:center;line-height:1.1;
+}
+
+/* ------------------------------------------------------------
+   Knoppen: gestempeld, niet geklikt.
+   ------------------------------------------------------------ */
+
+.stamp-btn{
+  position:relative;
+  font-family:var(--mono);
+  font-size:.78rem;letter-spacing:.2em;text-transform:uppercase;
+  padding:13px 26px;
+  border:1.5px solid var(--ink);
+  border-radius:2px;
+  background:transparent;
+  color:var(--ink);
+  transition:color .3s var(--ease),border-color .3s var(--ease);
+  overflow:hidden;
+}
+.stamp-btn::before{
+  content:"";position:absolute;inset:0;z-index:-1;
+  background:var(--yellow);
+  transform:scaleX(0);transform-origin:left;
+  transition:transform .45s var(--ease);
+}
+.stamp-btn:hover::before{transform:scaleX(1)}
+.stamp-btn:hover{border-color:var(--key)}
+.stamp-btn:focus-visible{outline:2.5px solid var(--cyan);outline-offset:3px}
+
+/* ------------------------------------------------------------
+   Friemellaag: blaadjes en inktvlekken die blijven liggen.
+   ------------------------------------------------------------ */
+
+#fidget{position:fixed;inset:0;pointer-events:none;z-index:880;overflow:hidden}
+.petal{
+  position:absolute;width:13px;height:13px;
+  background:var(--magenta);
+  opacity:.5;
+  border-radius:80% 12% 80% 12%;
+  mix-blend-mode:multiply;
+  will-change:transform,opacity;
+}
+.blot{
+  position:absolute;
+  border-radius:48% 52% 60% 40% / 55% 45% 55% 45%;
+  mix-blend-mode:multiply;
+  opacity:0;
+  will-change:transform,opacity;
+}
+
+/* ------------------------------------------------------------
+   Toegankelijkheid: wie minder beweging wil, krijgt geen film.
+   ------------------------------------------------------------ */
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:.01ms!important;
+    animation-iteration-count:1!important;
+    transition-duration:.01ms!important;
+  }
+  #fidget{display:none}
+}

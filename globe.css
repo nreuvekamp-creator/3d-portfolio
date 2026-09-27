@@ -1,0 +1,222 @@
+/* ============================================================
+   globe.css - de kaart, de balk en het vel papier ernaast.
+   Kleuren komen uit style.css; hier staan geen eigen kleuren.
+   ============================================================ */
+
+#map{
+  position:fixed;
+  inset:0;
+  z-index:1;
+  background:var(--paper-2);
+  opacity:0;
+  transition:opacity 1.8s var(--ease-soft);
+}
+#map.zichtbaar{opacity:1}
+/* De hele kaart door de drukpers: warmer, iets minder verzadigd, en
+   de lichte kaart die vanaf zoom 6 bovenkomt gaat zo mee in het papier. */
+#map .maplibregl-canvas{filter:sepia(.24) saturate(.94) contrast(1.03) brightness(1.02)}
+
+/* De aquareltegels zijn erg licht; een vleugje inkt eroverheen
+   houdt de stippen en labels leesbaar. */
+#map::after{
+  content:"";
+  position:absolute;inset:0;
+  pointer-events:none;
+  z-index:2;
+  background:linear-gradient(180deg,rgba(36,31,28,.05),rgba(36,31,28,.10));
+  mix-blend-mode:multiply;
+}
+
+.maplibregl-canvas{outline:none}
+
+.maplibregl-ctrl-attrib{
+  font-family:var(--mono)!important;
+  font-size:.58rem!important;
+  background:rgba(246,240,226,.82)!important;
+  color:var(--ink-soft)!important;
+  border-radius:2px;
+}
+.maplibregl-ctrl-attrib a{color:var(--ink)!important}
+.maplibregl-ctrl-group{
+  background:var(--paper)!important;
+  border:1.5px solid var(--ink)!important;
+  border-radius:2px!important;
+  box-shadow:0 6px 16px rgba(70,55,35,.20)!important;
+}
+.maplibregl-ctrl-group button+button{border-top:1px solid var(--line)!important}
+.maplibregl-ctrl-group button:hover{background:var(--yellow)!important}
+
+/* ------------------------------------------------------------
+   De balk bovenin: een rij gestempelde labels op papier.
+   ------------------------------------------------------------ */
+
+#bar{
+  position:fixed;
+  top:0;left:0;right:0;
+  z-index:30;
+  padding:calc(var(--pad-t) + 14px) 16px 16px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px 12px;
+  align-items:center;
+  background:linear-gradient(180deg,var(--paper) 18%,rgba(246,240,226,.82) 62%,rgba(246,240,226,0));
+  animation:bar-in .9s var(--ease) both;
+}
+@keyframes bar-in{from{opacity:0;transform:translateY(-14px)}to{opacity:1;transform:none}}
+
+.brand{display:flex;flex-direction:column;line-height:1.05;margin-right:4px;white-space:nowrap}
+.brand .label{font-size:.58rem;letter-spacing:.24em}
+.brand strong{font-family:var(--serif);font-weight:400;font-size:1.25rem;letter-spacing:.01em}
+
+.chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center;min-width:0}
+.sep{width:1px;height:18px;background:var(--line);margin:0 3px}
+
+/* Compacte variant van .stamp-btn uit style.css. */
+.chip{
+  position:relative;
+  font-family:var(--mono);
+  font-size:.64rem;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  padding:6px 12px;
+  border:1.2px solid var(--line);
+  border-radius:2px;
+  color:var(--ink-soft);
+  background:rgba(246,240,226,.72);
+  white-space:nowrap;
+  transition:color .25s var(--ease),border-color .25s var(--ease),background .25s var(--ease);
+}
+.chip:hover{border-color:var(--ink);color:var(--ink)}
+.chip:focus-visible{outline:2.5px solid var(--cyan);outline-offset:2px}
+.chip.on{
+  border-color:var(--key);
+  color:var(--key);
+  background:var(--yellow);
+  box-shadow:1.5px 1.5px 0 var(--key);
+}
+.chip.priv.on{background:var(--magenta);color:var(--paper);border-color:var(--key)}
+
+.count{margin-left:auto;white-space:nowrap;font-size:.64rem}
+
+@media (max-width:640px){
+  #bar{padding-bottom:10px;max-height:40vh;overflow-y:auto;gap:8px}
+  .chip{font-size:.58rem;padding:5px 9px;letter-spacing:.1em}
+  .brand strong{font-size:1.05rem}
+  .count{display:none}
+}
+
+/* ------------------------------------------------------------
+   Het paneel: een vel papier dat uit de kaart is gevouwen.
+   ------------------------------------------------------------ */
+
+#panel{
+  position:fixed;
+  z-index:40;
+  top:0;right:0;
+  height:100%;
+  width:min(440px,100%);
+  background:var(--paper);
+  border-left:1px solid var(--line);
+  box-shadow:-26px 0 70px rgba(70,55,35,.20),-2px 0 0 rgba(255,255,255,.5) inset;
+  transform:translateX(105%);
+  transition:transform .6s var(--ease);
+  display:flex;
+  flex-direction:column;
+}
+#panel.open{transform:none}
+
+/* De vouwlijn langs de linkerrand. */
+#panel::before{
+  content:"";
+  position:absolute;top:0;bottom:0;left:0;width:26px;
+  pointer-events:none;
+  background:linear-gradient(90deg,rgba(70,55,35,.13),transparent);
+}
+
+.p-photo{
+  flex:none;
+  padding:20px 22px 6px;
+}
+.p-photo .print{--tilt:-1.3deg}
+.p-photo .shot{aspect-ratio:16/10}
+.p-photo .shot img{width:100%;height:100%;object-fit:cover}
+/* Staande foto's niet kapot croppen: passend tonen op een
+   uitvergrote, vervaagde versie van zichzelf. */
+.p-photo .shot.tall img{object-fit:contain;position:relative;z-index:1}
+.p-photo .shot .blur{
+  position:absolute;inset:0;
+  background-size:cover;background-position:center;
+  filter:blur(24px) saturate(.6) brightness(1.08);
+  transform:scale(1.25);
+  opacity:.8;
+}
+.p-ph{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:22px;text-align:center;
+  font-family:var(--serif);font-size:1.35rem;line-height:1.15;
+  color:var(--paper);
+}
+.p-ph small{
+  display:block;
+  font-family:var(--mono);font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;
+  opacity:.82;margin-top:10px;
+}
+
+.p-body{padding:14px 26px calc(var(--pad-b) + 36px);overflow-y:auto}
+.p-meta{margin:0 0 10px;color:var(--ink-soft)}
+.p-body h2{margin:0 0 6px;font-size:1.85rem}
+.p-where{font-family:var(--mono);font-size:.74rem;letter-spacing:.1em;color:var(--ink-faint);margin:0 0 18px}
+.p-sum{font-size:1.06rem;line-height:1.5;font-style:italic;margin:0 0 16px}
+.p-text{color:var(--ink-soft);line-height:1.72;margin:0}
+.p-text .par{display:block;margin-bottom:.9em}
+.p-text .par:last-child{margin-bottom:0}
+
+.p-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:24px}
+.tag{
+  font-family:var(--mono);font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;
+  padding:5px 10px;border:1px solid var(--line);border-radius:2px;
+  color:var(--ink-soft);background:var(--paper-2);
+}
+
+.todo{
+  margin-top:22px;padding:13px 15px;border-radius:2px;
+  border:1.2px dashed var(--magenta);
+  background:var(--paper-2);
+  font-family:var(--mono);font-size:.76rem;line-height:1.6;letter-spacing:.02em;
+  color:var(--ink-soft);
+}
+
+.close{
+  position:absolute;top:14px;right:14px;z-index:3;
+  width:34px;height:34px;border-radius:50%;
+  border:1.5px solid var(--ink);
+  background:var(--paper);
+  font-size:1.15rem;line-height:1;
+  display:grid;place-items:center;
+  transition:background .25s var(--ease);
+}
+.close:hover{background:var(--yellow)}
+.close:focus-visible{outline:2.5px solid var(--cyan);outline-offset:2px}
+
+/* Smal scherm: het paneel wordt een blad dat van onderen omhoog komt. */
+@media (max-width:640px){
+  #panel{
+    top:auto;bottom:0;height:min(78vh,100%);width:100%;
+    border-left:0;border-top:1px solid var(--line);
+    border-radius:16px 16px 0 0;
+    transform:translateY(105%);
+    box-shadow:0 -22px 60px rgba(70,55,35,.22);
+  }
+  #panel.open{transform:none}
+  #panel::before{top:0;bottom:auto;left:0;right:0;width:auto;height:22px;
+    background:linear-gradient(180deg,rgba(70,55,35,.12),transparent)}
+  .p-photo{padding:22px 18px 4px}
+  .p-photo .shot{aspect-ratio:2/1}
+  .p-body{padding:12px 20px calc(var(--pad-b) + 28px)}
+}
+
+@media (prefers-reduced-motion:reduce){
+  #map{transition:none}
+  #bar{animation:none}
+}

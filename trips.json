@@ -19,7 +19,7 @@
       },
       {
         "id": "prive",
-        "label": "Prive",
+        "label": "Privé",
         "default": false
       }
     ],
@@ -60,7 +60,7 @@
     {
       "id": "naestved",
       "title": "International Retail Challenge",
-      "place": "Naestved",
+      "place": "Næstved",
       "country": "Denemarken",
       "lat": 55.2297,
       "lon": 11.7608,
@@ -69,7 +69,7 @@
       "study": "bi",
       "abroad": true,
       "summary": "Een bestemming bedenken voor de leegstaande winkels in het centrum.",
-      "body": "In Naestved liep het winkelcentrum leeg, een probleem dat je in veel middelgrote Europese steden ziet. Met een internationaal team keken we naar wat die panden nog wel konden betekenen voor de stad, en presenteerden we onze voorstellen aan de lokale partijen.\n\nDe International Retail Challenge is een Erasmus+ programma van vijf dagen: design thinking, gemengde teams uit zes landen, een echte bedrijfscase en aan het eind een pitch voor een jury. De gastinstelling wisselt per jaar; dit jaar was Denemarken aan de beurt.",
+      "body": "In Næstved liep het winkelcentrum leeg, een probleem dat je in veel middelgrote Europese steden ziet. Met een internationaal team keken we naar wat die panden nog wel konden betekenen voor de stad, en presenteerden we onze voorstellen aan de lokale partijen.\n\nDe International Retail Challenge is een Erasmus+ programma van vijf dagen: design thinking, gemengde teams uit zes landen, een echte bedrijfscase en aan het eind een pitch voor een jury. De gastinstelling wisselt per jaar; dit jaar was Denemarken aan de beurt.",
       "tags": [
         "Retail",
         "Internationaal team",
@@ -163,7 +163,7 @@
       "study": "bi",
       "abroad": true,
       "summary": "Een week in het innovatie-ecosysteem van Madrid, bij La Nave.",
-      "body": "La Nave is het innovatiecentrum van de stad Madrid, in een oude fabriekshal in Villaverde. We volgden er pitch trainings, luisterden naar ondernemers die hun bedrijf hadden opgebouwd, en werkten aan onze eigen business ideeen.\n\nOnderdeel van het start-up traject dat later uitmondde in de Dragons' Den. Vooral leerzaam om te zien hoe anders een ecosysteem werkt dan het Nederlandse.",
+      "body": "La Nave is het innovatiecentrum van de stad Madrid, in een oude fabriekshal in Villaverde. We volgden er pitch trainings, luisterden naar ondernemers die hun bedrijf hadden opgebouwd, en werkten aan onze eigen business ideeën.\n\nOnderdeel van het start-up traject dat later uitmondde in de Dragons' Den. Vooral leerzaam om te zien hoe anders een ecosysteem werkt dan het Nederlandse.",
       "tags": [
         "Start-ups",
         "Pitchen",
@@ -292,7 +292,7 @@
       "id": "reggio-emilia",
       "title": "Erasmus+ INTELLIGENT",
       "place": "Reggio Emilia",
-      "country": "Italie",
+      "country": "Italië",
       "lat": 44.6989,
       "lon": 10.6297,
       "date": "2026-05",
@@ -300,7 +300,7 @@
       "study": "bi",
       "abroad": true,
       "summary": "Communication Lead namens Avans in een Europees projectteam.",
-      "body": "INTELLIGENT is een Erasmus+ project over onderwijs voor generatie Z en Alpha, met partners uit Litouwen, Letland, Estland, Nederland, Portugal en Italie. Tijdens de trainingsweek in Reggio Emilia werkten 44 studenten uit zes landen aan een opdracht van het bedrijf ITINERE: het toeristische aanbod van de stad aantrekkelijker maken voor Gen Z. Ik was Communication Lead namens Avans. Onze concepten Neon Road en Exclusive Dining draaiden om de RCF Arena.",
+      "body": "INTELLIGENT is een Erasmus+ project over onderwijs voor generatie Z en Alpha, met partners uit Litouwen, Letland, Estland, Nederland, Portugal en Italië. Tijdens de trainingsweek in Reggio Emilia werkten 44 studenten uit zes landen aan een opdracht van het bedrijf ITINERE: het toeristische aanbod van de stad aantrekkelijker maken voor Gen Z. Ik was Communication Lead namens Avans. Onze concepten Neon Road en Exclusive Dining draaiden om de RCF Arena.",
       "tags": [
         "Erasmus+",
         "Communication Lead",
@@ -312,7 +312,7 @@
       "id": "antwerpen",
       "title": "Hack de Haven met AI",
       "place": "Havenhuis, Antwerpen",
-      "country": "Belgie",
+      "country": "België",
       "lat": 51.2411,
       "lon": 4.4072,
       "date": "2026-02",
@@ -608,7 +608,7 @@
       "tags": [
         "Inside joke",
         "Zuid-Korea",
-        "Azie"
+        "Azië"
       ]
     },
     {
@@ -627,7 +627,7 @@
       "tags": [
         "Inside joke",
         "Japan",
-        "Azie"
+        "Azië"
       ]
     },
     {
@@ -799,6 +799,45 @@
         "Fotografie",
         "Survivalrun",
         "Survivalrunbond"
+      ]
+    },
+    {
+      "id": "strava-hart",
+      "title": "Mijn eerste marathon, als hartje",
+      "place": "Nijmegen",
+      "country": "Nederland",
+      "lat": 51.818,
+      "lon": 5.856,
+      "date": "2024",
+      "context": "extracurriculair",
+      "study": null,
+      "abroad": false,
+      "summary": "42 kilometer gelopen die op de kaart een hart tekenen.",
+      "body": "Mijn eerste marathon, en in plaats van de snelste route koos ik de route die achteraf iets zou voorstellen. Elke bocht stond van tevoren vast, want een hart dat scheef loopt kun je niet terugdraaien als je al dertig kilometer op hebt zitten.\n\nDit is precies hoe mijn hoofd werkt: als je toch een marathon loopt, kan hij net zo goed ergens op lijken.",
+      "tags": [
+        "Strava-kunst",
+        "Hardlopen",
+        "Eerste marathon"
+      ]
+    },
+    {
+      "id": "strava-kroon",
+      "title": "Een kroon voor Koningsdag",
+      "place": "Nijmegen",
+      "country": "Nederland",
+      "lat": 51.8075,
+      "lon": 5.821,
+      "date": "2024-04",
+      "context": "extracurriculair",
+      "study": null,
+      "abroad": false,
+      "summary": "Dertig kilometer die samen een kroon vormen, op Koningsdag.",
+      "body": "Op Koningsdag dertig kilometer door Nijmegen gelopen, zo uitgestippeld dat het spoor op de kaart een kroon werd: drie punten met een bol erop.\n\nDe route moest van tevoren tot op de straat kloppen, want je kunt onderweg niet even gummen. Ik heb hem daarna op Reddit gezet.",
+      "tags": [
+        "Strava-kunst",
+        "Hardlopen",
+        "Koningsdag",
+        "Reddit"
       ]
     }
   ]
