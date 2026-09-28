@@ -5,7 +5,7 @@
    Deze laag reageert altijd, ook als het verhaal gewoon doorloopt,
    en hij houdt nooit het verhaal tegen.
 
-   - muis bewegen  -> de bloesem merkt je op en wijkt uit
+   - muis bewegen  -> je hand maakt wind; de bloesem waait mee die kant op
    - klikken       -> er dwarrelt bloesem bij
    - blijven klikken -> het wordt voller
    ============================================================ */
@@ -19,6 +19,10 @@ window.Fidget = (function(){
 
   var laag, aan = false, blaadjes = [];
   var muisX = 0.5, muisY = 0.5, doelX = 0.5, doelY = 0.5;
+  /* De wind. Niet waar je muis STAAT bepaalt de richting, maar waar hij
+     NAARTOE beweegt: achter je hand ontstaat een zog dat de blaadjes meetrekt.
+     windX en windY zijn pixels per frame; ze doven vanzelf uit. */
+  var windX = 0, windY = 0, vorigeX = null, vorigeY = null;
   var klikken = 0, laatsteKlik = 0;
   var rustigAan = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -62,15 +66,21 @@ window.Fidget = (function(){
   }
 
   function beweegBlaadjes(t){
+    /* De vlaag zakt elk frame een beetje in, zoals echte wind. */
+    windX *= 0.94;
+    windY *= 0.94;
+    if (Math.abs(windX) < 0.01) windX = 0;
+    if (Math.abs(windY) < 0.01) windY = 0;
+
     for (var i = 0; i < blaadjes.length; i++) {
       var b = blaadjes[i];
       b.fase += 0.012;
-      /* De muis duwt de blaadjes opzij, alsof je langs ze heen loopt. */
-      var duw = (muisX - 0.5) * 1.6;
-      b.vx = Math.sin(b.fase) * b.zwaai + duw;
+      /* Licht blad vangt meer wind dan zwaar blad. */
+      var vangst = 1.35 - b.maat * 0.5;
+      b.vx = Math.sin(b.fase) * b.zwaai + windX * vangst;
       b.x += b.vx;
-      b.y += b.vy;
-      b.draai += b.dDraai;
+      b.y += b.vy + windY * vangst * 0.7;
+      b.draai += b.dDraai + windX * 0.9;
 
       if (b.y > window.innerHeight + 40) { b.y = -30; b.x = Math.random() * window.innerWidth; }
       if (b.x < -40) b.x = window.innerWidth + 30;
@@ -131,6 +141,19 @@ window.Fidget = (function(){
       window.addEventListener("pointermove", function(e){
         doelX = e.clientX / window.innerWidth;
         doelY = e.clientY / window.innerHeight;
+
+        /* Snelheid van de hand wordt windkracht, met een plafond zodat een
+           ruk met de muis de blaadjes niet het scherm uit slingert. */
+        if (vorigeX !== null) {
+          var dx = e.clientX - vorigeX;
+          var dy = e.clientY - vorigeY;
+          windX += Math.max(-26, Math.min(26, dx)) * 0.055;
+          windY += Math.max(-26, Math.min(26, dy)) * 0.030;
+          windX = Math.max(-5.5, Math.min(5.5, windX));
+          windY = Math.max(-3.5, Math.min(3.5, windY));
+        }
+        vorigeX = e.clientX;
+        vorigeY = e.clientY;
       }, {passive: true});
 
       window.addEventListener("pointerdown", function(e){
