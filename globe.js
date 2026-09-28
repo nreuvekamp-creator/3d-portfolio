@@ -66,7 +66,8 @@ function bouwMappen(){
     active.context.prive = true;
     knop.setAttribute("aria-pressed", "true");
     knop.classList.add("open");
-    if (fluister) fluister.textContent = "nu weet je alles";
+    /* Na de klik blijft er niets staan: alleen de open map. */
+    if (fluister) setTimeout(function(){ fluister.textContent = ""; }, 700);
     vliegNaarBuiten();
   });
 }
@@ -266,6 +267,13 @@ function zetIconen(){
 
 /* ---------- het vel papier ---------- */
 
+/* Alle stappen van de opening lopen op een klok; bij een nieuwe klik
+   moet die klok eerst stil, anders lopen twee brieven door elkaar. */
+var timers = [], envLaag = null, huidig = null;
+
+function later(fn, ms){ timers.push(setTimeout(fn, ms)); }
+function stopTimers(){ timers.forEach(clearTimeout); timers = []; }
+
 function openTrip(id){
   var t = trips.filter(function(x){ return x.id === id; })[0];
   if (!t) return;
@@ -273,42 +281,52 @@ function openTrip(id){
   /* Deze pin is geen kaartje maar een deur: je loopt de zaal binnen. */
   if (t.zaal && window.Zaal) { closePanel(); Zaal.open(); return; }
 
-  var photo = document.getElementById("pPhoto");
-  photo.textContent = "";
+  stopTimers();
+  ruimEnvelopOp();
+  vulPaneel(t);
 
-  var print = document.createElement("div");
-  print.className = "print";
-  /* papier.css kiest hier de papiersoort bij het land. */
-  if (t.country) print.setAttribute("data-papier", t.country);
-  print.setAttribute("role", "button");
-  print.setAttribute("tabindex", "0");
-  print.setAttribute("aria-label", "Bekijk deze foto groot");
-  print.addEventListener("click", function(){ legOpTafel(print, t); });
-  print.addEventListener("keydown", function(e){
-    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); legOpTafel(print, t); }
+  var doel = {center: [t.lon, t.lat], zoom: Math.max(map.getZoom(), 4.5)};
+
+  /* De foto wordt vast gezocht, maar hij mag pas komen als de brief openligt. */
+  var beurt = {geladen: false, mag: false, img: null, trip: t};
+  huidig = beurt;
+  zoekFoto(t, function(img){
+    if (huidig !== beurt) return;
+    beurt.geladen = true;
+    beurt.img = img;
+    if (beurt.mag) plaatsFoto(beurt);
   });
-  var shot = document.createElement("div");
-  shot.className = "shot";
-  print.appendChild(shot);
-  var caption = document.createElement("div");
-  caption.className = "caption";
-  caption.textContent = t.place + (t.country ? ", " + t.country : "");
-  print.appendChild(caption);
-  photo.appendChild(print);
 
-  var kleur = t.context === "prive" ? ink.magenta : (t.context === "extracurriculair" ? ink.gold : ink.cyan);
-  var ph = document.createElement("div");
-  ph.className = "p-ph";
-  ph.style.background = "linear-gradient(135deg," + kleur + "," + ink.key + ")";
-  ph.appendChild(document.createTextNode(t.title));
-  var small = document.createElement("small");
-  small.textContent = t.place + (t.country ? ", " + t.country : "");
-  ph.appendChild(small);
-  shot.appendChild(ph);
+  if (stil()) {
+    panel.classList.remove("ontvouwt");
+    panel.classList.add("open");
+    beurt.mag = true;
+    if (beurt.geladen) plaatsFoto(beurt);
+    map.jumpTo(doel);
+    return;
+  }
 
-  /* Zodra photos/<id>.jpg (of .png) bestaat, vervangt die automatisch de placeholder. */
-  tryPhoto(shot, ["photos/" + t.id + ".jpg", "photos/" + t.id + ".png",
-                  "photos/" + t.id + ".jpeg", "photos/" + t.id + ".webp"], 0);
+  panel.classList.remove("open", "ontvouwt");
+  var p = map.project([t.lon, t.lat]);
+
+  /* De volgorde: (a) het envelopje groeit en komt naar je toe,
+     (b) de klep klapt open, (c) de kaart schuift eruit,
+     (d) de kaart vouwt open tot de brief, (e) de foto komt aanvliegen. */
+  speelEnvelop(p);
+  later(function(){
+    ontvouw(p);
+    map.easeTo(Object.assign({duration: 1500}, doel));
+  }, 1300);
+  later(function(){
+    if (huidig !== beurt) return;
+    beurt.mag = true;
+    if (beurt.geladen) plaatsFoto(beurt);
+  }, 2380);
+}
+
+/* Alles wat er in de brief staat, behalve de foto: die komt later. */
+function vulPaneel(t){
+  document.getElementById("pPhoto").textContent = "";
 
   var bits = [];
   if (t.date) bits.push(dateLabel(t.date));
@@ -349,46 +367,114 @@ function openTrip(id){
 
   if (t.country) panel.setAttribute("data-papier", t.country);
   else panel.removeAttribute("data-papier");
-
-  ontvouw(t);
-
-  var doel = {center: [t.lon, t.lat], zoom: Math.max(map.getZoom(), 4.5)};
-  if (stil()) map.jumpTo(doel);
-  else map.easeTo(Object.assign({duration: 1400}, doel));
 }
 
-/* De brief vertrekt bij de envelop op de kaart en vouwt zich in drie
-   slagen open tot het paneel. Alles gaat via transform; met width of
+/* ---------- de foto als los kaartje ---------- */
+
+/* Eerst kijken of photos/<id>.<ext> bestaat. Bestaat hij niet, dan komt er
+   ook geen lijst in de brief; er valt dan niets te vergroten. */
+function zoekFoto(t, klaar){
+  var lijst = ["photos/" + t.id + ".jpg", "photos/" + t.id + ".png",
+               "photos/" + t.id + ".jpeg", "photos/" + t.id + ".webp"];
+  (function probeer(i){
+    if (i >= lijst.length) { klaar(null); return; }
+    var img = new Image();
+    img.alt = "";
+    img.onload = function(){ klaar(img); };
+    img.onerror = function(){ probeer(i + 1); };
+    img.src = lijst[i];
+  })(0);
+}
+
+function plaatsFoto(beurt){
+  if (!beurt.img || huidig !== beurt) return;
+  var t = beurt.trip;
+  var photo = document.getElementById("pPhoto");
+  photo.textContent = "";
+
+  var print = document.createElement("div");
+  print.className = "print";
+  /* papier.css kiest hier de papiersoort bij het land. */
+  if (t.country) print.setAttribute("data-papier", t.country);
+  print.setAttribute("role", "button");
+  print.setAttribute("tabindex", "0");
+  print.setAttribute("aria-label", "Bekijk deze foto groot");
+  print.addEventListener("click", function(){ legOpTafel(print, t); });
+  print.addEventListener("keydown", function(e){
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); legOpTafel(print, t); }
+  });
+
+  var shot = document.createElement("div");
+  shot.className = "shot";
+  var img = beurt.img;
+  if (img.naturalHeight > img.naturalWidth * 1.05) {
+    shot.classList.add("tall");
+    var bg = document.createElement("div");
+    bg.className = "blur";
+    bg.style.backgroundImage = "url(\"" + img.src.replace(/"/g, "%22") + "\")";
+    shot.appendChild(bg);
+  }
+  shot.appendChild(img);
+  print.appendChild(shot);
+
+  var caption = document.createElement("div");
+  caption.className = "caption";
+  caption.textContent = t.place + (t.country ? ", " + t.country : "");
+  print.appendChild(caption);
+  photo.appendChild(print);
+
+  if (stil()) return;
+  /* Los van de kaart: hij komt van opzij aanvliegen en landt in zijn lijst. */
+  print.classList.add("vliegt");
+  later(function(){ print.classList.remove("vliegt"); }, 1000);
+}
+
+/* ---------- het envelopje dat opengaat ---------- */
+
+function ruimEnvelopOp(){
+  if (envLaag) { envLaag.remove(); envLaag = null; }
+}
+
+/* Een echte envelop met diepte: een bak, een klep die om zijn vouwlijn
+   kantelt, en een kaart die er daarna uit schuift. */
+function speelEnvelop(p){
+  var laag = document.createElement("div");
+  laag.className = "env3d";
+  laag.style.left = Math.round(p.x) + "px";
+  laag.style.top = Math.round(p.y) + "px";
+  laag.innerHTML =
+    '<span class="env-schaduw"></span>' +
+    '<span class="env-scene">' +
+      '<span class="env-kaart"></span>' +
+      '<span class="env-bak"><i class="env-dikte"></i></span>' +
+      '<span class="env-klep"></span>' +
+    '</span>';
+  document.body.appendChild(laag);
+  envLaag = laag;
+  void laag.offsetWidth;
+
+  laag.classList.add("groeit");                                  /* a */
+  later(function(){ laag.classList.add("klep-op"); }, 440);      /* b */
+  later(function(){ laag.classList.add("kaart-uit"); }, 900);    /* c */
+  later(function(){ laag.classList.add("weg"); }, 1300);
+  later(function(){ if (envLaag === laag) ruimEnvelopOp(); }, 1900);
+}
+
+/* De kaart vouwt open tot het paneel. Alles via transform; met width of
    height hapert het, want dan moet de hele opmaak opnieuw worden gerekend. */
-function ontvouw(t){
-  panel.classList.remove("ontvouwt");
-  if (stil()) { panel.classList.add("open"); return; }
-
-  var p = map.project([t.lon, t.lat]);
+function ontvouw(p){
+  /* De brief scharniert om zijn rechterrand (breed scherm) of om zijn
+     onderrand (smal scherm); het beginpunt wordt vanaf die rand gerekend,
+     zodat het kaartje echt bij de envelop vandaan komt. */
   var vak = panel.getBoundingClientRect();
-  var cx = vak.left + vak.width / 2;
-  var cy = vak.top + vak.height / 2;
-  /* Het paneel staat er al (buiten beeld), dus zijn maten kloppen. */
-  panel.style.setProperty("--fx", Math.round(p.x - cx) + "px");
-  panel.style.setProperty("--fy", Math.round(p.y - cy) + "px");
-
-  klepOpen(p.x, p.y);
+  panel.style.setProperty("--fx", Math.round(p.x - vak.right) + "px");
+  panel.style.setProperty("--fy", Math.round(p.y - (vak.top + vak.height / 2)) + "px");
+  panel.style.setProperty("--gx", Math.round(p.x - (vak.left + vak.width / 2)) + "px");
+  panel.style.setProperty("--gy", Math.round(p.y - vak.bottom) + "px");
 
   panel.classList.add("open");
   void panel.offsetWidth;                  /* anders slaat de browser de animatie over */
   panel.classList.add("ontvouwt");
-}
-
-/* Het envelopje op de kaart gaat open en er vliegt een kaartje uit. */
-function klepOpen(x, y){
-  var laag = document.createElement("div");
-  laag.className = "klep-laag";
-  laag.style.left = x + "px";
-  laag.style.top = y + "px";
-  laag.innerHTML = '<span class="klep-bak"></span><span class="klep-flap"></span>' +
-                   '<span class="klep-kaart"></span>';
-  document.body.appendChild(laag);
-  setTimeout(function(){ laag.remove(); }, 1100);
 }
 
 /* ---------- de foto op tafel ---------- */
@@ -410,6 +496,7 @@ function legOpTafel(print, t){
   var kopie = print.cloneNode(true);
   kopie.removeAttribute("role");
   kopie.removeAttribute("tabindex");
+  kopie.classList.remove("vliegt");
   kopie.classList.add("op-tafel");
   /* Het handgeschreven onderschrift gaat mee; zonder foto is er niets te vergroten. */
   tafel.appendChild(kopie);
@@ -439,27 +526,13 @@ function vanTafel(){
   else setTimeout(weg, 460);
 }
 
-function tryPhoto(container, list, i){
-  if (i >= list.length) return;
-  var img = new Image();
-  img.onload = function(){
-    container.textContent = "";
-    container.classList.remove("tall");
-    if (img.naturalHeight > img.naturalWidth * 1.05) {
-      container.classList.add("tall");
-      var bg = document.createElement("div");
-      bg.className = "blur";
-      bg.style.backgroundImage = "url(\"" + img.src.replace(/"/g, "%22") + "\")";
-      container.appendChild(bg);
-    }
-    container.appendChild(img);
-  };
-  img.onerror = function(){ tryPhoto(container, list, i + 1); };
-  img.alt = "";
-  img.src = list[i];
+function closePanel(){
+  stopTimers();
+  ruimEnvelopOp();
+  huidig = null;
+  panel.classList.remove("ontvouwt");
+  panel.classList.remove("open");
 }
-
-function closePanel(){ panel.classList.remove("ontvouwt"); panel.classList.remove("open"); }
 
 /* ---------- de kaart ---------- */
 

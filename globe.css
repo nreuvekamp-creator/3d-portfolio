@@ -80,6 +80,7 @@
 /* Een dossiermap met een stempel erop. */
 .tab-confidential{
   position:relative;
+  perspective:760px;
   width:132px;height:88px;
   background:linear-gradient(170deg,#d9c79b,#c9b184);
   border:1px solid rgba(60,45,26,.42);
@@ -109,7 +110,8 @@
 .tab-confidential:focus-visible{outline:2.5px solid var(--cyan);outline-offset:4px}
 
 .stempel{
-  position:absolute;left:50%;top:52%;
+  position:absolute;left:50%;top:52%;z-index:3;
+  transition:opacity .5s var(--ease-soft);
   transform:translate(-50%,-50%) rotate(-9deg);
   font-family:var(--mono);font-size:.74rem;letter-spacing:.14em;text-transform:uppercase;
   color:#a4243d;
@@ -119,20 +121,40 @@
   white-space:nowrap;
 }
 .tab-confidential.open{transform:rotate(-1deg)}
-.tab-confidential.open .stempel{color:var(--ink-soft);border-color:var(--ink-soft);opacity:.5}
+.tab-confidential.open .stempel{opacity:0}
 
 .fluister{
   margin:0 0 6px;
   font-size:1.1rem;line-height:1.22;
   color:var(--ink-soft);
   max-width:15ch;
-  transition:color .6s var(--ease-soft);
+  transition:opacity .55s var(--ease-soft),transform .55s var(--ease-soft);
 }
-.tab-confidential.open ~ .fluister{color:var(--magenta)}
+/* Na de klik staat er niets meer: alleen de open map. */
+.tab-confidential.open ~ .fluister{opacity:0;transform:translateY(8px);pointer-events:none}
 
 /* Wat er in de map blijft liggen als hij eenmaal open is. */
-.inhoud{position:absolute;inset:6px 8px 10px;opacity:0;transition:opacity .8s var(--ease-soft) .5s}
-.tab-confidential.open .inhoud{opacity:1}
+.inhoud{position:absolute;inset:6px 8px 10px;transform-style:preserve-3d}
+/* De voorflap van de map: hij scharniert om zijn bovenrand, klapt naar
+   achteren open en blijft daar liggen. */
+.inhoud::before{
+  content:"";
+  position:absolute;left:-9px;right:-9px;top:-7px;bottom:-11px;
+  background:linear-gradient(170deg,#d9c79b,#c9b184);
+  border:1px solid rgba(60,45,26,.42);
+  border-radius:3px 12px 3px 3px;
+  transform-origin:50% 0;
+  transform:translateZ(9px) rotateX(0deg);
+  box-shadow:0 5px 12px rgba(70,55,35,.22);
+  transition:transform .95s var(--ease),box-shadow .95s var(--ease);
+}
+.tab-confidential.open .inhoud::before{
+  transform:translateZ(9px) rotateX(151deg);
+  box-shadow:0 12px 26px rgba(70,55,35,.28);
+}
+.inhoud .vel,.inhoud .pen{opacity:0;transition:opacity .7s var(--ease-soft) .45s}
+.tab-confidential.open .inhoud .vel,
+.tab-confidential.open .inhoud .pen{opacity:1}
 .inhoud .vel{
   position:absolute;background:var(--paper);
   border:1px solid rgba(60,45,26,.28);
@@ -204,39 +226,51 @@
   transition:transform .6s var(--ease);
   display:flex;
   flex-direction:column;
+  transform-style:preserve-3d;
+  backface-visibility:hidden;
 }
 #panel.open{transform:none}
 
 /* ------------------------------------------------------------
    De brief die zich ontvouwt.
-   Hij begint als een dichtgevouwen vlakje op de plek van de envelop
-   en gaat in drie slagen open tot het volle paneel. Alles met
+   Hij komt als dichtgevouwen kaartje van de plek van de envelop en
+   scharniert om zijn rechterrand open tot het volle vel. Alles met
    transform; met width of height hapert het.
    ------------------------------------------------------------ */
 
 #panel.ontvouwt{
-  transform-origin:50% 50%;
-  animation:brief-ontvouwt 1.05s var(--ease) both;
+  transform-origin:100% 50%;
+  animation:brief-vouwt 1.05s var(--ease) both;
 }
-@keyframes brief-ontvouwt{
+@keyframes brief-vouwt{
   0%{
     opacity:0;
-    transform:translate(var(--fx,0px),var(--fy,0px)) rotate(-7deg) scale(.055,.038);
+    transform:perspective(1600px)
+              translate3d(var(--fx,0px),var(--fy,0px),-340px)
+              rotateY(-74deg) rotateX(11deg) rotateZ(-5deg) scale(.38);
+    box-shadow:-4px 6px 12px rgba(70,55,35,.34);
   }
-  14%{opacity:1}
-  /* eerste vouw: het kaartje strekt zich in de breedte */
-  40%{
+  16%{opacity:1}
+  /* eerste slag: de kaart komt overeind en draait naar je toe */
+  46%{
     opacity:1;
-    transform:translate(calc(var(--fx,0px) * .52),calc(var(--fy,0px) * .52))
-              rotate(-4deg) scale(.30,.085);
+    transform:perspective(1600px)
+              translate3d(calc(var(--fx,0px) * .44),calc(var(--fy,0px) * .44),-150px)
+              rotateY(-55deg) rotateX(6deg) rotateZ(-3deg) scale(.66);
+    box-shadow:-14px 12px 34px rgba(70,55,35,.30);
   }
-  /* tweede vouw: de brief klapt open in de hoogte */
-  68%{
-    transform:translate(calc(var(--fx,0px) * .20),calc(var(--fy,0px) * .20))
-              rotate(-1.6deg) scale(.66,.50);
+  /* tweede slag: het vel vouwt open */
+  76%{
+    transform:perspective(1600px)
+              translate3d(calc(var(--fx,0px) * .11),calc(var(--fy,0px) * .11),-42px)
+              rotateY(-27deg) rotateX(2deg) scale(.93);
+    box-shadow:-24px 10px 56px rgba(70,55,35,.26);
   }
-  /* derde vouw: het laatste blad valt op zijn plek */
-  86%{transform:translate(calc(var(--fx,0px) * .05),calc(var(--fy,0px) * .05)) rotate(-.4deg) scale(1.02,.94)}
+  /* derde slag: het laatste blad valt plat */
+  92%{
+    transform:perspective(1600px) translate3d(0,0,0) rotateY(-6deg) scale(1);
+    box-shadow:-26px 4px 66px rgba(70,55,35,.22);
+  }
   100%{opacity:1;transform:none}
 }
 
@@ -253,54 +287,147 @@
 }
 @keyframes vouw-weg{0%,60%{opacity:1}100%{opacity:0}}
 
-/* Het envelopje op de kaart dat opengaat en een kaartje loslaat. */
-.klep-laag{position:fixed;width:0;height:0;pointer-events:none;z-index:39}
-.klep-laag span{position:absolute;display:block}
-.klep-bak{
-  left:-21px;top:-14px;width:42px;height:28px;
-  background:#fdf8ec;
-  border:1.3px solid rgba(36,31,28,.78);
-  box-shadow:0 5px 14px rgba(70,55,35,.3);
-  animation:klep-bak-weg 1s var(--ease) both;
+/* ------------------------------------------------------------
+   Het envelopje op de kaart: het groeit, de klep kantelt om zijn
+   vouwlijn en daarna schuift de kaart eruit.
+   ------------------------------------------------------------ */
+
+.env3d{
+  position:fixed;width:0;height:0;
+  pointer-events:none;z-index:39;
+  perspective:800px;
+  perspective-origin:50% 50%;
 }
-@keyframes klep-bak-weg{0%,45%{opacity:1;transform:none}100%{opacity:0;transform:scale(.8) translateY(6px)}}
-.klep-flap{
-  left:-21px;top:-14px;width:42px;height:17px;
-  background:linear-gradient(180deg,#fbf4e4,#f2e9d2);
-  border:1.3px solid rgba(60,45,26,.6);
-  clip-path:polygon(0 0,100% 0,50% 100%);
-  transform-origin:50% 0;
-  animation:klep-wipt .95s var(--ease) both;
+.env-scene{
+  position:absolute;
+  left:-36px;top:-24px;width:72px;height:48px;
+  transform-style:preserve-3d;
+  transform:scale(.42) translateZ(0);
+  opacity:0;
+  transition:transform .46s var(--ease),opacity .3s var(--ease-soft);
 }
-@keyframes klep-wipt{
-  0%{transform:rotateX(0deg)}
-  38%{transform:rotateX(168deg)}
-  100%{transform:rotateX(168deg);opacity:0}
-}
-.klep-kaart{
-  left:-17px;top:-11px;width:34px;height:22px;
-  background:var(--paper);
-  border:1px solid rgba(60,45,26,.45);
-  box-shadow:0 6px 16px rgba(70,55,35,.3);
-  animation:kaart-vliegt 1s var(--ease) .16s both;
-}
-@keyframes kaart-vliegt{
-  0%{opacity:0;transform:translate(0,0) scale(.5) rotate(-6deg)}
-  20%{opacity:1}
-  100%{opacity:0;transform:translate(0,-46px) scale(1.5) rotate(9deg)}
+.env3d.groeit .env-scene{transform:scale(1.35) translateZ(110px) rotateX(15deg);opacity:1}
+.env3d.weg .env-scene{
+  transform:scale(1.9) translateZ(230px) rotateX(15deg);
+  opacity:0;
+  transition:transform .5s var(--ease),opacity .45s var(--ease-soft);
 }
 
-/* De vouwlijn langs de linkerrand. */
+/* De slagschaduw beweegt mee met de vouw. */
+.env-schaduw{
+  position:absolute;left:-46px;top:18px;width:92px;height:22px;
+  border-radius:50%;
+  background:rgba(70,55,35,.42);
+  filter:blur(9px);
+  opacity:0;
+  transition:opacity .45s var(--ease-soft),transform .55s var(--ease);
+  transform:scale(.5);
+}
+.env3d.groeit .env-schaduw{opacity:.75;transform:scale(1.45) translateY(16px)}
+.env3d.klep-op .env-schaduw{transform:scale(1.7) translateY(22px);opacity:.6}
+.env3d.weg .env-schaduw{opacity:0}
+
+.env-bak{
+  position:absolute;inset:0;
+  background:linear-gradient(170deg,#fdf8ec,#f4ecd8);
+  border:1.3px solid rgba(36,31,28,.78);
+  transform:translateZ(3px);
+  box-shadow:0 10px 22px rgba(70,55,35,.3);
+}
+/* De onderflap van de voorkant: een V, net als op het envelopje op de kaart. */
+.env-bak::after{
+  content:"";position:absolute;left:0;right:0;bottom:0;height:54%;
+  clip-path:polygon(0 50%,100% 50%,100% 100%,0 100%);
+  background:linear-gradient(135deg,transparent 47.6%,rgba(60,45,26,.26) 48.6%,transparent 49.6%),
+             linear-gradient(225deg,transparent 47.6%,rgba(60,45,26,.26) 48.6%,transparent 49.6%);
+}
+/* De dikte van het papier langs de onderrand. */
+.env-dikte{
+  position:absolute;left:3px;right:3px;bottom:-2px;height:2px;
+  background:linear-gradient(180deg,var(--paper-deep),rgba(60,45,26,.42));
+  transform-origin:50% 0;
+  transform:rotateX(-80deg);
+}
+
+/* De klep kantelt om zijn vouwlijn bovenaan. */
+.env-klep{
+  position:absolute;left:0;top:0;width:100%;height:62%;
+  background:linear-gradient(180deg,#fdf8ec,#f3ead4);
+  border:1.3px solid rgba(60,45,26,.58);
+  clip-path:polygon(0 0,100% 0,50% 100%);
+  transform-origin:50% 0;
+  transform:translateZ(4px) rotateX(0deg);
+  /* de schaduw volgt de geknipte rand, zodat de vouwlijn te zien is */
+  filter:drop-shadow(0 1px .5px rgba(60,45,26,.5));
+  transition:transform .48s var(--ease),filter .48s var(--ease);
+}
+/* Het postzegeltje, in de kleur van de context, zoals op de kaart. */
+.env-klep::before{
+  content:"";position:absolute;left:10px;top:3px;width:11px;height:8px;
+  background:var(--cyan);
+  outline:1.2px solid rgba(253,248,236,.9);
+}
+.env3d.klep-op .env-klep{transform:translateZ(4px) rotateX(-158deg);
+  filter:drop-shadow(0 -1px .5px rgba(60,45,26,.35)) brightness(.97)}
+
+/* De kaart zit in de envelop en schuift er daarna uit. */
+.env-kaart{
+  position:absolute;left:7%;top:0;width:86%;height:112%;
+  background:var(--paper);
+  border:1px solid rgba(60,45,26,.42);
+  border-bottom:3px solid rgba(60,45,26,.3);   /* de dikte van het vel */
+  box-shadow:0 8px 20px rgba(70,55,35,.28);
+  transform:translateZ(0) translateY(6%);
+  transition:transform .42s var(--ease);
+}
+.env-kaart::after{
+  content:"";position:absolute;left:12%;right:12%;top:22%;height:1px;
+  background:rgba(60,45,26,.2);
+  box-shadow:0 7px 0 rgba(60,45,26,.16),0 14px 0 rgba(60,45,26,.13),0 21px 0 rgba(60,45,26,.1);
+}
+.env3d.kaart-uit .env-kaart{transform:translateZ(26px) translateY(-64%) rotateX(-6deg)}
+
+/* De vouwlijn langs de linkerrand, plus de zichtbare dikte van het vel:
+   drie papierlagen op elkaar, net buiten de rand. */
 #panel::before{
   content:"";
-  position:absolute;top:0;bottom:0;left:0;width:26px;
+  position:absolute;top:0;bottom:0;left:-6px;right:auto;width:32px;
   pointer-events:none;
-  background:linear-gradient(90deg,rgba(70,55,35,.13),transparent);
+  background:
+    linear-gradient(90deg,
+      rgba(70,55,35,.34) 0 1px,
+      var(--paper-deep) 1px 2.5px,
+      rgba(70,55,35,.22) 2.5px 3.5px,
+      var(--paper-2) 3.5px 5px,
+      rgba(70,55,35,.14) 5px 6px,
+      rgba(70,55,35,.13) 6px,
+      transparent 100%);
 }
 
 .p-photo{
   flex:none;
   padding:20px 22px 6px;
+  perspective:1100px;
+}
+/* Geen foto, geen lijst: dan valt er ook niets te vergroten. */
+.p-photo:empty{display:none}
+/* De foto is los van de kaart: hij komt er achteraf bij vliegen en
+   landt in zijn lijst. */
+.p-photo .print.vliegt{animation:foto-vliegt .95s var(--ease) both}
+@keyframes foto-vliegt{
+  0%{
+    opacity:0;
+    transform:translate3d(-46vw,-16vh,-320px) rotateY(62deg) rotateZ(-17deg) scale(.5);
+    box-shadow:0 30px 50px rgba(70,55,35,.34);
+  }
+  18%{opacity:1}
+  62%{
+    opacity:1;
+    transform:translate3d(-6vw,-2vh,-40px) rotateY(16deg) rotateZ(-5deg) scale(.94);
+    box-shadow:0 22px 40px rgba(70,55,35,.3);
+  }
+  86%{transform:translate3d(0,0,6px) rotateY(-3deg) rotateZ(var(--tilt,-1.3deg)) scale(1.02)}
+  100%{opacity:1;transform:rotate(var(--tilt,-1.3deg))}
 }
 .p-photo .print{--tilt:-1.3deg}
 .p-photo .shot{aspect-ratio:16/10}
@@ -329,9 +456,9 @@
 }
 
 .p-body{padding:14px 26px calc(var(--pad-b) + 36px);overflow-y:auto}
-.p-meta{margin:0 0 10px;color:var(--ink-soft)}
+.p-meta{margin:0 0 10px;color:var(--ink-soft);font-family:var(--type-1,var(--mono))}
 .p-body h2{margin:0 0 6px;font-size:1.85rem}
-.p-where{font-family:var(--mono);font-size:.74rem;letter-spacing:.1em;color:var(--ink-faint);margin:0 0 18px}
+.p-where{font-family:var(--type-2,var(--mono));font-size:.74rem;letter-spacing:.1em;color:var(--ink-faint);margin:0 0 18px}
 .p-sum{font-size:1.06rem;line-height:1.5;font-style:italic;margin:0 0 16px}
 .p-text{color:var(--ink-soft);line-height:1.72;margin:0}
 .p-text .par{display:block;margin-bottom:.9em}
@@ -339,7 +466,7 @@
 
 .p-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:24px}
 .tag{
-  font-family:var(--mono);font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;
+  font-family:var(--type-3,var(--mono));font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;
   padding:5px 10px;border:1px solid var(--line);border-radius:2px;
   color:var(--ink-soft);background:var(--paper-2);
 }
@@ -348,7 +475,7 @@
   margin-top:22px;padding:13px 15px;border-radius:2px;
   border:1.2px dashed var(--magenta);
   background:var(--paper-2);
-  font-family:var(--mono);font-size:.76rem;line-height:1.6;letter-spacing:.02em;
+  font-family:var(--type-1,var(--mono));font-size:.76rem;line-height:1.6;letter-spacing:.02em;
   color:var(--ink-soft);
 }
 
@@ -374,8 +501,47 @@
     box-shadow:0 -22px 60px rgba(70,55,35,.22);
   }
   #panel.open{transform:none}
-  #panel::before{top:0;bottom:auto;left:0;right:0;width:auto;height:22px;
-    background:linear-gradient(180deg,rgba(70,55,35,.12),transparent)}
+  /* Geen ruimte naast de kaart: hij komt van onderen en scharniert
+     dan om zijn onderrand in plaats van om de zijkant. */
+  #panel.ontvouwt{transform-origin:50% 100%;animation-name:brief-vouwt-onder}
+  @keyframes brief-vouwt-onder{
+    0%{
+      opacity:0;
+      transform:perspective(1300px)
+                translate3d(var(--gx,0px),var(--gy,0px),-300px)
+                rotateX(74deg) rotateZ(-5deg) scale(.38);
+    }
+    16%{opacity:1}
+    46%{
+      opacity:1;
+      transform:perspective(1300px)
+                translate3d(calc(var(--gx,0px) * .44),calc(var(--gy,0px) * .44),-130px)
+                rotateX(55deg) rotateZ(-3deg) scale(.66);
+    }
+    76%{
+      transform:perspective(1300px)
+                translate3d(calc(var(--gx,0px) * .11),calc(var(--gy,0px) * .11),-36px)
+                rotateX(24deg) scale(.94);
+    }
+    92%{transform:perspective(1300px) rotateX(6deg) scale(1)}
+    100%{opacity:1;transform:none}
+  }
+  #panel::before{top:-6px;bottom:auto;left:0;right:0;width:auto;height:32px;
+    background:linear-gradient(180deg,
+      rgba(70,55,35,.34) 0 1px,
+      var(--paper-deep) 1px 2.5px,
+      rgba(70,55,35,.22) 2.5px 3.5px,
+      var(--paper-2) 3.5px 5px,
+      rgba(70,55,35,.13) 5px 6px,
+      rgba(70,55,35,.12) 6px,
+      transparent 100%)}
+  .p-photo .print.vliegt{animation-name:foto-vliegt-smal}
+  @keyframes foto-vliegt-smal{
+    0%{opacity:0;transform:translate3d(-60vw,8vh,-260px) rotateY(58deg) rotateZ(-14deg) scale(.55)}
+    18%{opacity:1}
+    62%{opacity:1;transform:translate3d(-8vw,1vh,-30px) rotateY(14deg) scale(.95)}
+    100%{opacity:1;transform:rotate(var(--tilt,-1.3deg))}
+  }
   .p-photo{padding:22px 18px 4px}
   .p-photo .shot{aspect-ratio:2/1}
   .p-body{padding:12px 20px calc(var(--pad-b) + 28px)}
@@ -462,6 +628,8 @@ body.ruimte .count{color:rgba(246,240,226,.7)}
 @media (prefers-reduced-motion:reduce){
   #panel.ontvouwt{animation:none}
   #panel.ontvouwt::after{display:none}
-  .klep-laag{display:none}
+  .env3d{display:none}
+  .p-photo .print.vliegt{animation:none}
+  .inhoud::before,.inhoud .vel,.inhoud .pen,.fluister{transition:none}
   .tafel,.tafel .print.op-tafel{transition:none}
 }

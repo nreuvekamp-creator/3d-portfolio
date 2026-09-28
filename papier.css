@@ -158,8 +158,10 @@
   --pap-merk:linear-gradient(transparent,transparent),linear-gradient(transparent,transparent);
   --pap-merk-blend:normal,normal;
 
-  background-color:var(--pap-bg);
-  background-image:
+  /* De hele stapel in een variabele, zodat vlakken met een hogere
+     soortelijkheid (zoals #panel) hem kunnen overnemen zonder te
+     herhalen. */
+  --pap-image:
     var(--pap-merk),
     repeating-linear-gradient(90deg,
       rgba(36,31,28,var(--verge-a)) 0 .7px, transparent .7px var(--verge-gap)),
@@ -167,12 +169,23 @@
       rgba(36,31,28,var(--ketting-a)) 0 1.2px, transparent 1.2px var(--ketting-gap)),
     var(--pap-vezel),
     var(--pap-pulp);
-  background-size:
+  --pap-image-size:
     auto auto, auto auto,
     auto auto, auto auto,
     var(--pap-vezel-size),
     var(--pap-pulp-size);
-  background-blend-mode:var(--pap-merk-blend),multiply,multiply,multiply,multiply;
+  --pap-image-blend:var(--pap-merk-blend),multiply,multiply,multiply,multiply;
+
+  /* De letter waarop deze brief getypt is. */
+  --pap-type:var(--type-1);
+  --pap-type-sp:0;
+  --pap-type-size:1rem;
+  --pap-inkt:var(--ink);
+
+  background-color:var(--pap-bg);
+  background-image:var(--pap-image);
+  background-size:var(--pap-image-size);
+  background-blend-mode:var(--pap-image-blend);
   color:var(--ink);
 }
 
@@ -197,7 +210,7 @@
 /* Alvøens Papirfabrik bij Bergen, 1797. Bankbiljetpapier:
    fijn, glad, bijna geen insluitsels. */
 [data-papier="Noorwegen"]{
-  --pap-bg:#f2ead8;
+  --pap-bg:#e9dec2;
   --verge-a:.03;
   --verge-gap:3.4px;
   --ketting-a:.032;
@@ -210,7 +223,7 @@
 
 /* Kludepapir uit Silkeborg: wolkig in tegenlicht, textielvlekjes. */
 [data-papier="Denemarken"]{
-  --pap-bg:#ece2ca;
+  --pap-bg:#e5d8bc;
   --verge-a:.042;
   --verge-gap:4.4px;
   --ketting-a:.05;
@@ -224,7 +237,7 @@
 /* Molí Paperer de Capellades: katoen, linnen, abaca en sisal
    door elkaar, en een deckle-rand aan alle vier de zijden. */
 [data-papier="Spanje"]{
-  --pap-bg:#f0e8d5;
+  --pap-bg:#e8dcc2;
   --verge-a:.026;
   --verge-gap:6px;
   --ketting-a:.03;
@@ -238,9 +251,11 @@
 /* Hadern-Büttenpapier uit het Waldviertel: wisselende dikte,
    gedroogde bloemblaadjes in de pulp. */
 [data-papier="Oostenrijk"]{
-  --pap-bg:#f3eddc;
-  --verge-a:0;
-  --ketting-a:0;
+  --pap-bg:#eadfc4;
+  --verge-a:.03;
+  --verge-gap:5.6px;
+  --ketting-a:.028;
+  --ketting-gap:38px;
   --pap-vezel:var(--t-bloem);
   --pap-vezel-size:300px 300px;
   --pap-pulp:var(--t-wolk);
@@ -250,7 +265,7 @@
 /* Fabriano, sinds 1264: vergé, kettinglijnen en een watermerk.
    Het watermerk ligt als lichte plek in het vel. */
 [data-papier="Italië"]{
-  --pap-bg:#f2e9d8;
+  --pap-bg:#e9dcc3;
   --verge-a:.05;
   --verge-gap:3.2px;
   --ketting-a:.07;
@@ -298,7 +313,7 @@
 
 /* Tervakoski: dicht, glad, grauwig, nauwelijks insluitsels. */
 [data-papier="Finland"]{
-  --pap-bg:#ebe5d7;
+  --pap-bg:#e4dbc6;
   --verge-a:.035;
   --verge-gap:3.8px;
   --ketting-a:.038;
@@ -312,7 +327,7 @@
 /* Nishijima-washi uit Yamanashi, mitsumata-bast:
    dun, glanzend, lange vezels, wolkige nijimi. Geen schepraam-lijnen. */
 [data-papier="Japan"]{
-  --pap-bg:#f6f0e4;
+  --pap-bg:#ece1cb;
   --verge-a:0;
   --ketting-a:0;
   --pap-vezel:var(--t-vezel-lang);
@@ -323,7 +338,7 @@
 
 /* Hanji: bast van de papiermoerbei, kruislaags geschept. */
 [data-papier="Zuid-Korea"]{
-  --pap-bg:#efe6d3;
+  --pap-bg:#e7dbc1;
   --verge-a:0;
   --ketting-a:0;
   --pap-vezel:var(--t-vezel-kruis);
@@ -365,3 +380,85 @@
   -webkit-mask-size:calc(100% - 18px) calc(100% - 18px),100% 11px,100% 11px,11px 100%,11px 100%;
   mask-size:calc(100% - 18px) calc(100% - 18px),100% 11px,100% 11px,11px 100%,11px 100%;
 }
+
+
+/* ------------------------------------------------------------
+   Het paneel is het grootste vel van de site. Hij had een eigen
+   vlakke achtergrond in globe.css, en omdat #panel zwaarder weegt
+   dan [data-papier] won die het altijd: vandaar dat je het papier
+   er niet in zag. Hier nemen we de stapel over, met hetzelfde
+   gewicht als de id.
+   ------------------------------------------------------------ */
+
+#panel[data-papier]{
+  background-color:var(--pap-bg);
+  /* Strijklicht vooraan: het vel ligt niet kaarsrecht. */
+  background-image:
+    linear-gradient(104deg,
+      rgba(255,252,243,.42) 0%, rgba(255,252,243,0) 26%,
+      rgba(96,78,50,.07) 62%, rgba(96,78,50,.13) 100%),
+    var(--pap-image);
+  background-size:auto auto,var(--pap-image-size);
+  background-blend-mode:normal,var(--pap-image-blend);
+}
+
+/* Het deckle-masker knipt de randen weg, en daarmee de slagschaduw
+   van het paneel. Een vel dat tegen de schermrand aanligt heeft die
+   rafelrand niet nodig, dus daar zetten we het masker uit. */
+#panel[data-papier]{
+  -webkit-mask-image:none;
+  mask-image:none;
+}
+
+/* De brief is getypt, niet gezet. Kop en onderschrift blijven in
+   de schrijfletter staan; de tekst zelf komt uit de machine. */
+#panel[data-papier] .p-sum,
+#panel[data-papier] .p-text,
+#panel[data-papier] .p-meta,
+#panel[data-papier] .p-where,
+#panel[data-papier] .tag,
+#panel[data-papier] .todo{
+  font-family:var(--pap-type);
+  letter-spacing:var(--pap-type-sp);
+  color:var(--pap-inkt);
+}
+#panel[data-papier] .p-sum,
+#panel[data-papier] .p-text{
+  font-size:var(--pap-type-size);
+  font-style:normal;
+}
+/* Een typemachine laat de regels iets ruimer vallen. */
+#panel[data-papier] .p-text{line-height:1.78}
+
+/* De lijst om de foto is geen standaard wit randje meer maar het
+   papier van dat land; de foto ligt er met een schaduwtje op. */
+.print[data-papier] .shot{
+  box-shadow:
+    inset 1.5px 0 0 rgba(10,163,194,.42),
+    inset -1.5px 0 0 rgba(214,51,126,.38),
+    inset 0 -1.5px 0 rgba(240,180,41,.45),
+    0 1px 4px rgba(70,55,35,.30);
+}
+
+/* ------------------------------------------------------------
+   Welke machine hoort bij welk land.
+   Drie families, verdeeld zodat buren nooit dezelfde hebben.
+   ------------------------------------------------------------ */
+
+/* strak lint */
+[data-papier="Noorwegen"]{--pap-type:var(--type-1);--pap-type-sp:.004em;--pap-type-size:.98rem}
+[data-papier="Finland"]{--pap-type:var(--type-1);--pap-type-sp:.03em;--pap-type-size:.95rem;--pap-inkt:#4a4640}
+[data-papier="Italië"]{--pap-type:var(--type-1);--pap-type-sp:.012em;--pap-type-size:1rem}
+[data-papier="Oostenrijk"]{--pap-type:var(--type-1);--pap-type-sp:.018em;--pap-type-size:1rem;--pap-inkt:#3b332c}
+[data-papier="Zuid-Korea"]{--pap-type:var(--type-1);--pap-type-sp:.05em;--pap-type-size:.96rem}
+
+/* versleten aanslag, de inkt slaat door */
+[data-papier="Nederland"]{--pap-type:var(--type-2);--pap-type-sp:.006em;--pap-type-size:1rem;--pap-inkt:#2b2521}
+[data-papier="België"]{--pap-type:var(--type-2);--pap-type-sp:.02em;--pap-type-size:.97rem}
+[data-papier="Frankrijk"]{--pap-type:var(--type-2);--pap-type-sp:.035em;--pap-type-size:.95rem;--pap-inkt:#3a332c}
+[data-papier="Denemarken"]{--pap-type:var(--type-2);--pap-type-sp:0;--pap-type-size:1.02rem}
+
+/* licht en open, een reisschrijfmachine */
+[data-papier="Japan"]{--pap-type:var(--type-3);--pap-type-sp:.045em;--pap-type-size:.97rem;--pap-inkt:#4b4a46}
+
+[data-papier="Spanje"]{--pap-type:var(--type-3);--pap-type-sp:.028em;--pap-type-size:.99rem}

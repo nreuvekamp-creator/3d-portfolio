@@ -59,8 +59,10 @@
   <!-- jij in de leegte -->
   <figure class="me" id="me"><img id="meImg" alt=""></figure>
 
-  <!-- de zwevende tekst -->
-  <div class="lines" id="lines" aria-live="polite"></div>
+  <!-- de brief: een vel papier waarop de tekst wordt getypt -->
+  <div class="vel" id="vel">
+    <div class="lines" id="lines" aria-live="polite"></div>
+  </div>
 
   <!-- drie voorbeelden vliegen langs -->
   <div class="examples" id="examples"></div>
@@ -72,7 +74,11 @@
       <div class="kist">
         <div class="grond"></div>
         <div class="vlak bodem"></div>
-        <div class="vlak wand achter"></div>
+        <div class="vlak wand achter">
+          <!-- de scharnieren zitten aan de achterkant, je mag ze zien -->
+          <span class="scharnier s-links"></span>
+          <span class="scharnier s-rechts"></span>
+        </div>
         <div class="vlak wand links"></div>
         <div class="vlak wand rechts"></div>
         <div class="vlak wand voor"><span class="slot"></span></div>

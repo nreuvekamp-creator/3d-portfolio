@@ -1,9 +1,10 @@
 /* ============================================================
    Het verhaal.
 
-   Vijf scenes die zichzelf afspelen. De bezoeker hoeft niets te doen,
-   maar mag alles onderbreken: knop, Escape, of de spatiebalk drie
-   seconden vasthouden.
+   Vijf scenes. De brief wordt getypt, letter voor letter, met een
+   tik erbij. De bezoeker hoeft niets te doen, maar mag alles
+   onderbreken: knop, Escape, of de spatiebalk drie seconden
+   vasthouden. Aan het eind opent hij zelf de doos.
 
    De tekst staat hieronder in SCRIPT. Dat is het enige wat je hoeft
    aan te passen als het verhaal verandert; de rest regelt zichzelf.
@@ -15,29 +16,33 @@ window.Intro = (function(){
   "use strict";
 
   /* --------------------------------------------------------
-     Het script. `wacht` is hoe lang de regel blijft staan
-     voordat de volgende komt, in milliseconden.
+     Het script. `wacht` is hoe lang de regel blijft staan NADAT
+     hij is uitgetypt, in milliseconden. Het typen zelf kost tijd
+     en die komt er dus bovenop.
      -------------------------------------------------------- */
 
   var SCRIPT = [
-    {scene: "leegte", tekst: "Hi, ik ben Niels.", wacht: 2259},
-    {tekst: "Welkom op mijn plekje op het internet.", wacht: 2734},
-    {tekst: "Het is hier groot, en toch ben je op de juiste plek beland.", klasse: "small", wacht: 2496},
+    {scene: "leegte", tekst: "Hi, ik ben Niels.", stem: null, wacht: 900},
+    {tekst: "Welkom op mijn plekje op het internet.", stem: null, wacht: 900},
+    {tekst: "Het is hier groot, en toch ben je op de juiste plek beland.", klasse: "small", stem: null, wacht: 1100},
 
-    {scene: "breed", tekst: "Mijn interesses lopen alle kanten op.", wacht: 2496},
+    {scene: "breed", tekst: "Mijn interesses lopen alle kanten op.", stem: null, wacht: 900},
     {voorbeelden: true, wacht: 4280},
 
-    {scene: "kist", tekst: "Dat komt omdat ik iemand van ideeën ben.", wacht: 2615},
-    {tekst: "Mijn hoofd ontploft er soms van.", wacht: 2496},
-    {tekst: "Dus ik verzamel ze.", klasse: "hand", wacht: 2259},
-    {tekst: "In een doos.", wacht: 2496},
+    {scene: "kist", tekst: "Dat komt omdat ik iemand van ideeën ben.", stem: null, wacht: 900},
+    {tekst: "Mijn hoofd ontploft er soms van.", stem: null, wacht: 900},
+    {tekst: "Dus ik verzamel ze.", klasse: "hand", stem: null, wacht: 800},
+    {tekst: "In een doos.", stem: null, wacht: 1200},
 
-    {scene: "open", tekst: "", wacht: 1426},
-    {tekst: "Elk idee kwam ergens vandaan.", wacht: 2615},
-    {tekst: "Dus elk idee heeft een plek op de wereld.", wacht: 3091},
+    {scene: "open", tekst: "", wacht: 1200},
+    {tekst: "Elk idee kwam ergens vandaan.", stem: null, wacht: 900},
+    {tekst: "Dus elk idee heeft een plek op de wereld.", stem: null, wacht: 1300},
 
-    {scene: "wacht", tekst: "Kom maar kijken.", klasse: "hand", wacht: 999999}
+    {scene: "wacht", tekst: "Kom maar kijken.", klasse: "hand", stem: null, wacht: 999999}
   ];
+
+  /* Aanslagtempo: ongeveer 22 aanslagen per seconde, met wat spel erin. */
+  var TEMPO = 45;
 
   /* De drie dingen die langsvliegen. De derde is de grap: dit is het. */
   var VOORBEELDEN = [
@@ -47,20 +52,93 @@ window.Intro = (function(){
   ];
 
   var intro, lijnenBak, voorbeeldBak, envBak;
-  var timer = null, klaar = false, opGang = false;
+  var timer = null, typTimer = null, klaar = false, opGang = false;
   var afgerond;
 
   var rustig = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   /* ------------------------------------------------------------
-     De stem. Voorlopig die van de browser, laag en langzaam gezet,
-     zodat je hoort hoe het loopt. Zodra er echte opnamen zijn,
-     krijgt elke regel in SCRIPT een veld `stem` met een bestandsnaam
-     en vervangt `zeg()` de spraaksynthese door een audio-element.
+     Geluid. Drie standen: 0 uit, 1 typemachine, 2 typemachine en stem.
+     Alles wordt ter plekke gemaakt met de Web Audio API; er zijn geen
+     geluidsbestanden. Zonder geluid loopt het verhaal precies zo door.
      ------------------------------------------------------------ */
-  var geluid = false;
 
-  function stem(){
+  var geluid = 0;
+  var ac = null, mix = null, ruisBuf = null;
+
+  function audioAan(){
+    if (ac) { if (ac.state === "suspended") ac.resume(); return true; }
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return false;
+    try {
+      ac = new AC();
+      mix = ac.createGain();
+      mix.gain.value = 0.55;
+      mix.connect(ac.destination);
+      /* Een kwart seconde uitdovende ruis: de grondstof van elke tik. */
+      var n = Math.floor(ac.sampleRate * 0.25);
+      ruisBuf = ac.createBuffer(1, n, ac.sampleRate);
+      var d = ruisBuf.getChannelData(0);
+      for (var i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / n);
+      return true;
+    } catch (e) { ac = null; return false; }
+  }
+
+  function ruispuls(t, freq, q, vol, duur, rate){
+    var s = ac.createBufferSource();
+    s.buffer = ruisBuf;
+    s.playbackRate.value = rate;
+    var bp = ac.createBiquadFilter();
+    bp.type = "bandpass"; bp.frequency.value = freq; bp.Q.value = q;
+    var g = ac.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(vol, t + 0.002);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + duur);
+    s.connect(bp); bp.connect(g); g.connect(mix);
+    s.start(t); s.stop(t + duur + 0.03);
+  }
+
+  /* Eén aanslag: de klap van de hamer op de rol, plus het tikje van de toets. */
+  function tik(){
+    if (geluid < 1 || !ac) return;
+    var t = ac.currentTime;
+    ruispuls(t, 1500 + Math.random() * 1500, 0.9,
+             0.20 + Math.random() * 0.16, 0.055, 0.85 + Math.random() * 0.5);
+    var o = ac.createOscillator();
+    o.type = "triangle";
+    o.frequency.setValueAtTime(190 + Math.random() * 70, t);
+    o.frequency.exponentialRampToValueAtTime(72, t + 0.05);
+    var og = ac.createGain();
+    og.gain.setValueAtTime(0.10 + Math.random() * 0.04, t);
+    og.gain.exponentialRampToValueAtTime(0.0001, t + 0.06);
+    o.connect(og); og.connect(mix);
+    o.start(t); o.stop(t + 0.08);
+  }
+
+  /* Eind van de regel: het belletje en de wagen die terugschuift. */
+  function retour(){
+    if (geluid < 1 || !ac) return;
+    var t = ac.currentTime;
+    var o = ac.createOscillator();
+    o.type = "sine";
+    o.frequency.setValueAtTime(1720, t);
+    var og = ac.createGain();
+    og.gain.setValueAtTime(0.16, t);
+    og.gain.exponentialRampToValueAtTime(0.0001, t + 0.34);
+    o.connect(og); og.connect(mix);
+    o.start(t); o.stop(t + 0.36);
+    ruispuls(t + 0.09, 900, 0.7, 0.13, 0.22, 0.35);
+    ruispuls(t + 0.26, 380, 1.4, 0.16, 0.07, 0.6);
+  }
+
+  /* ------------------------------------------------------------
+     De stem. Voorlopig die van de browser, laag en langzaam gezet.
+     Zodra er echte opnamen zijn, krijgt elke regel in SCRIPT een
+     bestandsnaam in `stem` en vervangt `zeg()` de spraaksynthese
+     door een audio-element.
+     ------------------------------------------------------------ */
+
+  function stemKeuze(){
     if (!window.speechSynthesis) return null;
     var lijst = speechSynthesis.getVoices() || [];
     var nl = lijst.filter(function(v){ return /^nl/i.test(v.lang); });
@@ -70,10 +148,10 @@ window.Intro = (function(){
   }
 
   function zeg(tekst){
-    if (!geluid || !tekst || !window.speechSynthesis) return;
+    if (geluid < 2 || !tekst || !window.speechSynthesis) return;
     speechSynthesis.cancel();
     var u = new SpeechSynthesisUtterance(tekst);
-    var v = stem();
+    var v = stemKeuze();
     if (v) u.voice = v;
     u.lang = (v && v.lang) || "nl-NL";
     u.pitch = 0.55;   /* zo laag als het mag: een verteller, geen assistent */
@@ -83,10 +161,10 @@ window.Intro = (function(){
   }
 
   /* --------------------------------------------------------
-     Regels tonen
+     Regels typen
      -------------------------------------------------------- */
 
-  function toonRegel(stap){
+  function toonRegel(stap, gedaan){
     /* Wat er staat, verdwijnt naar voren toe. */
     var oud = lijnenBak.querySelectorAll(".line.in");
     for (var i = 0; i < oud.length; i++) {
@@ -94,17 +172,39 @@ window.Intro = (function(){
       oud[i].classList.add("out");
       opruimen(oud[i], 1600);
     }
-    if (!stap.tekst) return;
+    if (!stap.tekst) { gedaan(); return; }
     zeg(stap.tekst);
 
     var el = document.createElement("span");
-    el.className = "line" + (stap.klasse ? " " + stap.klasse : "");
-    el.textContent = stap.tekst;
+    el.className = "line in" + (stap.klasse ? " " + stap.klasse : "");
+    var veld = document.createElement("span");
+    veld.className = "tekst";
+    var cursor = document.createElement("span");
+    cursor.className = "caret";
+    cursor.setAttribute("aria-hidden", "true");
+    el.appendChild(veld);
+    el.appendChild(cursor);
     lijnenBak.appendChild(el);
-    /* Twee frames wachten zodat de begintoestand echt wordt getekend. */
-    requestAnimationFrame(function(){
-      requestAnimationFrame(function(){ el.classList.add("in"); });
-    });
+
+    var j = 0;
+    function volgende(){
+      if (klaar) return;
+      if (j >= stap.tekst.length) {
+        retour();
+        el.classList.add("af");
+        gedaan();
+        return;
+      }
+      var ch = stap.tekst.charAt(j++);
+      veld.appendChild(document.createTextNode(ch));
+      if (ch !== " ") tik();
+      var d = TEMPO + (Math.random() - 0.5) * 16;
+      if (ch === " ") d *= 0.8;
+      if (ch === "," || ch === ";" || ch === ":") d += 170;
+      if (ch === ".") d += 200;
+      typTimer = setTimeout(volgende, d);
+    }
+    volgende();
   }
 
   function opruimen(el, na){
@@ -150,11 +250,20 @@ window.Intro = (function(){
       el.style.setProperty("--es", (0.9 + Math.random() * 0.9).toFixed(2));
       el.style.setProperty("--er", ((Math.random() - 0.5) * 460).toFixed(0) + "deg");
       el.style.setProperty("--dur", (2.6 + Math.random() * 1.6).toFixed(2) + "s");
-      el.style.setProperty("--del", (Math.random() * 1.5).toFixed(2) + "s");
+      el.style.setProperty("--del", (Math.random() * 1.1).toFixed(2) + "s");
       envBak.appendChild(el);
       (function(e){ requestAnimationFrame(function(){ e.classList.add("uit"); }); })(el);
       opruimen(el, 6200);
     }
+  }
+
+  /* Het geluid van een deksel dat opengaat: hout, scharnier, en de zwerm. */
+  function doosGeluid(){
+    if (geluid < 1 || !ac) return;
+    var t = ac.currentTime;
+    ruispuls(t, 260, 1.2, 0.22, 0.13, 0.5);
+    ruispuls(t + 0.16, 2400, 2.0, 0.09, 0.30, 0.25);
+    ruispuls(t + 0.55, 1200, 0.6, 0.10, 0.90, 0.2);
   }
 
   /* --------------------------------------------------------
@@ -164,24 +273,37 @@ window.Intro = (function(){
   function scene(naam){
     if (naam === "leegte") intro.classList.add("me-in");
     if (naam === "kist")   intro.classList.add("kist");
-    if (naam === "open"){
-      intro.classList.add("open", "goud");
-      zwermEnveloppen(22);
-    }
+    /* De kist komt naar voren, maar blijft dicht: die doet de bezoeker zelf. */
+    if (naam === "open")   intro.classList.add("open");
     if (naam === "wacht"){
-      /* Vanaf hier loopt het verhaal niet verder: je moet zelf de doos opendoen. */
       intro.classList.add("wacht");
       var k = document.getElementById("chest");
-      if (k) { k.disabled = false; k.addEventListener("click", eindig); k.focus({preventScroll:true}); }
+      if (k) { k.disabled = false; k.addEventListener("click", openDoos); k.focus({preventScroll:true}); }
     }
+  }
+
+  /* De klik op de kist: deksel open, gloed eruit, enveloppen naar buiten,
+     en pas als die op gang zijn eindigt het verhaal. */
+  function openDoos(){
+    if (klaar || intro.classList.contains("goud")) return;
+    intro.classList.add("goud");
+    doosGeluid();
+    setTimeout(function(){ if (!klaar) zwermEnveloppen(22); }, 380);
+    setTimeout(eindig, 1700);
   }
 
   function speel(i){
     if (klaar || i >= SCRIPT.length) return;
     var stap = SCRIPT[i];
     if (stap.scene) scene(stap.scene);
-    if (stap.voorbeelden) vliegVoorbeelden(); else toonRegel(stap);
-    timer = setTimeout(function(){ speel(i + 1); }, stap.wacht);
+    if (stap.voorbeelden) {
+      vliegVoorbeelden();
+      timer = setTimeout(function(){ speel(i + 1); }, stap.wacht);
+      return;
+    }
+    toonRegel(stap, function(){
+      timer = setTimeout(function(){ speel(i + 1); }, stap.wacht);
+    });
   }
 
   /* --------------------------------------------------------
@@ -193,6 +315,7 @@ window.Intro = (function(){
     klaar = true;
     if (window.speechSynthesis) speechSynthesis.cancel();
     clearTimeout(timer);
+    clearTimeout(typTimer);
     intro.classList.add("gone");
     /* Pas na de uitfade echt uit de weg halen, anders knippert het. */
     setTimeout(function(){ intro.hidden = true; }, 1700);
@@ -204,17 +327,17 @@ window.Intro = (function(){
     var DUUR = 3000, start = 0, bezig = false, raf = null;
     var OMTREK = 119.4;
 
-    function tik(){
+    function tikRing(){
       var door = Math.min((performance.now() - start) / DUUR, 1);
       ring.querySelector(".fill").style.strokeDashoffset = (OMTREK * (1 - door)).toFixed(1);
       if (door >= 1) { los(); eindig(); return; }
-      raf = requestAnimationFrame(tik);
+      raf = requestAnimationFrame(tikRing);
     }
     function pak(){
       if (bezig || klaar) return;
       bezig = true; start = performance.now();
       ring.classList.add("bezig");
-      raf = requestAnimationFrame(tik);
+      raf = requestAnimationFrame(tikRing);
     }
     function los(){
       bezig = false;
@@ -259,15 +382,22 @@ window.Intro = (function(){
       var img = document.getElementById("meImg");
       if (img) { img.src = foto; img.alt = (data.profile && data.profile.name) || ""; }
 
+      /* Eén knop, drie standen: uit, alleen de typemachine, en de
+         typemachine met de verteller erbij. Browsers laten geluid pas
+         toe na een echt gebaar; deze klik is dat gebaar. */
+      var STANDEN = ["geluid aan", "typemachine", "typemachine en stem"];
       var gknop = document.getElementById("geluidBtn");
       if (gknop) {
-        if (!window.speechSynthesis) gknop.hidden = true;
+        var AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC && !window.speechSynthesis) gknop.hidden = true;
         gknop.addEventListener("click", function(){
-          geluid = !geluid;
-          gknop.setAttribute("aria-pressed", geluid ? "true" : "false");
-          gknop.textContent = geluid ? "geluid uit" : "geluid aan";
-          if (!geluid) speechSynthesis.cancel();
-          else zeg("Hi, ik ben Niels.");
+          var max = window.speechSynthesis ? 2 : 1;
+          geluid = (geluid + 1) % (max + 1);
+          if (geluid > 0 && !audioAan()) geluid = window.speechSynthesis ? 2 : 0;
+          gknop.setAttribute("aria-pressed", geluid > 0 ? "true" : "false");
+          gknop.textContent = STANDEN[geluid] || STANDEN[0];
+          if (geluid < 2 && window.speechSynthesis) speechSynthesis.cancel();
+          if (geluid > 0) tik();
         });
       }
 

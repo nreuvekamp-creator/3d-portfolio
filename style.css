@@ -4,7 +4,7 @@
    De losse schermen staan in intro.css en globe.css.
    ============================================================ */
 
-@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Courier+Prime:wght@400;700&family=Caveat:wght@400;600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Caveat:wght@400;600&family=Special+Elite&family=Cutive+Mono&family=Nanum+Gothic+Coding:wght@400;700&display=swap");
 
 :root{
   /* Inkten. Geen RGB-scherm maar een drukpers: cyaan, magenta, geel, zwart. */
@@ -37,6 +37,13 @@
   --body:"EB Garamond",Garamond,Georgia,serif;
   --mono:"Courier Prime","Courier New",monospace;
   --hand:"Caveat","Bradley Hand",cursive;
+
+  /* Drie schrijfmachines. Elke brief is op een andere getypt, zodat een
+     kaart uit Japan er anders uitziet dan een kaart uit Nederland.
+     De namen liggen vast: de intro en het paneel gebruiken ze ook. */
+  --type-1:"Cutive Mono","Courier Prime","Courier New",monospace;   /* strak, dun lint */
+  --type-2:"Special Elite","Courier Prime","Courier New",monospace; /* versleten, ongelijke aanslag */
+  --type-3:"Nanum Gothic Coding","Courier Prime","Courier New",monospace; /* licht en open */
 }
 
 *{box-sizing:border-box}
@@ -149,44 +156,91 @@ h2{font-size:clamp(1.6rem,3.4vw,2.4rem)}
 .print{
   position:relative;
   display:block;
-  background:#fdfaf2;
-  padding:10px 10px 34px;
-  box-shadow:0 1px 0 rgba(255,255,255,.9) inset,
+  background:var(--paper);
+  padding:13px 13px 36px;
+  box-shadow:0 1px 0 rgba(255,255,255,.55) inset,
              0 10px 26px rgba(70,55,35,.22),
              0 2px 5px rgba(70,55,35,.14);
   transform:rotate(var(--tilt,-1.1deg));
   transition:transform .45s var(--ease),box-shadow .45s var(--ease);
 }
 .print:hover{transform:rotate(calc(var(--tilt,-1.1deg) * .3)) translateY(-3px)}
+/* Draagt de lijst een papiersoort, dan knipt het deckle-masker de
+   slagschaduw eraf. De schaduw verhuist daarom naar de ouder, waar
+   hij als drop-shadow de gerafelde rand netjes volgt. */
+.p-photo:has(.print[data-papier]){
+  filter:drop-shadow(0 9px 18px rgba(70,55,35,.26)) drop-shadow(0 2px 3px rgba(70,55,35,.18));
+}
+.print[data-papier]{box-shadow:0 1px 0 rgba(255,255,255,.4) inset}
+/* Op tafel hangt de foto los: daar draagt de foto zelf de schaduw. */
+.tafel .print.op-tafel[data-papier]{
+  filter:drop-shadow(0 16px 30px rgba(30,22,10,.45)) drop-shadow(0 3px 6px rgba(30,22,10,.3));
+}
 .print img{display:block;width:100%;height:100%;object-fit:cover}
 
-/* De inkt-filter over elke foto: minder rood, meer papier. */
+/* ------------------------------------------------------------
+   Vierkleurendruk op de foto.
+   Het SVG-filter splitst het beeld in een cyaan, een magenta en een
+   gele plaat, schuift ze een haar uit elkaar en drukt ze over elkaar
+   heen: precies wat een goedkope pers doet. De zwarten worden opgetild
+   (riso krijgt geen diep zwart op papier), de kleur gaat omhoog.
+   Het beeld wordt dus lichter en kleuriger, niet donkerder.
+   ------------------------------------------------------------ */
+
+:root{
+  --riso:url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg'>\
+<filter id='r' color-interpolation-filters='sRGB'>\
+<feComponentTransfer in='SourceGraphic' result='p'>\
+<feFuncR type='linear' slope='.92' intercept='.09'/>\
+<feFuncG type='linear' slope='.92' intercept='.08'/>\
+<feFuncB type='linear' slope='.94' intercept='.07'/></feComponentTransfer>\
+<feColorMatrix in='p' type='saturate' values='1.95' result='s'/>\
+<feColorMatrix in='s' type='matrix' values='1 0 0 0 0  0 0 0 0 1  0 0 0 0 1  0 0 0 1 0' result='cy'/>\
+<feColorMatrix in='s' type='matrix' values='0 0 0 0 1  0 1 0 0 0  0 0 0 0 1  0 0 0 1 0' result='mg'/>\
+<feColorMatrix in='s' type='matrix' values='0 0 0 0 1  0 0 0 0 1  0 0 1 0 0  0 0 0 1 0' result='yl'/>\
+<feOffset in='cy' dx='-.34' dy='.18' result='cyo'/>\
+<feOffset in='mg' dx='.36' dy='-.14' result='mgo'/>\
+<feOffset in='yl' dx='.10' dy='.30' result='ylo'/>\
+<feBlend in='cyo' in2='mgo' mode='multiply' result='b1'/>\
+<feBlend in='b1' in2='ylo' mode='multiply'/></filter></svg>#r");
+}
+
 .print .shot{
   position:relative;
   overflow:hidden;
-  background:var(--paper-deep);
+  background:var(--pap-bg,var(--paper-deep));
 }
 .print .shot img{
-  filter:sepia(.34) saturate(.78) contrast(1.09) brightness(1.03);
+  filter:var(--riso) contrast(1.06);
 }
-/* De inktwolken over de foto: geel bovenin, cyaan onderin, magenta in de hoek. */
+/* De inkten die de pers er te veel op zet: geel in de lichte hoek,
+   cyaan onderin. Licht, want het mag niet donker worden. */
 .print .shot::after{
-  content:"";position:absolute;inset:0;pointer-events:none;
+  content:"";position:absolute;inset:0;pointer-events:none;z-index:3;
   mix-blend-mode:multiply;
-  opacity:.5;
+  opacity:.17;
   background:
-    radial-gradient(70% 60% at 18% 12%, rgba(240,180,41,.55), transparent 68%),
-    radial-gradient(64% 56% at 84% 26%, rgba(214,51,126,.38), transparent 66%),
-    radial-gradient(90% 70% at 50% 100%, rgba(10,163,194,.42), transparent 70%);
+    radial-gradient(76% 62% at 16% 10%, rgba(240,180,41,.60), transparent 70%),
+    radial-gradient(60% 54% at 86% 24%, rgba(214,51,126,.30), transparent 68%),
+    radial-gradient(96% 74% at 52% 102%, rgba(10,163,194,.42), transparent 72%);
 }
-/* En een verschoven kleurkanaal eroverheen, de misregistratie. */
+/* En de plaat die te licht is doorgekomen: de schaduwen lopen vol
+   met cyaan en magenta in plaats van zwart. Dat is de riso-look. */
 .print .shot::before{
-  content:"";position:absolute;inset:0;z-index:2;pointer-events:none;
+  content:"";position:absolute;inset:0;z-index:4;pointer-events:none;
   mix-blend-mode:screen;
-  opacity:.16;
+  opacity:.20;
   background:
-    linear-gradient(90deg, rgba(10,163,194,.9) 0 2px, transparent 2px) 0 0/100% 100%,
-    linear-gradient(270deg, rgba(214,51,126,.9) 0 2px, transparent 2px) 0 0/100% 100%;
+    linear-gradient(150deg, rgba(10,163,194,.55) 0%, rgba(10,163,194,0) 52%),
+    linear-gradient(330deg, rgba(214,51,126,.42) 0%, rgba(214,51,126,0) 48%);
+}
+/* De rand waar de platen niet dekken: een cyaan en een magenta zoom. */
+.print .shot{
+  box-shadow:
+    inset 1.5px 0 0 rgba(10,163,194,.42),
+    inset -1.5px 0 0 rgba(214,51,126,.38),
+    inset 0 -1.5px 0 rgba(240,180,41,.45);
 }
 .print .caption{
   position:absolute;left:12px;right:12px;bottom:8px;
