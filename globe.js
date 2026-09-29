@@ -27,9 +27,94 @@ var MONTHS = ["januari","februari","maart","april","mei","juni",
 var data, trips, map, panel, ink = {}, revealWacht = false;
 var active = {context:{}, study:{}, world:{}};
 var tafel = null, tafelOpen = false;
+var gelezen = {}, postMap = null, postStapel = null, postTeller = null, postOpen = false;
+var dichtBezig = false;
 
 function stil(){
   return window.matchMedia && window.matchMedia("(prefers-reduced-motion:reduce)").matches;
+}
+
+/* ------------------------------------------------------------
+   Fotos: een verzoek per reis, en dat onthouden.
+   De site probeerde per reis vier bestandsnamen; dat gaf bij het
+   openen tientallen mislukte verzoeken. Nu doet de eerste vraag om
+   photos/<id> een echte poging en onthoudt de uitkomst; elke volgende
+   vraag om dezelfde reis wordt uit het geheugen beantwoord, ook die
+   van de zaal. Het geheugen gaat mee in localStorage, in een try/catch
+   want een privevenster mag daar niet aan.
+   ------------------------------------------------------------ */
+
+var FOTO_SLEUTEL = "ideeendoos.fotos.v1";
+var FOTO_PAD = /(?:^|\/)photos\/([^\/?#]+?)\.(jpg|jpeg|png|webp)(?:[?#]|$)/i;
+var fotoReg = {};
+
+function leesFotoGeheugen(){
+  try{
+    var rauw = window.localStorage.getItem(FOTO_SLEUTEL);
+    if (!rauw) return;
+    var o = JSON.parse(rauw) || {};
+    Object.keys(o).forEach(function(id){
+      fotoReg[id] = {klaar: true, bezig: false, bron: o[id] || null, src: o[id] || null, wacht: []};
+    });
+  }catch(e){}
+}
+
+function bewaarFotoGeheugen(){
+  try{
+    var o = {};
+    Object.keys(fotoReg).forEach(function(id){
+      if (fotoReg[id].klaar) o[id] = fotoReg[id].src || "";
+    });
+    window.localStorage.setItem(FOTO_SLEUTEL, JSON.stringify(o));
+  }catch(e){}
+}
+
+/* De bewaking zit op het plaatje zelf; zo profiteert elk onderdeel
+   van de site ervan, ook de onderdelen die hun eigen poging doen. */
+function bewaakFotos(){
+  var proto = window.HTMLImageElement && window.HTMLImageElement.prototype;
+  if (!proto || proto.__fotoBewaakt) return;
+  var basis = Object.getOwnPropertyDescriptor(proto, "src");
+  if (!basis || !basis.set) return;
+  proto.__fotoBewaakt = true;
+
+  Object.defineProperty(proto, "src", {
+    configurable: true,
+    enumerable: basis.enumerable,
+    get: function(){ return basis.get.call(this); },
+    set: function(v){
+      var url = String(v);
+      var m = FOTO_PAD.exec(url);
+      if (!m) { basis.set.call(this, v); return; }
+
+      var id = m[1], self = this;
+      var zet = function(u){ basis.set.call(self, u); };
+      var mis = function(){
+        setTimeout(function(){ self.dispatchEvent(new Event("error")); }, 0);
+      };
+      var st = fotoReg[id];
+
+      if (st && st.klaar) { if (st.src) zet(st.src); else mis(); return; }
+      if (st && st.bezig) {
+        if (st.bron === url) { zet(url); return; }
+        st.wacht.push(function(){ if (st.src) zet(st.src); else mis(); });
+        return;
+      }
+
+      st = fotoReg[id] = {klaar: false, bezig: true, bron: url, src: null, wacht: []};
+      var af = function(gelukt){
+        if (st.klaar) return;
+        st.klaar = true; st.bezig = false;
+        st.src = gelukt ? url : null;
+        bewaarFotoGeheugen();
+        var w = st.wacht; st.wacht = [];
+        w.forEach(function(f){ f(); });
+      };
+      this.addEventListener("load", function(){ af(true); });
+      this.addEventListener("error", function(){ af(false); });
+      zet(url);
+    }
+  });
 }
 
 /* De inkten staan in style.css; hier alleen uitlezen. */
@@ -123,12 +208,39 @@ function visible(t){
   return true;
 }
 
+/* ---------- gelezen post ---------- */
+
+var GELEZEN_SLEUTEL = "ideeendoos.gelezen.v1";
+
+function leesGelezen(){
+  try{
+    var rauw = window.localStorage.getItem(GELEZEN_SLEUTEL);
+    if (!rauw) return;
+    (JSON.parse(rauw) || []).forEach(function(id){ gelezen[id] = true; });
+  }catch(e){}
+}
+
+function bewaarGelezen(){
+  try{
+    window.localStorage.setItem(GELEZEN_SLEUTEL, JSON.stringify(Object.keys(gelezen)));
+  }catch(e){}
+}
+
+function markeerGelezen(id){
+  if (gelezen[id]) return;
+  gelezen[id] = true;
+  bewaarGelezen();
+  refresh();
+  vulPostmap();
+}
+
 function features(){
   return trips.filter(visible).map(function(t){
     return {
       type: "Feature",
       geometry: {type: "Point", coordinates: [t.lon, t.lat]},
-      properties: {id: t.id, title: t.title, todo: t.todo ? 1 : 0, context: t.context}
+      properties: {id: t.id, title: t.title, todo: t.todo ? 1 : 0, context: t.context,
+                   icoon: icoonNaam(t, !!gelezen[t.id])}
     };
   });
 }
@@ -161,13 +273,155 @@ function alsIcoon(vel){
   return {width: d.width, height: d.height, data: d.data};
 }
 
-/* Een dichtgevouwen envelopje: papier, twee flapnaden, een klep en een
-   postzegeltje in de kleur van de context. */
-function tekenEnvelop(zegel, flauw){
-  var w = 40, h = 27, m = 3;      /* m = marge voor de slagschaduw */
-  var vel = nieuwVel(w + m * 2, h + m * 2);
+/* ------------------------------------------------------------
+   De postzegel: het land kiest de kleur, de reis kiest de vorm.
+   De kleuren worden gemengd uit de vier inkten van style.css; er
+   komt hier geen nieuwe kleur bij. Per land een korte reden.
+   ------------------------------------------------------------ */
+
+function hex(c){
+  c = String(c || "").trim();
+  var m = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(c);
+  if (!m) return [120,110,100];
+  var h = m[1];
+  if (h.length === 3) h = h[0]+h[0]+h[1]+h[1]+h[2]+h[2];
+  return [parseInt(h.slice(0,2),16), parseInt(h.slice(2,4),16), parseInt(h.slice(4,6),16)];
+}
+
+/* Meng de inkten zoals een pers dat doet: delen van elke plaat. */
+function meng(delen){
+  var r = 0, g = 0, b = 0, som = 0;
+  Object.keys(delen).forEach(function(naam){
+    var d = delen[naam], kl = hex(ink[naam]);
+    r += kl[0] * d; g += kl[1] * d; b += kl[2] * d; som += d;
+  });
+  if (!som) return "#7a6e62";
+  var f = function(v){ return Math.max(0, Math.min(255, Math.round(v / som))); };
+  return "rgb(" + f(r) + "," + f(g) + "," + f(b) + ")";
+}
+
+/* Elk land zijn eigen inkt, gemengd uit cyaan, magenta, geel en zwart. */
+var LAND_MENG = {
+  "Nederland":  {yellow:.72, magenta:.28},            /* oranje: de kleur van thuis */
+  "België":     {yellow:.86, key:.14},                /* geel met een zwarte rand, als de vlag */
+  "Frankrijk":  {cyan:.52, magenta:.22, key:.26},     /* diep blauw, het blauw van de driekleur */
+  "Spanje":     {magenta:.46, yellow:.54},            /* rood en geel samen: de vlag */
+  "Italië":     {cyan:.5, yellow:.5},                 /* groen, de eerste baan van de vlag */
+  "Oostenrijk": {magenta:.58, key:.42},               /* donker wijnrood, het rood van de Alpenvlag */
+  "Denemarken": {magenta:.92, yellow:.08},            /* helder rood: de Dannebrog */
+  "Noorwegen":  {cyan:.46, magenta:.34, key:.2},      /* indigo: de vlag is blauw met rood */
+  "Finland":    {cyan:.62, paper:.38},                /* licht meerblauw op sneeuw */
+  "Japan":      {magenta:.78, yellow:.14, key:.08},   /* de zonnerode schijf */
+  "Zuid-Korea": {cyan:.5, magenta:.5}                 /* rood en blauw van de taegeuk samen: paars */
+};
+
+function zegelKleur(t){
+  var recept = LAND_MENG[t.country];
+  if (!recept) return ink["ink-faint"] || "#a2927f";
+  return meng(recept);
+}
+
+/* Een vaste, maar per reis andere vorm: twee reizen uit hetzelfde land
+   krijgen zo niet dezelfde zegel. */
+function vormVan(t){
+  var h = 0, id = String(t.id);
+  for (var i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) % 9973;
+  return h % 5;
+}
+
+var ZEGELVORM = [
+  {w:9,  h:7,   tand:false, stempel:false},   /* liggend, glad gesneden */
+  {w:7,  h:9.5, tand:true,  stempel:false},   /* staand, getand */
+  {w:7,  h:7,   tand:true,  stempel:true},    /* klein vierkant, afgestempeld */
+  {w:11, h:6.5, tand:false, stempel:true},    /* breed, afgestempeld */
+  {w:8,  h:8.5, tand:true,  stempel:false}    /* bijna vierkant, getand */
+];
+
+function tekenZegel(g, zx, zy, kleur, vorm){
+  var v = ZEGELVORM[vorm] || ZEGELVORM[0];
+  var w = v.w, h = v.h;
+
+  g.fillStyle = kleur;
+  g.fillRect(zx, zy, w, h);
+
+  /* De getande rand: kleine papierkleurige hapjes uit de zijkanten. */
+  if (v.tand) {
+    g.fillStyle = "#fdf8ec";
+    var stap = 2.2, r = .85, x, y;
+    for (x = zx + stap / 2; x < zx + w; x += stap) {
+      g.beginPath(); g.arc(x, zy, r, 0, 6.284); g.fill();
+      g.beginPath(); g.arc(x, zy + h, r, 0, 6.284); g.fill();
+    }
+    for (y = zy + stap / 2; y < zy + h; y += stap) {
+      g.beginPath(); g.arc(zx, y, r, 0, 6.284); g.fill();
+      g.beginPath(); g.arc(zx + w, y, r, 0, 6.284); g.fill();
+    }
+  }
+
+  /* De afstempeling: drie golven van de post er dwars overheen. */
+  if (v.stempel) {
+    g.save();
+    g.strokeStyle = "rgba(36,31,28,.55)";
+    g.lineWidth = .7;
+    for (var k = 0; k < 3; k++) {
+      var yy = zy + h * (.28 + k * .22);
+      g.beginPath();
+      g.moveTo(zx - 1.5, yy + 1.2);
+      g.lineTo(zx + w + 1.5, yy - 1.2);
+      g.stroke();
+    }
+    g.restore();
+  }
+
+  g.strokeStyle = "rgba(253,248,236,.9)";
+  g.lineWidth = 1.1;
+  g.strokeRect(zx - .4, zy - .4, w + .8, h + .8);
+}
+
+/* De naam waaronder het icoon bij de kaart bekend staat. */
+function icoonNaam(t, open){
+  var land = String(t.country || "onbekend").replace(/[^a-zA-Z]/g, "");
+  return "env-" + (open ? "o" : "d") + "-" + land + "-" + vormVan(t) + (t.todo ? "-t" : "");
+}
+
+/* Een envelopje: papier, twee flapnaden, een klep en een postzegel in
+   de kleur van het land. Open is hij herkenbaar anders: de klep staat
+   omhoog en er steekt een brief uit, ook als het icoon klein is. */
+function tekenEnvelop(zegel, flauw, vorm, open){
+  var w = 40, h = 27, m = 3, kop = 13;   /* kop = ruimte voor de opstaande klep */
+  var vel = nieuwVel(w + m * 2, h + m * 2 + kop);
   var g = vel.g;
-  var x = m, y = m, bw = w, bh = h;
+  var x = m, y = m + kop, bw = w, bh = h;
+
+  g.globalAlpha = flauw ? .55 : 1;
+
+  /* De brief die er bij een geopende envelop uitsteekt. */
+  if (open) {
+    g.save();
+    g.translate(x + bw / 2, y);
+    g.rotate(-.05);
+    g.shadowColor = "rgba(70,55,35,.3)";
+    g.shadowBlur = 3; g.shadowOffsetY = 1;
+    g.fillStyle = "#fffdf6";
+    g.fillRect(-bw * .38, -14, bw * .76, 20);
+    g.restore();
+    g.strokeStyle = "rgba(36,31,28,.6)";
+    g.lineWidth = 1;
+    g.save();
+    g.translate(x + bw / 2, y);
+    g.rotate(-.05);
+    g.strokeRect(-bw * .38, -14, bw * .76, 20);
+    /* drie regeltjes schrift, zodat je ziet dat het een brief is */
+    g.strokeStyle = "rgba(60,45,26,.4)";
+    g.lineWidth = .9;
+    for (var r = 0; r < 3; r++) {
+      g.beginPath();
+      g.moveTo(-bw * .3, -10 + r * 3.6);
+      g.lineTo(bw * .3, -10 + r * 3.6);
+      g.stroke();
+    }
+    g.restore();
+  }
 
   g.save();
   g.shadowColor = "rgba(70,55,35,.38)";
@@ -176,8 +430,6 @@ function tekenEnvelop(zegel, flauw){
   g.fillRect(x, y, bw, bh);
   g.restore();
 
-  g.globalAlpha = flauw ? .55 : 1;
-
   /* De twee zijflappen en de onderflap, als lichte vouwen. */
   g.strokeStyle = "rgba(60,45,26,.26)";
   g.lineWidth = 1;
@@ -185,24 +437,29 @@ function tekenEnvelop(zegel, flauw){
   g.moveTo(x, y + bh); g.lineTo(x + bw / 2, y + bh * .46); g.lineTo(x + bw, y + bh);
   g.stroke();
 
-  /* De klep die je straks opent. */
-  g.fillStyle = "rgba(60,45,26,.07)";
-  g.beginPath();
-  g.moveTo(x, y); g.lineTo(x + bw / 2, y + bh * .60); g.lineTo(x + bw, y); g.closePath();
-  g.fill();
-  g.strokeStyle = "rgba(60,45,26,.52)";
-  g.lineWidth = 1.2;
-  g.beginPath();
-  g.moveTo(x, y); g.lineTo(x + bw / 2, y + bh * .60); g.lineTo(x + bw, y);
-  g.stroke();
+  if (open) {
+    /* De klep ligt naar achteren opengeslagen: een driehoek boven de rand. */
+    g.fillStyle = "#f3ead4";
+    g.beginPath();
+    g.moveTo(x, y); g.lineTo(x + bw / 2, y - bh * .52); g.lineTo(x + bw, y); g.closePath();
+    g.fill();
+    g.strokeStyle = "rgba(60,45,26,.62)";
+    g.lineWidth = 1.2;
+    g.stroke();
+  } else {
+    /* De klep die je straks opent. */
+    g.fillStyle = "rgba(60,45,26,.07)";
+    g.beginPath();
+    g.moveTo(x, y); g.lineTo(x + bw / 2, y + bh * .60); g.lineTo(x + bw, y); g.closePath();
+    g.fill();
+    g.strokeStyle = "rgba(60,45,26,.52)";
+    g.lineWidth = 1.2;
+    g.beginPath();
+    g.moveTo(x, y); g.lineTo(x + bw / 2, y + bh * .60); g.lineTo(x + bw, y);
+    g.stroke();
+  }
 
-  /* Het postzegeltje linksboven, in de inkt van de context. */
-  var zw = 9, zh = 7, zx = x + 3.5, zy = y + 3;
-  g.fillStyle = zegel;
-  g.fillRect(zx, zy, zw, zh);
-  g.strokeStyle = "rgba(253,248,236,.9)";
-  g.lineWidth = 1.1;
-  g.strokeRect(zx - .4, zy - .4, zw + .8, zh + .8);
+  tekenZegel(g, x + 3.5, y + (open ? bh - 11 : 3), zegel, vorm);
 
   /* De rand van de envelop zelf, als laatste zodat hij bovenop ligt. */
   g.strokeStyle = "rgba(36,31,28,.78)";
@@ -253,16 +510,16 @@ function tekenStapel(){
 }
 
 function zetIconen(){
-  if (!map.hasImage("envelop-studie"))
-    map.addImage("envelop-studie", tekenEnvelop(ink.cyan, false), {pixelRatio: PR});
-  if (!map.hasImage("envelop-prive"))
-    map.addImage("envelop-prive", tekenEnvelop(ink.magenta, false), {pixelRatio: PR});
-  if (!map.hasImage("envelop-extra"))
-    map.addImage("envelop-extra", tekenEnvelop(ink.gold, false), {pixelRatio: PR});
-  if (!map.hasImage("envelop-todo"))
-    map.addImage("envelop-todo", tekenEnvelop(ink["ink-faint"] || "#a2927f", true), {pixelRatio: PR});
   if (!map.hasImage("envelop-stapel"))
     map.addImage("envelop-stapel", tekenStapel(), {pixelRatio: PR});
+  /* Per reis twee iconen: dicht en, als je hem gelezen hebt, open. */
+  trips.forEach(function(t){
+    [false, true].forEach(function(op){
+      var naam = icoonNaam(t, op);
+      if (map.hasImage(naam)) return;
+      map.addImage(naam, tekenEnvelop(zegelKleur(t), !!t.todo, vormVan(t), op), {pixelRatio: PR});
+    });
+  });
 }
 
 /* ---------- het vel papier ---------- */
@@ -304,6 +561,7 @@ function openTrip(id){
     beurt.mag = true;
     if (beurt.geladen) plaatsFoto(beurt);
     map.jumpTo(doel);
+    markeerGelezen(t.id);
     return;
   }
 
@@ -314,7 +572,7 @@ function openTrip(id){
      (b) de klep klapt open, (c) de kaart schuift eruit,
      (d) de kaart vouwt open tot de brief, (e) de foto komt aanvliegen. */
   document.body.classList.add("bezig");
-  speelEnvelop(p);
+  speelEnvelop(p, t);
   /* De bol vliegt meteen mee en is klaar voordat de brief opengaat; liepen ze
      samen, dan vochten de kaart en de brief om dezelfde beeldjes. */
   map.easeTo(Object.assign({duration: 1150}, doel));
@@ -331,6 +589,8 @@ function openTrip(id){
      het hele scherm blijft uit tot ook de foto geland is. */
   later(function(){ kaartRust(false); }, 2420);
   later(function(){ document.body.classList.remove("bezig"); }, 3420);
+  /* Pas als de brief openligt telt hij als gelezen. */
+  later(function(){ markeerGelezen(t.id); }, 2450);
 }
 
 /* De bol laten rusten: hij tekent anders continu door terwijl de brief
@@ -395,19 +655,17 @@ function vulPaneel(t){
 
 /* ---------- de foto als los kaartje ---------- */
 
-/* Eerst kijken of photos/<id>.<ext> bestaat. Bestaat hij niet, dan komt er
-   ook geen lijst in de brief; er valt dan niets te vergroten. */
+/* Een poging, meer niet: photos/<id>.jpg. De bewaking hierboven stuurt
+   hem door naar de goede naam als die al bekend is, of meldt meteen dat
+   er geen foto is. Geen foto betekent geen lijst in de brief. */
 function zoekFoto(t, klaar){
-  var lijst = ["photos/" + t.id + ".jpg", "photos/" + t.id + ".png",
-               "photos/" + t.id + ".jpeg", "photos/" + t.id + ".webp"];
-  (function probeer(i){
-    if (i >= lijst.length) { klaar(null); return; }
-    var img = new Image();
-    img.alt = "";
-    img.onload = function(){ klaar(img); };
-    img.onerror = function(){ probeer(i + 1); };
-    img.src = lijst[i];
-  })(0);
+  var st = fotoReg[t.id];
+  if (st && st.klaar && !st.src) { klaar(null); return; }
+  var img = new Image();
+  img.alt = "";
+  img.onload = function(){ klaar(img); };
+  img.onerror = function(){ klaar(null); };
+  img.src = "photos/" + t.id + ".jpg";
 }
 
 function plaatsFoto(beurt){
@@ -461,9 +719,10 @@ function ruimEnvelopOp(){
 
 /* Een echte envelop met diepte: een bak, een klep die om zijn vouwlijn
    kantelt, en een kaart die er daarna uit schuift. */
-function speelEnvelop(p){
+function speelEnvelop(p, t){
   var laag = document.createElement("div");
   laag.className = "env3d";
+  if (t) laag.style.setProperty("--zegel", zegelKleur(t));
   laag.style.left = Math.round(p.x) + "px";
   laag.style.top = Math.round(p.y) + "px";
   laag.innerHTML =
@@ -550,6 +809,143 @@ function vanTafel(){
   else setTimeout(weg, 460);
 }
 
+/* ---------- de brief weer dichtvouwen ---------- */
+
+/* De omgekeerde weg, en korter: eerst vouwt het vel zich op, dan komt
+   de envelop terug op zijn plek op de kaart, slikt de brief in, klapt
+   zijn klep dicht en krimpt terug tot het icoontje. */
+function vouwDicht(){
+  if (!panel.classList.contains("open")) return;
+  var beurt = huidig;
+  var t = beurt && beurt.trip;
+  if (stil() || !t || !map) { closePanel(); return; }
+  if (dichtBezig) return;
+  dichtBezig = true;
+
+  stopTimers();
+  ruimEnvelopOp();
+  var p = map.project([t.lon, t.lat]);
+  var vak = panel.getBoundingClientRect();
+  panel.style.setProperty("--fx", Math.round(p.x - vak.right) + "px");
+  panel.style.setProperty("--fy", Math.round(p.y - (vak.top + vak.height / 2)) + "px");
+  panel.style.setProperty("--gx", Math.round(p.x - (vak.left + vak.width / 2)) + "px");
+  panel.style.setProperty("--gy", Math.round(p.y - vak.bottom) + "px");
+
+  document.body.classList.add("bezig");
+  panel.classList.remove("ontvouwt");
+  void panel.offsetWidth;
+  panel.classList.add("vouwt");
+
+  later(function(){
+    panel.classList.remove("vouwt", "open");
+    speelEnvelopDicht(p, t);
+  }, 700);
+  later(function(){
+    dichtBezig = false;
+    document.body.classList.remove("bezig");
+    closePanel();
+  }, 2250);
+}
+
+/* Dezelfde envelop als bij het openen, maar de stappen lopen terug. */
+function speelEnvelopDicht(p, t){
+  var laag = document.createElement("div");
+  laag.className = "env3d groeit klep-op kaart-uit";
+  if (t) laag.style.setProperty("--zegel", zegelKleur(t));
+  laag.style.left = Math.round(p.x) + "px";
+  laag.style.top = Math.round(p.y) + "px";
+  laag.innerHTML =
+    '<span class="env-schaduw"></span>' +
+    '<span class="env-scene">' +
+      '<span class="env-kaart"></span>' +
+      '<span class="env-bak"><i class="env-dikte"></i></span>' +
+      '<span class="env-klep"></span>' +
+    '</span>';
+  document.body.appendChild(laag);
+  envLaag = laag;
+  void laag.offsetWidth;
+
+  later(function(){ laag.classList.remove("kaart-uit"); }, 80);
+  later(function(){ laag.classList.remove("klep-op"); }, 480);
+  later(function(){ laag.classList.remove("groeit"); }, 900);
+  later(function(){ if (envLaag === laag) ruimEnvelopOp(); }, 1450);
+}
+
+/* ---------- het postmapje rechtsonder ---------- */
+
+function maakPostmap(){
+  if (postMap) return;
+  postMap = document.createElement("div");
+  postMap.className = "postmap";
+  postMap.id = "postmap";
+  postMap.hidden = true;
+  postMap.innerHTML =
+    '<div class="post-map">' +
+      '<button class="post-greep" id="postGreep" aria-expanded="false" ' +
+              'aria-label="Gelezen post"></button>' +
+      '<div class="post-stapel" id="postStapel"></div>' +
+      '<span class="post-flap" aria-hidden="true"></span>' +
+      '<span class="post-opschrift" aria-hidden="true">Gelezen post</span>' +
+    '</div>' +
+    '<p class="post-teller label" id="postTeller"></p>';
+  document.body.appendChild(postMap);
+  postStapel = postMap.querySelector("#postStapel");
+  postTeller = postMap.querySelector("#postTeller");
+  postMap.querySelector("#postGreep").addEventListener("click", function(){
+    postOpen = !postOpen;
+    postMap.classList.toggle("open", postOpen);
+    this.setAttribute("aria-expanded", postOpen ? "true" : "false");
+  });
+  vulPostmap();
+}
+
+/* De stapel: elke gelezen brief een eigen hoek, zodat het een echte
+   stapel wordt. Wie een foto had, krijgt een fotootje in de stapel. */
+function vulPostmap(){
+  if (!postMap || !trips) return;
+  var lijst = trips.filter(function(t){ return gelezen[t.id]; });
+  postStapel.textContent = "";
+
+  lijst.forEach(function(t, i){
+    var b = document.createElement("button");
+    b.className = "post-item";
+    b.type = "button";
+    b.setAttribute("aria-label", t.title);
+    /* Een hoek en een verschuiving die per brief vastliggen. */
+    var v = vormVan(t), n = i + 1;
+    b.style.setProperty("--r", (((v * 7 + n * 11) % 23) - 11).toFixed(1) + "deg");
+    b.style.setProperty("--x", (((v * 5 + n * 13) % 27) - 13) + "px");
+    b.style.setProperty("--i", String(i));
+
+    var st = fotoReg[t.id];
+    if (st && st.klaar && st.src) {
+      b.classList.add("met-foto");
+      var img = new Image();
+      img.alt = "";
+      img.src = st.src;
+      b.appendChild(img);
+    } else {
+      b.classList.add("met-brief");
+      var zegel = document.createElement("span");
+      zegel.className = "post-zegel";
+      zegel.style.background = zegelKleur(t);
+      b.appendChild(zegel);
+      var titel = document.createElement("span");
+      titel.className = "post-titel";
+      titel.textContent = t.title;
+      b.appendChild(titel);
+    }
+    b.addEventListener("click", function(e){
+      e.stopPropagation();
+      openTrip(t.id);
+    });
+    postStapel.appendChild(b);
+  });
+
+  postTeller.textContent = lijst.length + (lijst.length === 1 ? " gelezen" : " gelezen");
+  postMap.classList.toggle("leeg", lijst.length === 0);
+}
+
 function closePanel(){
   stopTimers();
   kaartRust(false);
@@ -634,11 +1030,10 @@ function initMap(){
       id: "dots", type: "symbol", source: "trips",
       filter: ["!", ["has", "point_count"]],
       layout: {
-        "icon-image": ["case",
-          ["==", ["get", "todo"], 1], "envelop-todo",
-          ["==", ["get", "context"], "prive"], "envelop-prive",
-          ["==", ["get", "context"], "extracurriculair"], "envelop-extra",
-          "envelop-studie"],
+        "icon-image": ["get", "icoon"],
+        /* Het icoon heeft bovenin ruimte voor de opstaande klep; die ruimte
+           telt niet mee voor de plek op de kaart. */
+        "icon-offset": [0, -6.5],
         "icon-allow-overlap": true,
         "icon-size": ["interpolate", ["linear"], ["zoom"], 2, .72, 5, .95, 9, 1.1]
       }
@@ -684,21 +1079,32 @@ function zoomNaar(center, zoom){
 return {
   init: function(json){
     leesInkten();
+    leesFotoGeheugen();
+    leesGelezen();
+    bewaakFotos();
     data = json || {};
     trips = (data.trips || []).filter(function(t){
       return typeof t.lat === "number" && typeof t.lon === "number";
     });
     panel = document.getElementById("panel");
     var close = document.getElementById("closeBtn");
-    if (close) close.addEventListener("click", closePanel);
+    if (close) {
+      /* Geen kruisje meer: de brief vouwt zich dicht. */
+      close.textContent = "";
+      close.classList.add("vouw");
+      close.setAttribute("aria-label", "Vouw de brief dicht");
+      close.setAttribute("title", "Vouw de brief dicht");
+      close.addEventListener("click", vouwDicht);
+    }
     document.addEventListener("keydown", function(e){
       if (e.key !== "Escape") return;
-      if (tafelOpen) vanTafel(); else closePanel();
+      if (tafelOpen) vanTafel(); else vouwDicht();
     });
     panel.addEventListener("animationend", function(e){
       if (e.target === panel && !e.pseudoElement) panel.classList.remove("ontvouwt");
     });
     bouwMappen();
+    maakPostmap();
     initMap();
     if (revealWacht) { revealWacht = false; Globe.reveal(); }
   },
@@ -711,6 +1117,7 @@ return {
     if (bar) bar.hidden = false;
     var mp = document.getElementById("mappen");
     if (mp) mp.hidden = false;
+    if (postMap) { postMap.hidden = false; vulPostmap(); }
     document.body.classList.add("bol");
     if (!map) { revealWacht = true; return; }
     if (stil()) map.jumpTo({center: [8, 48], zoom: 3});

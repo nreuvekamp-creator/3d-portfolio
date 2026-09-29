@@ -359,7 +359,8 @@ body.bezig #map::after{mix-blend-mode:normal;background:rgba(36,31,28,.075)}
 /* Het postzegeltje, in de kleur van de context, zoals op de kaart. */
 .env-klep::before{
   content:"";position:absolute;left:10px;top:3px;width:11px;height:8px;
-  background:var(--cyan);
+  /* dezelfde inkt als op de kaart: het land kiest de kleur */
+  background:var(--zegel,var(--cyan));
   outline:1.2px solid rgba(253,248,236,.9);
 }
 .env3d.klep-op .env-klep{transform:translateZ(4px) rotateX(-158deg)}
@@ -635,4 +636,186 @@ body.ruimte .count{color:rgba(246,240,226,.7)}
   .p-photo .print.vliegt{animation:none}
   .inhoud::before,.inhoud .vel,.inhoud .pen,.fluister{transition:none}
   .tafel,.tafel .print.op-tafel{transition:none}
+}
+
+/* ------------------------------------------------------------
+   Dichtvouwen: dezelfde beweging als het openen, maar achteruit
+   en korter. De curve zit in de standen zelf, dus met reverse
+   loopt hij precies terug.
+   ------------------------------------------------------------ */
+
+#panel.vouwt{
+  will-change:transform,opacity;backface-visibility:hidden;
+  transform-origin:100% 50%;
+  animation:brief-vouwt .7s linear reverse both;
+}
+/* De vouwnaden komen terug terwijl hij zich opvouwt. */
+#panel.vouwt::after{
+  content:"";
+  position:absolute;inset:0;
+  pointer-events:none;z-index:2;
+  background:
+    linear-gradient(180deg,transparent 31.4%,rgba(70,55,35,.30) 33%,transparent 34.6%),
+    linear-gradient(180deg,transparent 65.4%,rgba(70,55,35,.22) 67%,transparent 68.6%);
+  animation:vouw-weg .7s var(--ease) reverse both;
+}
+
+/* Het kruisje is weg; er staat nu een vel dat zich dichtvouwt. */
+.close.vouw{font-size:0}
+.close.vouw::before{
+  content:"";
+  width:15px;height:15px;
+  border:1.4px solid var(--ink);
+  border-radius:1px;
+  background:
+    linear-gradient(135deg,transparent 49%,rgba(36,31,28,.55) 49% 51%,transparent 51%);
+  transition:transform .3s var(--ease);
+}
+.close.vouw::after{
+  content:"";
+  position:absolute;left:50%;top:50%;
+  width:15px;height:7.5px;
+  margin:-7.5px 0 0 -7.5px;
+  border:1.4px solid var(--ink);border-bottom:0;
+  background:var(--paper-2);
+  transform-origin:50% 100%;
+  transform:rotate(0deg);
+  transition:transform .35s var(--ease);
+}
+.close.vouw:hover::after{transform:rotate(-24deg)}
+
+/* ------------------------------------------------------------
+   Rechtsonder: het postmapje met de gelezen post.
+   Rechtsonder stonden al de teller en de zoomknoppen; die schuiven
+   hierboven, zodat niets over elkaar valt.
+   ------------------------------------------------------------ */
+
+.postmap{
+  position:fixed;
+  right:24px;bottom:calc(var(--pad-b) + 22px);
+  z-index:32;
+  animation:bar-in 1.1s var(--ease) .45s both;
+}
+.post-map{
+  position:relative;
+  width:132px;height:88px;
+  background:linear-gradient(170deg,#d9c79b,#c9b184);
+  border:1px solid rgba(60,45,26,.42);
+  border-radius:12px 3px 3px 3px;
+  box-shadow:0 8px 20px rgba(70,55,35,.26);
+  transform:rotate(2deg);
+  transition:transform .45s var(--ease),box-shadow .45s var(--ease);
+}
+/* Het tabje, hier linksboven zodat hij de spiegeling is van de dossiermap. */
+.post-map::before{
+  content:"";position:absolute;top:-11px;left:10px;
+  width:52px;height:13px;
+  background:linear-gradient(170deg,#ddcda4,#cdb689);
+  border:1px solid rgba(60,45,26,.42);border-bottom:0;
+  border-radius:4px 4px 0 0;
+}
+.postmap:hover .post-map{transform:rotate(1deg) translateY(-4px);box-shadow:0 14px 28px rgba(70,55,35,.3)}
+
+.post-greep{
+  position:absolute;inset:0;z-index:1;
+  border-radius:inherit;
+}
+.post-opschrift{
+  position:absolute;left:50%;bottom:8px;z-index:4;transform:translateX(-50%);
+  pointer-events:none;
+  font-family:var(--mono);font-size:.56rem;letter-spacing:.16em;text-transform:uppercase;
+  color:rgba(60,45,26,.7);
+  white-space:nowrap;
+}
+.post-greep:focus-visible{outline:2.5px solid var(--cyan);outline-offset:4px}
+
+/* De voorflap van de map, net als bij de dossiermap. */
+.post-flap{
+  position:absolute;left:-1px;right:-1px;top:14px;bottom:-1px;z-index:3;
+  background:linear-gradient(170deg,#ddcda4,#cdb689);
+  border:1px solid rgba(60,45,26,.42);
+  border-radius:3px 3px 3px 3px;
+  transform-origin:50% 100%;
+  transform:rotateX(0deg);
+  box-shadow:0 -4px 10px rgba(70,55,35,.18);
+  transition:transform .8s var(--ease);
+  pointer-events:none;
+}
+.postmap.open .post-flap{transform:perspective(600px) rotateX(64deg)}
+
+/* De stapel steekt boven de map uit, elk vel onder een eigen hoek. */
+.post-stapel{
+  position:absolute;left:8px;right:8px;bottom:8px;
+  height:0;z-index:2;
+}
+.post-item{
+  position:absolute;left:50%;bottom:0;
+  width:66px;height:44px;
+  margin-left:-33px;
+  padding:0;
+  background:var(--paper);
+  border:1px solid rgba(60,45,26,.42);
+  box-shadow:0 3px 8px rgba(70,55,35,.26);
+  overflow:hidden;
+  /* Dicht: alleen de koppen steken boven de map uit, elk onder een
+     eigen hoek, zodat het een stapel wordt en geen nette rij. */
+  transform:translate(calc(var(--x,0px) * .4),calc(-42px - var(--i,0) * 4px))
+            rotate(var(--r,0deg)) scale(.92);
+  transform-origin:50% 100%;
+  transition:transform .55s var(--ease),box-shadow .35s var(--ease);
+}
+.postmap.open .post-item{
+  transform:translate(var(--x,0px),calc(-62px - var(--i,0) * 17px)) rotate(var(--r,0deg));
+}
+.post-item:hover,.post-item:focus-visible{
+  box-shadow:0 8px 18px rgba(70,55,35,.34);
+  z-index:9;
+}
+.postmap.open .post-item:hover{
+  transform:translate(var(--x,0px),calc(-70px - var(--i,0) * 17px)) rotate(0deg) scale(1.06);
+}
+.post-item:focus-visible{outline:2.5px solid var(--cyan);outline-offset:2px}
+.post-item img{display:block;width:100%;height:100%;object-fit:cover}
+.post-item.met-foto{padding:3px;background:#fffdf8}
+.post-item.met-brief{
+  background:linear-gradient(170deg,#fdf8ec,#f4ecd8);
+}
+.post-zegel{
+  position:absolute;right:4px;top:4px;width:9px;height:7px;
+  outline:1px solid rgba(253,248,236,.9);
+}
+.post-titel{
+  position:absolute;left:5px;right:16px;top:5px;
+  font-family:var(--type-3,var(--mono));font-size:.42rem;line-height:1.35;
+  letter-spacing:.04em;text-align:left;
+  color:var(--ink-soft);
+  max-height:34px;overflow:hidden;
+}
+
+.post-teller{
+  margin:8px 0 0;text-align:right;
+  font-size:.56rem;color:var(--ink-soft);
+}
+.postmap.leeg .post-stapel{display:none}
+.postmap.leeg .post-teller{opacity:.55}
+
+/* De zoomknoppen en de bronvermelding schuiven boven het mapje. */
+body.bol .maplibregl-ctrl-bottom-right{margin-bottom:126px}
+/* De teller van de plekken gaat naar het midden, weg bij het mapje. */
+/* Op smal scherm is onderaan geen ruimte: de teller gaat naar rechtsboven,
+   onder de naam, waar niets anders staat. */
+  .count{right:14px;left:auto;transform:none;top:calc(var(--pad-t) + 18px);bottom:auto}
+
+@media (max-width:640px){
+  .postmap{right:16px;bottom:calc(var(--pad-b) + 16px)}
+  .post-map{width:104px;height:70px}
+  .post-item{width:54px;height:36px;margin-left:-27px}
+  body.bol .maplibregl-ctrl-bottom-right{margin-bottom:104px}
+}
+
+@media (prefers-reduced-motion:reduce){
+  #panel.vouwt{animation:none}
+  #panel.vouwt::after{display:none}
+  .postmap{animation:none}
+  .post-item,.post-flap,.post-map{transition:none}
 }
