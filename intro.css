@@ -444,7 +444,12 @@
 #intro.wacht .chest{pointer-events:auto;cursor:pointer}
 #intro.wacht .chest:hover{transform:translate(-50%,-31%) translateZ(-20px) scale(1.18)}
 #intro.wacht .chest:focus-visible{transform:translate(-50%,-31%) translateZ(-20px) scale(1.18)}
-#intro.wacht .chest:focus-visible{outline:2.5px solid var(--cyan);outline-offset:8px}
+#intro.wacht .chest:focus-visible{outline:none}
+#intro.wacht .chest:focus-visible .chest-cue{
+  color:var(--cyan);
+  text-decoration:underline;
+  text-underline-offset:4px;
+}
 .chest-cue{
   position:absolute;left:50%;bottom:-40px;
   transform:translateX(-50%);

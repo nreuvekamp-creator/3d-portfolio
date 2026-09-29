@@ -348,7 +348,7 @@ window.Intro = (function(){
     if (naam === "wacht"){
       intro.classList.add("wacht");
       var k = document.getElementById("chest");
-      if (k) { k.disabled = false; k.addEventListener("click", openDoos); k.focus({preventScroll:true}); }
+      if (k) { k.disabled = false; k.addEventListener("click", openDoos);  }
     }
   }
 
