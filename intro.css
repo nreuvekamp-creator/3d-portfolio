@@ -313,11 +313,16 @@
 .chest .s-links {left:4.2em}
 .chest .s-rechts{right:4.2em}
 /* De binnenkant: donkerder, en zonder vezel want daar zit stof op. */
+/* De donkere binnenkant. Bij een DICHTE doos kun je die nooit zien, en dan
+   viel hij juist over de buitenkant heen; dat was het gat in de zijkant.
+   Hij komt dus pas op als het deksel opengaat. */
 .chest .vlak::after{
   content:"";
   position:absolute;inset:0;
   transform:translateZ(-.01em) rotateY(180deg);
   backface-visibility:hidden;
+  opacity:0;
+  transition:opacity .6s var(--ease-soft);
   background-color:var(--karton-diep);
   background-image:linear-gradient(rgba(30,18,6,.86),rgba(18,10,3,.93));
   background-size:100% 100%;background-position:0 0;
@@ -360,6 +365,7 @@
   transition:opacity 1.4s var(--ease-soft);
 }
 #intro.goud .chest .mond{opacity:1}
+#intro.goud .chest .vlak::after{opacity:1}
 
 /* De schaduw op het papier onder de kist. */
 .chest .grond{
@@ -420,6 +426,11 @@
   background:linear-gradient(90deg,rgba(36,31,28,.22),rgba(201,150,44,.30),rgba(36,31,28,.22));
   box-shadow:inset .06em 0 0 rgba(255,255,255,.12),inset -.06em 0 0 rgba(36,31,28,.4);
 }
+
+/* Het deksel is een dichte plaat: zijn zes vlakken hebben geen
+   binnenkant nodig. Zonder deze regel legt de ::after van de voering
+   zich als een donkere baan over de bovenkant van het deksel heen. */
+.chest .deksel .vlak::after{content:none}
 
 /* De onderkant van het deksel is de voering: donker, en hij vangt
    het licht op dat uit de kist omhoog schijnt. */
