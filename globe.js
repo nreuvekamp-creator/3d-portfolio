@@ -282,6 +282,7 @@ function openTrip(id){
   if (t.zaal && window.Zaal) { closePanel(); Zaal.open(); return; }
 
   stopTimers();
+  kaartRust(false);
   ruimEnvelopOp();
   vulPaneel(t);
 
@@ -312,16 +313,39 @@ function openTrip(id){
   /* De volgorde: (a) het envelopje groeit en komt naar je toe,
      (b) de klep klapt open, (c) de kaart schuift eruit,
      (d) de kaart vouwt open tot de brief, (e) de foto komt aanvliegen. */
+  document.body.classList.add("bezig");
   speelEnvelop(p);
+  /* De bol vliegt meteen mee en is klaar voordat de brief opengaat; liepen ze
+     samen, dan vochten de kaart en de brief om dezelfde beeldjes. */
+  map.easeTo(Object.assign({duration: 1150}, doel));
   later(function(){
+    kaartRust(true);
     ontvouw(p);
-    map.easeTo(Object.assign({duration: 1500}, doel));
   }, 1300);
   later(function(){
     if (huidig !== beurt) return;
     beurt.mag = true;
     if (beurt.geladen) plaatsFoto(beurt);
   }, 2380);
+  /* Zodra de brief plat ligt mag je de bol weer pakken; de menglaag over
+     het hele scherm blijft uit tot ook de foto geland is. */
+  later(function(){ kaartRust(false); }, 2420);
+  later(function(){ document.body.classList.remove("bezig"); }, 3420);
+}
+
+/* De bol laten rusten: hij tekent anders continu door terwijl de brief
+   opengaat, en dan is er geen rekenkracht over voor de beweging zelf. */
+var rustte = false;
+function kaartRust(aan){
+  if (!map || rustte === aan) return;
+  rustte = aan;
+  var h = ["scrollZoom", "dragPan", "dragRotate", "boxZoom", "keyboard", "doubleClickZoom", "touchZoomRotate"];
+  if (aan) {
+    map.stop();
+    h.forEach(function(n){ if (map[n]) map[n].disable(); });
+  } else {
+    h.forEach(function(n){ if (map[n]) map[n].enable(); });
+  }
 }
 
 /* Alles wat er in de brief staat, behalve de foto: die komt later. */
@@ -528,6 +552,8 @@ function vanTafel(){
 
 function closePanel(){
   stopTimers();
+  kaartRust(false);
+  document.body.classList.remove("bezig");
   ruimEnvelopOp();
   huidig = null;
   panel.classList.remove("ontvouwt");

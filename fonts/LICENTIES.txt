@@ -1,0 +1,18 @@
+Lettertypen in deze map
+
+Mom's Typewriter, Christoph Mueller
+  Volledig vrij. De maker typte het alfabet op de schrijfmachine van zijn
+  moeder, scande dat in en maakte er een lettertype van.
+  https://www.dafont.com/moms-typewriter.font
+
+JMH Typewriter, Jorge Moron
+  Free for personal use. Dit is een persoonlijk portfolio, dus dat past;
+  wordt de site ooit commercieel gebruikt, dan is een licentie nodig.
+  https://www.dafont.com/jmh-typewriter.font
+
+Old Newspaper Types, Manfred Klein
+  Van Manfred Klein; zijn lettertypen zijn vrij te gebruiken, met een
+  donatie als je er geld mee verdient.
+  https://www.dafont.com/old-newspaper-types.font
+
+Omgezet naar woff2 met fontTools, zodat ze snel laden.

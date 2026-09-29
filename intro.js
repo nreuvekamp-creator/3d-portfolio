@@ -51,7 +51,7 @@ window.Intro = (function(){
     {tekst: "deze site", note: "ja, deze. dit is nummer drie", dx: -40, dy: 150, r: "-3deg"}
   ];
 
-  var intro, lijnenBak, voorbeeldBak, envBak;
+  var intro, lijnenBak, rol, voorbeeldBak, envBak;
   var timer = null, typTimer = null, klaar = false, opGang = false;
   var afgerond;
 
@@ -73,7 +73,7 @@ window.Intro = (function(){
     try {
       ac = new AC();
       mix = ac.createGain();
-      mix.gain.value = 0.55;
+      mix.gain.value = 0.95;
       mix.connect(ac.destination);
       /* Een kwart seconde uitdovende ruis: de grondstof van elke tik. */
       var n = Math.floor(ac.sampleRate * 0.25);
@@ -98,21 +98,72 @@ window.Intro = (function(){
     s.start(t); s.stop(t + duur + 0.03);
   }
 
-  /* Eén aanslag: de klap van de hamer op de rol, plus het tikje van de toets. */
+  /* Een korte toon onder de ruis: de hamer die het papier raakt. */
+  function toon(t, type, van, naar, vol, duur){
+    var o = ac.createOscillator();
+    o.type = type;
+    o.frequency.setValueAtTime(van, t);
+    o.frequency.exponentialRampToValueAtTime(naar, t + duur);
+    var g = ac.createGain();
+    g.gain.setValueAtTime(vol, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + duur);
+    o.connect(g); g.connect(mix);
+    o.start(t); o.stop(t + duur + 0.02);
+  }
+
+  /* Vijf aanslagen die echt van elkaar verschillen: hard, dof, met
+     nagalm van het mechaniek, licht, en eentje die net achterblijft.
+     Elke toets krijgt er willekeurig een, nooit twee keer dezelfde
+     achter elkaar. */
+  var AANSLAGEN = [
+    /* 0: hard, kort, hoog in het lint */
+    function(t){
+      ruispuls(t, 2700, 0.8, 0.52, 0.045, 1.25);
+      toon(t, "triangle", 250, 82, 0.26, 0.055);
+    },
+    /* 1: dof, zwaar, alsof de toets te diep gaat */
+    function(t){
+      ruispuls(t, 820, 1.1, 0.46, 0.085, 0.5);
+      toon(t, "sine", 145, 58, 0.30, 0.095);
+    },
+    /* 2: met nagalm van het mechaniek erachteraan */
+    function(t){
+      ruispuls(t, 1800, 0.7, 0.42, 0.05, 1.0);
+      ruispuls(t + 0.035, 3300, 2.2, 0.20, 0.20, 0.3);
+      toon(t, "triangle", 205, 70, 0.20, 0.07);
+    },
+    /* 3: licht, bijna een tikje op glas */
+    function(t){
+      ruispuls(t, 3600, 1.5, 0.34, 0.03, 1.5);
+      toon(t, "square", 360, 150, 0.10, 0.03);
+    },
+    /* 4: blijft net achter; eerst het toetsje, dan pas de klap */
+    function(t){
+      ruispuls(t, 2100, 1.8, 0.14, 0.02, 1.6);
+      ruispuls(t + 0.028, 1300, 0.9, 0.50, 0.07, 0.75);
+      toon(t + 0.028, "triangle", 175, 62, 0.28, 0.085);
+    }
+  ];
+
+  var vorigeAanslag = -1;
+  /* Voor de test: welke aanslag klonk wanneer. */
+  window.__tikLog = [];
+
   function tik(){
+    var k = Math.floor(Math.random() * AANSLAGEN.length);
+    if (k === vorigeAanslag) k = (k + 1 + Math.floor(Math.random() * (AANSLAGEN.length - 1))) % AANSLAGEN.length;
+    vorigeAanslag = k;
+    window.__tikLog.push(k);
+    if (geluid < 1 || !ac) return;
+    AANSLAGEN[k](ac.currentTime);
+  }
+
+  /* De spatiebalk: breed, zacht en laag, duidelijk geen letter. */
+  function spatie(){
     if (geluid < 1 || !ac) return;
     var t = ac.currentTime;
-    ruispuls(t, 1500 + Math.random() * 1500, 0.9,
-             0.20 + Math.random() * 0.16, 0.055, 0.85 + Math.random() * 0.5);
-    var o = ac.createOscillator();
-    o.type = "triangle";
-    o.frequency.setValueAtTime(190 + Math.random() * 70, t);
-    o.frequency.exponentialRampToValueAtTime(72, t + 0.05);
-    var og = ac.createGain();
-    og.gain.setValueAtTime(0.10 + Math.random() * 0.04, t);
-    og.gain.exponentialRampToValueAtTime(0.0001, t + 0.06);
-    o.connect(og); og.connect(mix);
-    o.start(t); o.stop(t + 0.08);
+    ruispuls(t, 480, 0.7, 0.26, 0.10, 0.35);
+    toon(t, "sine", 96, 52, 0.14, 0.09);
   }
 
   /* Eind van de regel: het belletje en de wagen die terugschuift. */
@@ -164,14 +215,26 @@ window.Intro = (function(){
      Regels typen
      -------------------------------------------------------- */
 
-  function toonRegel(stap, gedaan){
-    /* Wat er staat, verdwijnt naar voren toe. */
-    var oud = lijnenBak.querySelectorAll(".line.in");
-    for (var i = 0; i < oud.length; i++) {
-      oud[i].classList.remove("in");
-      oud[i].classList.add("out");
-      opruimen(oud[i], 1600);
+  /* De regels blijven staan en stapelen zich op, zoals op een echte
+     brief. Het vel groeit mee tot het niet verder kan; daarna schuift
+     de rol omhoog zodat de laatste regel altijd onderaan zichtbaar is.
+     Oudere regels worden lichter, maar blijven leesbaar. */
+  function schuifMee(){
+    if (!rol || !lijnenBak) return;
+    var over = rol.scrollHeight - lijnenBak.clientHeight;
+    rol.style.transform = "translateY(" + (over > 0 ? -Math.round(over) : 0) + "px)";
+  }
+
+  function verflauw(){
+    var regels = rol.querySelectorAll(".line");
+    var TRAP = [1, 0.82, 0.68, 0.58];
+    for (var i = 0; i < regels.length; i++) {
+      var terug = regels.length - 1 - i;
+      regels[i].style.opacity = TRAP[Math.min(terug, TRAP.length - 1)];
     }
+  }
+
+  function toonRegel(stap, gedaan){
     if (!stap.tekst) { gedaan(); return; }
     zeg(stap.tekst);
 
@@ -179,12 +242,10 @@ window.Intro = (function(){
     el.className = "line in" + (stap.klasse ? " " + stap.klasse : "");
     var veld = document.createElement("span");
     veld.className = "tekst";
-    var cursor = document.createElement("span");
-    cursor.className = "caret";
-    cursor.setAttribute("aria-hidden", "true");
     el.appendChild(veld);
-    el.appendChild(cursor);
-    lijnenBak.appendChild(el);
+    rol.appendChild(el);
+    verflauw();
+    schuifMee();
 
     var j = 0;
     function volgende(){
@@ -197,7 +258,8 @@ window.Intro = (function(){
       }
       var ch = stap.tekst.charAt(j++);
       veld.appendChild(document.createTextNode(ch));
-      if (ch !== " ") tik();
+      if (ch === " ") spatie(); else tik();
+      schuifMee();
       var d = TEMPO + (Math.random() - 0.5) * 16;
       if (ch === " ") d *= 0.8;
       if (ch === "," || ch === ";" || ch === ":") d += 170;
@@ -215,21 +277,29 @@ window.Intro = (function(){
      De drie voorbeelden
      -------------------------------------------------------- */
 
+  /* De drie kaarten komen van ver naar voren en komen tot rust op hun
+     eigen plek: eentje links, twee rechts. Ze blijven daarna liggen,
+     zodat je ze rustig kunt bekijken. Een klik licht er eentje uit;
+     inhoud komt later. De plek volgt uit de volgorde in VOORBEELDEN,
+     dus drie regels wijzigen is genoeg. */
+
   function vliegVoorbeelden(){
     VOORBEELDEN.forEach(function(v, i){
       setTimeout(function(){
         if (klaar) return;
-        var el = document.createElement("div");
-        el.className = "ex";
-        el.style.setProperty("--dx", v.dx + "px");
-        el.style.setProperty("--dy", v.dy + "px");
+        var el = document.createElement("button");
+        el.className = "ex plek-" + (i + 1);
+        el.type = "button";
         el.style.setProperty("--r", v.r);
-        el.innerHTML = '<div class="sheet"></div><div class="note"></div>';
+        el.innerHTML = '<span class="sheet"></span><span class="note"></span>';
         el.querySelector(".sheet").textContent = v.tekst;
         el.querySelector(".note").textContent = v.note;
+        el.setAttribute("aria-label", v.tekst + ", " + v.note);
+        el.addEventListener("click", function(){ el.classList.toggle("op"); });
         voorbeeldBak.appendChild(el);
-        requestAnimationFrame(function(){ el.classList.add("fly"); });
-        opruimen(el, 3800);
+        requestAnimationFrame(function(){
+          requestAnimationFrame(function(){ el.classList.add("lig"); });
+        });
       }, i * 900);
     });
   }
@@ -375,6 +445,9 @@ window.Intro = (function(){
       opGang = true;
 
       lijnenBak = document.getElementById("lines");
+      rol = document.createElement("div");
+      rol.className = "rol";
+      lijnenBak.appendChild(rol);
       voorbeeldBak = document.getElementById("examples");
       envBak = document.getElementById("envelopes");
 

@@ -6,6 +6,31 @@
 
 @import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Caveat:wght@400;600&family=Special+Elite&family=Cutive+Mono&display=swap");
 
+/* ------------------------------------------------------------
+   Echte schrijfmachines, zelf meegeleverd. Niet van Google:
+   deze drie komen van dafont en staan in fonts/.
+   Licenties: Mom's Typewriter is volledig vrij; JMH Typewriter
+   is "free for personal use"; Old Newspaper Types is van
+   Manfred Klein. Zie fonts/LICENTIES.txt.
+   ------------------------------------------------------------ */
+
+@font-face{
+  font-family:"JMH Typewriter";
+  src:url("fonts/JMHTypewriter.woff2") format("woff2");
+  font-weight:400;font-style:normal;font-display:swap;
+}
+@font-face{
+  font-family:"Moms Typewriter";
+  src:url("fonts/MomsTypewriter.woff2") format("woff2");
+  font-weight:400;font-style:normal;font-display:swap;
+}
+@font-face{
+  font-family:"Old Newspaper Types";
+  src:url("fonts/OldNewspaperTypes.woff2") format("woff2");
+  font-weight:400;font-style:normal;font-display:swap;
+}
+
+
 :root{
   /* Inkten. Geen RGB-scherm maar een drukpers: cyaan, magenta, geel, zwart. */
   --cyan:#0aa3c2;
@@ -41,9 +66,9 @@
   /* Drie schrijfmachines, alle drie rechtstreeks van een echte machine
      afgeleid: even brede letters, slabschreven, ongelijke aanslag.
      De namen liggen vast: de intro en het paneel gebruiken ze ook. */
-  --type-1:"Courier Prime","Courier New",monospace;                 /* IBM-pica, vers lint */
-  --type-2:"Special Elite","Courier Prime","Courier New",monospace; /* Remington, versleten aanslag */
-  --type-3:"Cutive Mono","Courier Prime","Courier New",monospace;   /* Bulletin-elite, licht en ruim */
+  --type-1:"JMH Typewriter","Courier Prime","Courier New",monospace;                 /* IBM-pica, vers lint */
+  --type-2:"Moms Typewriter","Special Elite","Courier Prime","Courier New",monospace; /* Remington, versleten aanslag */
+  --type-3:"Old Newspaper Types","Cutive Mono","Courier Prime","Courier New",monospace;   /* Bulletin-elite, licht en ruim */
 }
 
 *{box-sizing:border-box}

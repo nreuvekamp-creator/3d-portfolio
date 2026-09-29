@@ -3,6 +3,10 @@
    Kleuren komen uit style.css; hier staan geen eigen kleuren.
    ============================================================ */
 
+/* Een uitloop die niet meteen op zijn eindstand zit; de vaste curve van de
+   site is te kort voor een beweging die je moet kunnen volgen. */
+:root{--ease-vloei:cubic-bezier(.22,.62,.32,1)}
+
 #map{
   position:fixed;
   inset:0;
@@ -26,6 +30,10 @@
   background:linear-gradient(180deg,rgba(36,31,28,.05),rgba(36,31,28,.10));
   mix-blend-mode:multiply;
 }
+/* Zolang er een brief opengaat gaat de menglaag over het hele scherm uit:
+   vermenigvuldigen dwingt de browser elk beeldje het hele venster opnieuw
+   samen te stellen, en daar liep de beweging op stuk. */
+body.bezig #map::after{mix-blend-mode:normal;background:rgba(36,31,28,.075)}
 
 .maplibregl-canvas{outline:none}
 
@@ -226,10 +234,11 @@
   transition:transform .6s var(--ease);
   display:flex;
   flex-direction:column;
-  transform-style:preserve-3d;
-  backface-visibility:hidden;
 }
 #panel.open{transform:none}
+/* Alleen terwijl hij beweegt krijgt hij een eigen laag; daarna weer eraf,
+   want een blijvende will-change maakt het juist trager. */
+#panel.ontvouwt{will-change:transform,opacity;backface-visibility:hidden}
 
 /* ------------------------------------------------------------
    De brief die zich ontvouwt.
@@ -240,37 +249,21 @@
 
 #panel.ontvouwt{
   transform-origin:100% 50%;
-  animation:brief-vouwt 1.05s var(--ease) both;
+  /* Lineair, met genoeg tussenstanden. Met de harde uitloopcurve schoot hij
+     per stap meteen naar zijn eindstand en stond daar stil; dan zie je losse
+     standen in plaats van een beweging. De curve zit nu in de waarden. */
+  animation:brief-vouwt 1.05s linear both;
 }
 @keyframes brief-vouwt{
-  0%{
-    opacity:0;
-    transform:perspective(1600px)
-              translate3d(var(--fx,0px),var(--fy,0px),-340px)
-              rotateY(-74deg) rotateX(11deg) rotateZ(-5deg) scale(.38);
-    box-shadow:-4px 6px 12px rgba(70,55,35,.34);
-  }
-  16%{opacity:1}
-  /* eerste slag: de kaart komt overeind en draait naar je toe */
-  46%{
-    opacity:1;
-    transform:perspective(1600px)
-              translate3d(calc(var(--fx,0px) * .44),calc(var(--fy,0px) * .44),-150px)
-              rotateY(-55deg) rotateX(6deg) rotateZ(-3deg) scale(.66);
-    box-shadow:-14px 12px 34px rgba(70,55,35,.30);
-  }
-  /* tweede slag: het vel vouwt open */
-  76%{
-    transform:perspective(1600px)
-              translate3d(calc(var(--fx,0px) * .11),calc(var(--fy,0px) * .11),-42px)
-              rotateY(-27deg) rotateX(2deg) scale(.93);
-    box-shadow:-24px 10px 56px rgba(70,55,35,.26);
-  }
-  /* derde slag: het laatste blad valt plat */
-  92%{
-    transform:perspective(1600px) translate3d(0,0,0) rotateY(-6deg) scale(1);
-    box-shadow:-26px 4px 66px rgba(70,55,35,.22);
-  }
+  0%{opacity:0;transform:perspective(1600px) translate3d(var(--fx,0px),var(--fy,0px),-340px) rotateY(-74deg) rotateX(11deg) rotateZ(-5deg) scale(.38)}
+  12%{opacity:1}
+  12.5%{opacity:1;transform:perspective(1600px) translate3d(calc(var(--fx,0px) * 0.766),calc(var(--fy,0px) * 0.766),-260px) rotateY(-56.7deg) rotateX(8.42deg) rotateZ(-3.83deg) scale(0.525)}
+  25%{opacity:1;transform:perspective(1600px) translate3d(calc(var(--fx,0px) * 0.562),calc(var(--fy,0px) * 0.562),-191px) rotateY(-41.6deg) rotateX(6.19deg) rotateZ(-2.81deg) scale(0.651)}
+  37.5%{opacity:1;transform:perspective(1600px) translate3d(calc(var(--fx,0px) * 0.391),calc(var(--fy,0px) * 0.391),-133px) rotateY(-28.9deg) rotateX(4.30deg) rotateZ(-1.95deg) scale(0.758)}
+  50%{opacity:1;transform:perspective(1600px) translate3d(calc(var(--fx,0px) * 0.250),calc(var(--fy,0px) * 0.250),-85px) rotateY(-18.5deg) rotateX(2.75deg) rotateZ(-1.25deg) scale(0.845)}
+  62.5%{opacity:1;transform:perspective(1600px) translate3d(calc(var(--fx,0px) * 0.141),calc(var(--fy,0px) * 0.141),-48px) rotateY(-10.4deg) rotateX(1.55deg) rotateZ(-0.70deg) scale(0.913)}
+  75%{opacity:1;transform:perspective(1600px) translate3d(calc(var(--fx,0px) * 0.062),calc(var(--fy,0px) * 0.062),-21px) rotateY(-4.6deg) rotateX(0.69deg) rotateZ(-0.31deg) scale(0.961)}
+  87.5%{opacity:1;transform:perspective(1600px) translate3d(calc(var(--fx,0px) * 0.016),calc(var(--fy,0px) * 0.016),-5px) rotateY(-1.2deg) rotateX(0.17deg) rotateZ(-0.08deg) scale(0.990)}
   100%{opacity:1;transform:none}
 }
 
@@ -304,13 +297,14 @@
   transform-style:preserve-3d;
   transform:scale(.42) translateZ(0);
   opacity:0;
-  transition:transform .46s var(--ease),opacity .3s var(--ease-soft);
+  transition:transform .52s var(--ease-vloei),opacity .3s linear;
+  will-change:transform,opacity;
 }
 .env3d.groeit .env-scene{transform:scale(1.35) translateZ(110px) rotateX(15deg);opacity:1}
 .env3d.weg .env-scene{
   transform:scale(1.9) translateZ(230px) rotateX(15deg);
   opacity:0;
-  transition:transform .5s var(--ease),opacity .45s var(--ease-soft);
+  transition:transform .56s var(--ease-vloei),opacity .45s linear;
 }
 
 /* De slagschaduw beweegt mee met de vouw. */
@@ -320,7 +314,7 @@
   background:rgba(70,55,35,.42);
   filter:blur(9px);
   opacity:0;
-  transition:opacity .45s var(--ease-soft),transform .55s var(--ease);
+  transition:opacity .45s linear,transform .58s var(--ease-vloei);
   transform:scale(.5);
 }
 .env3d.groeit .env-schaduw{opacity:.75;transform:scale(1.45) translateY(16px)}
@@ -359,7 +353,8 @@
   transform:translateZ(4px) rotateX(0deg);
   /* de schaduw volgt de geknipte rand, zodat de vouwlijn te zien is */
   filter:drop-shadow(0 1px .5px rgba(60,45,26,.5));
-  transition:transform .48s var(--ease),filter .48s var(--ease);
+  transition:transform .54s var(--ease-vloei);
+  will-change:transform;
 }
 /* Het postzegeltje, in de kleur van de context, zoals op de kaart. */
 .env-klep::before{
@@ -367,8 +362,7 @@
   background:var(--cyan);
   outline:1.2px solid rgba(253,248,236,.9);
 }
-.env3d.klep-op .env-klep{transform:translateZ(4px) rotateX(-158deg);
-  filter:drop-shadow(0 -1px .5px rgba(60,45,26,.35)) brightness(.97)}
+.env3d.klep-op .env-klep{transform:translateZ(4px) rotateX(-158deg)}
 
 /* De kaart zit in de envelop en schuift er daarna uit. */
 .env-kaart{
@@ -378,7 +372,8 @@
   border-bottom:3px solid rgba(60,45,26,.3);   /* de dikte van het vel */
   box-shadow:0 8px 20px rgba(70,55,35,.28);
   transform:translateZ(0) translateY(6%);
-  transition:transform .42s var(--ease);
+  transition:transform .48s var(--ease-vloei);
+  will-change:transform;
 }
 .env-kaart::after{
   content:"";position:absolute;left:12%;right:12%;top:22%;height:1px;
@@ -391,17 +386,27 @@
    drie papierlagen op elkaar, net buiten de rand. */
 #panel::before{
   content:"";
-  position:absolute;top:0;bottom:0;left:-6px;right:auto;width:32px;
+  position:absolute;top:0;bottom:0;left:-13px;right:auto;width:44px;
   pointer-events:none;
+  /* De doorsnede van het vel: het papier zelf, een randje licht op de
+     bovenkant ervan, en de schaduw die bij die dikte hoort. */
   background:
     linear-gradient(90deg,
-      rgba(70,55,35,.34) 0 1px,
-      var(--paper-deep) 1px 2.5px,
-      rgba(70,55,35,.22) 2.5px 3.5px,
-      var(--paper-2) 3.5px 5px,
-      rgba(70,55,35,.14) 5px 6px,
-      rgba(70,55,35,.13) 6px,
-      transparent 100%);
+      transparent 0 2px,
+      rgba(70,55,35,.20) 2px 3px,
+      var(--paper-deep) 3px 5px,
+      rgba(255,253,246,.88) 5px 6.2px,
+      var(--paper) 6.2px 8.4px,
+      rgba(70,55,35,.16) 8.4px 9.4px,
+      var(--paper-2) 9.4px 11.4px,
+      rgba(70,55,35,.30) 11.4px 12.6px,
+      var(--paper-deep) 12.6px 13px,
+      transparent 13px 100%),
+    linear-gradient(90deg,
+      rgba(70,55,35,.26) 0 3px,
+      rgba(70,55,35,.13) 3px 9px,
+      rgba(70,55,35,.06) 9px 17px,
+      transparent 17px 100%);
 }
 
 .p-photo{
@@ -413,20 +418,16 @@
 .p-photo:empty{display:none}
 /* De foto is los van de kaart: hij komt er achteraf bij vliegen en
    landt in zijn lijst. */
-.p-photo .print.vliegt{animation:foto-vliegt .95s var(--ease) both}
+.p-photo .print.vliegt{animation:foto-vliegt .95s linear both;will-change:transform,opacity}
 @keyframes foto-vliegt{
-  0%{
-    opacity:0;
-    transform:translate3d(-46vw,-16vh,-320px) rotateY(62deg) rotateZ(-17deg) scale(.5);
-    box-shadow:0 30px 50px rgba(70,55,35,.34);
-  }
-  18%{opacity:1}
-  62%{
-    opacity:1;
-    transform:translate3d(-6vw,-2vh,-40px) rotateY(16deg) rotateZ(-5deg) scale(.94);
-    box-shadow:0 22px 40px rgba(70,55,35,.3);
-  }
-  86%{transform:translate3d(0,0,6px) rotateY(-3deg) rotateZ(var(--tilt,-1.3deg)) scale(1.02)}
+  0%{opacity:0;transform:translate3d(-46vw,-16vh,-320px) rotateY(62deg) rotateZ(-17deg) scale(.5)}
+  14%{opacity:1;transform:translate3d(-34.6vw,-12vh,-241px) rotateY(46.7deg) rotateZ(-12.8deg) scale(.63)}
+  28%{transform:translate3d(-25vw,-8.7vh,-174px) rotateY(33.7deg) rotateZ(-9.2deg) scale(.73)}
+  42%{transform:translate3d(-17vw,-5.9vh,-118px) rotateY(22.9deg) rotateZ(-6.3deg) scale(.82)}
+  56%{transform:translate3d(-10.6vw,-3.7vh,-74px) rotateY(14.3deg) rotateZ(-3.9deg) scale(.89)}
+  70%{transform:translate3d(-5.8vw,-2vh,-40px) rotateY(7.8deg) rotateZ(-2.1deg) scale(.94)}
+  84%{transform:translate3d(-2.6vw,-.9vh,-18px) rotateY(3.5deg) rotateZ(-1.6deg) scale(.98)}
+  94%{transform:translate3d(-.7vw,-.2vh,-4px) rotateY(.9deg) rotateZ(var(--tilt,-1.3deg)) scale(.995)}
   100%{opacity:1;transform:rotate(var(--tilt,-1.3deg))}
 }
 .p-photo .print{--tilt:-1.3deg}
@@ -505,41 +506,45 @@
      dan om zijn onderrand in plaats van om de zijkant. */
   #panel.ontvouwt{transform-origin:50% 100%;animation-name:brief-vouwt-onder}
   @keyframes brief-vouwt-onder{
-    0%{
-      opacity:0;
-      transform:perspective(1300px)
-                translate3d(var(--gx,0px),var(--gy,0px),-300px)
-                rotateX(74deg) rotateZ(-5deg) scale(.38);
-    }
-    16%{opacity:1}
-    46%{
-      opacity:1;
-      transform:perspective(1300px)
-                translate3d(calc(var(--gx,0px) * .44),calc(var(--gy,0px) * .44),-130px)
-                rotateX(55deg) rotateZ(-3deg) scale(.66);
-    }
-    76%{
-      transform:perspective(1300px)
-                translate3d(calc(var(--gx,0px) * .11),calc(var(--gy,0px) * .11),-36px)
-                rotateX(24deg) scale(.94);
-    }
-    92%{transform:perspective(1300px) rotateX(6deg) scale(1)}
+    0%{opacity:0;transform:perspective(1300px) translate3d(var(--gx,0px),var(--gy,0px),-300px) rotateX(74deg) rotateZ(-5deg) scale(.38)}
+    12%{opacity:1}
+    12.5%{opacity:1;transform:perspective(1300px) translate3d(calc(var(--gx,0px) * 0.766),calc(var(--gy,0px) * 0.766),-230px) rotateX(56.7deg) rotateZ(-3.83deg) scale(0.525)}
+    25%{opacity:1;transform:perspective(1300px) translate3d(calc(var(--gx,0px) * 0.562),calc(var(--gy,0px) * 0.562),-169px) rotateX(41.6deg) rotateZ(-2.81deg) scale(0.651)}
+    37.5%{opacity:1;transform:perspective(1300px) translate3d(calc(var(--gx,0px) * 0.391),calc(var(--gy,0px) * 0.391),-117px) rotateX(28.9deg) rotateZ(-1.95deg) scale(0.758)}
+    50%{opacity:1;transform:perspective(1300px) translate3d(calc(var(--gx,0px) * 0.250),calc(var(--gy,0px) * 0.250),-75px) rotateX(18.5deg) rotateZ(-1.25deg) scale(0.845)}
+    62.5%{opacity:1;transform:perspective(1300px) translate3d(calc(var(--gx,0px) * 0.141),calc(var(--gy,0px) * 0.141),-42px) rotateX(10.4deg) rotateZ(-0.70deg) scale(0.913)}
+    75%{opacity:1;transform:perspective(1300px) translate3d(calc(var(--gx,0px) * 0.062),calc(var(--gy,0px) * 0.062),-19px) rotateX(4.6deg) rotateZ(-0.31deg) scale(0.961)}
+    87.5%{opacity:1;transform:perspective(1300px) translate3d(calc(var(--gx,0px) * 0.016),calc(var(--gy,0px) * 0.016),-5px) rotateX(1.2deg) rotateZ(-0.08deg) scale(0.990)}
     100%{opacity:1;transform:none}
   }
-  #panel::before{top:-6px;bottom:auto;left:0;right:0;width:auto;height:32px;
-    background:linear-gradient(180deg,
-      rgba(70,55,35,.34) 0 1px,
-      var(--paper-deep) 1px 2.5px,
-      rgba(70,55,35,.22) 2.5px 3.5px,
-      var(--paper-2) 3.5px 5px,
-      rgba(70,55,35,.13) 5px 6px,
-      rgba(70,55,35,.12) 6px,
-      transparent 100%)}
+  #panel::before{top:-13px;bottom:auto;left:0;right:0;width:auto;height:44px;
+    background:
+      linear-gradient(180deg,
+        transparent 0 2px,
+        rgba(70,55,35,.20) 2px 3px,
+        var(--paper-deep) 3px 5px,
+        rgba(255,253,246,.88) 5px 6.2px,
+        var(--paper) 6.2px 8.4px,
+        rgba(70,55,35,.16) 8.4px 9.4px,
+        var(--paper-2) 9.4px 11.4px,
+        rgba(70,55,35,.30) 11.4px 12.6px,
+        var(--paper-deep) 12.6px 13px,
+        transparent 13px 100%),
+      linear-gradient(180deg,
+        rgba(70,55,35,.26) 0 3px,
+        rgba(70,55,35,.13) 3px 9px,
+        rgba(70,55,35,.06) 9px 17px,
+        transparent 17px 100%)}
   .p-photo .print.vliegt{animation-name:foto-vliegt-smal}
   @keyframes foto-vliegt-smal{
     0%{opacity:0;transform:translate3d(-60vw,8vh,-260px) rotateY(58deg) rotateZ(-14deg) scale(.55)}
-    18%{opacity:1}
-    62%{opacity:1;transform:translate3d(-8vw,1vh,-30px) rotateY(14deg) scale(.95)}
+    14%{opacity:1;transform:translate3d(-45vw,6.1vh,-196px) rotateY(43.6deg) rotateZ(-10.5deg) scale(.66)}
+    28%{transform:translate3d(-32.6vw,4.4vh,-142px) rotateY(31.6deg) rotateZ(-7.6deg) scale(.75)}
+    42%{transform:translate3d(-22.4vw,3vh,-97px) rotateY(21.7deg) rotateZ(-5.2deg) scale(.83)}
+    56%{transform:translate3d(-14.2vw,1.9vh,-62px) rotateY(13.7deg) rotateZ(-3.3deg) scale(.89)}
+    70%{transform:translate3d(-8vw,1.1vh,-35px) rotateY(7.7deg) rotateZ(-2.2deg) scale(.94)}
+    84%{transform:translate3d(-3.6vw,.5vh,-15px) rotateY(3.5deg) rotateZ(-1.6deg) scale(.98)}
+    94%{transform:translate3d(-.9vw,.1vh,-4px) rotateY(.9deg) rotateZ(var(--tilt,-1.3deg)) scale(.995)}
     100%{opacity:1;transform:rotate(var(--tilt,-1.3deg))}
   }
   .p-photo{padding:22px 18px 4px}
