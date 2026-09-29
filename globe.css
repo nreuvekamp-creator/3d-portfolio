@@ -229,7 +229,7 @@ body.bezig #map::after{mix-blend-mode:normal;background:rgba(36,31,28,.075)}
   width:min(440px,100%);
   background:var(--paper);
   border-left:1px solid var(--line);
-  box-shadow:-26px 0 70px rgba(70,55,35,.20),-2px 0 0 rgba(255,255,255,.5) inset;
+  box-shadow:-26px 0 70px rgba(70,55,35,.20),-13px 0 20px rgba(70,55,35,.15),-2px 0 0 rgba(255,255,255,.5) inset;
   transform:translateX(105%);
   transition:transform .6s var(--ease);
   display:flex;
@@ -392,21 +392,20 @@ body.bezig #map::after{mix-blend-mode:normal;background:rgba(36,31,28,.075)}
      bovenkant ervan, en de schaduw die bij die dikte hoort. */
   background:
     linear-gradient(90deg,
-      transparent 0 2px,
-      rgba(70,55,35,.20) 2px 3px,
-      var(--paper-deep) 3px 5px,
-      rgba(255,253,246,.88) 5px 6.2px,
-      var(--paper) 6.2px 8.4px,
-      rgba(70,55,35,.16) 8.4px 9.4px,
-      var(--paper-2) 9.4px 11.4px,
-      rgba(70,55,35,.30) 11.4px 12.6px,
-      var(--paper-deep) 12.6px 13px,
-      transparent 13px 100%),
+      transparent 0 1.5px,
+      rgba(255,253,246,.92) 1.5px 3.2px,
+      var(--paper) 3.2px 5.6px,
+      rgba(70,55,35,.11) 5.6px 6.3px,
+      var(--paper-deep) 6.3px 9.2px,
+      rgba(70,55,35,.14) 9.2px 9.9px,
+      var(--paper-deep) 9.9px 12.4px,
+      rgba(70,55,35,.40) 12.4px 14px,
+      transparent 14px 100%),
     linear-gradient(90deg,
-      rgba(70,55,35,.26) 0 3px,
-      rgba(70,55,35,.13) 3px 9px,
-      rgba(70,55,35,.06) 9px 17px,
-      transparent 17px 100%);
+      rgba(70,55,35,.30) 0 2px,
+      rgba(70,55,35,.17) 2px 8px,
+      rgba(70,55,35,.08) 8px 18px,
+      transparent 18px 100%);
 }
 
 .p-photo{
@@ -499,7 +498,7 @@ body.bezig #map::after{mix-blend-mode:normal;background:rgba(36,31,28,.075)}
     border-left:0;border-top:1px solid var(--line);
     border-radius:16px 16px 0 0;
     transform:translateY(105%);
-    box-shadow:0 -22px 60px rgba(70,55,35,.22);
+    box-shadow:0 -22px 60px rgba(70,55,35,.22),0 -13px 20px rgba(70,55,35,.15);
   }
   #panel.open{transform:none}
   /* Geen ruimte naast de kaart: hij komt van onderen en scharniert
@@ -520,21 +519,20 @@ body.bezig #map::after{mix-blend-mode:normal;background:rgba(36,31,28,.075)}
   #panel::before{top:-13px;bottom:auto;left:0;right:0;width:auto;height:44px;
     background:
       linear-gradient(180deg,
-        transparent 0 2px,
-        rgba(70,55,35,.20) 2px 3px,
-        var(--paper-deep) 3px 5px,
-        rgba(255,253,246,.88) 5px 6.2px,
-        var(--paper) 6.2px 8.4px,
-        rgba(70,55,35,.16) 8.4px 9.4px,
-        var(--paper-2) 9.4px 11.4px,
-        rgba(70,55,35,.30) 11.4px 12.6px,
-        var(--paper-deep) 12.6px 13px,
-        transparent 13px 100%),
+        transparent 0 1.5px,
+        rgba(255,253,246,.92) 1.5px 3.2px,
+        var(--paper) 3.2px 5.6px,
+        rgba(70,55,35,.11) 5.6px 6.3px,
+        var(--paper-deep) 6.3px 9.2px,
+        rgba(70,55,35,.14) 9.2px 9.9px,
+        var(--paper-deep) 9.9px 12.4px,
+        rgba(70,55,35,.40) 12.4px 14px,
+        transparent 14px 100%),
       linear-gradient(180deg,
-        rgba(70,55,35,.26) 0 3px,
-        rgba(70,55,35,.13) 3px 9px,
-        rgba(70,55,35,.06) 9px 17px,
-        transparent 17px 100%)}
+        rgba(70,55,35,.30) 0 2px,
+        rgba(70,55,35,.17) 2px 8px,
+        rgba(70,55,35,.08) 8px 18px,
+        transparent 18px 100%)}
   .p-photo .print.vliegt{animation-name:foto-vliegt-smal}
   @keyframes foto-vliegt-smal{
     0%{opacity:0;transform:translate3d(-60vw,8vh,-260px) rotateY(58deg) rotateZ(-14deg) scale(.55)}
