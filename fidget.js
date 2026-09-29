@@ -5,7 +5,8 @@
    Deze laag reageert altijd, ook als het verhaal gewoon doorloopt,
    en hij houdt nooit het verhaal tegen.
 
-   - muis bewegen  -> je hand maakt wind; de bloesem waait mee die kant op
+   - muis bewegen  -> je hand maakt een vlaag; alleen de bloesem vlak om je
+                      vinger waait mee, de rest drijft ongestoord door
    - klikken       -> er dwarrelt bloesem bij
    - blijven klikken -> het wordt voller
    ============================================================ */
@@ -23,6 +24,10 @@ window.Fidget = (function(){
      NAARTOE beweegt: achter je hand ontstaat een zog dat de blaadjes meetrekt.
      windX en windY zijn pixels per frame; ze doven vanzelf uit. */
   var windX = 0, windY = 0, vorigeX = null, vorigeY = null;
+  /* De vlaag reikt niet verder dan dit, in pixels. Daarbuiten merkt een
+     blaadje niets van je hand; alleen wat vlak langs je vinger drijft waait mee. */
+  var BEREIK = 210;
+  var handX = -9999, handY = -9999;
   var klikken = 0, laatsteKlik = 0;
   var rustigAan = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -75,12 +80,21 @@ window.Fidget = (function(){
     for (var i = 0; i < blaadjes.length; i++) {
       var b = blaadjes[i];
       b.fase += 0.012;
+      /* Hoe dichter bij je hand, hoe harder de vlaag. Buiten het bereik nul. */
+      var ax = b.x - handX, ay = b.y - handY;
+      var afstand = Math.sqrt(ax * ax + ay * ay);
+      var nabij = 0;
+      if (afstand < BEREIK) {
+        var v = 1 - afstand / BEREIK;
+        nabij = v * v * (3 - 2 * v);   /* zachte rand, geen harde cirkel */
+      }
+
       /* Licht blad vangt meer wind dan zwaar blad. */
-      var vangst = 1.35 - b.maat * 0.5;
+      var vangst = (1.35 - b.maat * 0.5) * nabij;
       b.vx = Math.sin(b.fase) * b.zwaai + windX * vangst;
       b.x += b.vx;
       b.y += b.vy + windY * vangst * 0.7;
-      b.draai += b.dDraai + windX * 0.9;
+      b.draai += b.dDraai + windX * vangst * 0.9;
 
       if (b.y > window.innerHeight + 40) { b.y = -30; b.x = Math.random() * window.innerWidth; }
       if (b.x < -40) b.x = window.innerWidth + 30;
@@ -141,6 +155,8 @@ window.Fidget = (function(){
       window.addEventListener("pointermove", function(e){
         doelX = e.clientX / window.innerWidth;
         doelY = e.clientY / window.innerHeight;
+        handX = e.clientX;
+        handY = e.clientY;
 
         /* Snelheid van de hand wordt windkracht, met een plafond zodat een
            ruk met de muis de blaadjes niet het scherm uit slingert. */
