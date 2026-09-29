@@ -430,14 +430,27 @@
 /* Een typemachine laat de regels iets ruimer vallen. */
 #panel[data-papier] .p-text{line-height:1.78}
 
-/* De lijst om de foto is geen standaard wit randje meer maar het
-   papier van dat land; de foto ligt er met een schaduwtje op. */
+/* ------------------------------------------------------------
+   De lijst om de foto is geen geschept vel maar een afdruk: die
+   blijft wit, in elk land. globe.js zet data-papier ook op .print,
+   dus we draaien hier alleen de opmaak terug, niet het attribuut.
+   Daarmee vervalt ook het deckle-masker, en houdt .print zijn
+   gewone slagschaduw uit style.css.
+   ------------------------------------------------------------ */
+
+.print[data-papier]{
+  background-color:#fffdf8;
+  background-image:none;
+  -webkit-mask-image:none;
+  mask-image:none;
+}
+/* De foto ligt met een schaduwrandje op die witte lijst. */
 .print[data-papier] .shot{
   box-shadow:
-    inset 1.5px 0 0 rgba(10,163,194,.42),
-    inset -1.5px 0 0 rgba(214,51,126,.38),
-    inset 0 -1.5px 0 rgba(240,180,41,.45),
-    0 1px 4px rgba(70,55,35,.30);
+    inset 1px 0 0 rgba(10,163,194,.20),
+    inset -1px 0 0 rgba(214,51,126,.18),
+    inset 0 -1px 0 rgba(240,180,41,.22),
+    0 1px 4px rgba(70,55,35,.22);
 }
 
 /* ------------------------------------------------------------
@@ -445,20 +458,20 @@
    Drie families, verdeeld zodat buren nooit dezelfde hebben.
    ------------------------------------------------------------ */
 
-/* strak lint */
+/* Courier Prime: strak, vers lint */
 [data-papier="Noorwegen"]{--pap-type:var(--type-1);--pap-type-sp:.004em;--pap-type-size:.98rem}
 [data-papier="Finland"]{--pap-type:var(--type-1);--pap-type-sp:.03em;--pap-type-size:.95rem;--pap-inkt:#4a4640}
 [data-papier="Italië"]{--pap-type:var(--type-1);--pap-type-sp:.012em;--pap-type-size:1rem}
 [data-papier="Oostenrijk"]{--pap-type:var(--type-1);--pap-type-sp:.018em;--pap-type-size:1rem;--pap-inkt:#3b332c}
-[data-papier="Zuid-Korea"]{--pap-type:var(--type-1);--pap-type-sp:.05em;--pap-type-size:.96rem}
+[data-papier="Zuid-Korea"]{--pap-type:var(--type-1);--pap-type-sp:.028em;--pap-type-size:.96rem}
 
-/* versleten aanslag, de inkt slaat door */
+/* Special Elite: versleten aanslag, de inkt slaat door */
 [data-papier="Nederland"]{--pap-type:var(--type-2);--pap-type-sp:.006em;--pap-type-size:1rem;--pap-inkt:#2b2521}
 [data-papier="België"]{--pap-type:var(--type-2);--pap-type-sp:.02em;--pap-type-size:.97rem}
-[data-papier="Frankrijk"]{--pap-type:var(--type-2);--pap-type-sp:.035em;--pap-type-size:.95rem;--pap-inkt:#3a332c}
+[data-papier="Frankrijk"]{--pap-type:var(--type-2);--pap-type-sp:.022em;--pap-type-size:.95rem;--pap-inkt:#3a332c}
 [data-papier="Denemarken"]{--pap-type:var(--type-2);--pap-type-sp:0;--pap-type-size:1.02rem}
 
-/* licht en open, een reisschrijfmachine */
-[data-papier="Japan"]{--pap-type:var(--type-3);--pap-type-sp:.045em;--pap-type-size:.97rem;--pap-inkt:#4b4a46}
+/* Cutive Mono: licht en ruim, een reisschrijfmachine */
+[data-papier="Japan"]{--pap-type:var(--type-3);--pap-type-sp:.016em;--pap-type-size:.97rem;--pap-inkt:#4b4a46}
 
-[data-papier="Spanje"]{--pap-type:var(--type-3);--pap-type-sp:.028em;--pap-type-size:.99rem}
+[data-papier="Spanje"]{--pap-type:var(--type-3);--pap-type-sp:.006em;--pap-type-size:.99rem}
