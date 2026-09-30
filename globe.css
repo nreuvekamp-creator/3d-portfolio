@@ -383,30 +383,14 @@ body.bezig #map::after{mix-blend-mode:normal;background:rgba(36,31,28,.075)}
 }
 .env3d.kaart-uit .env-kaart{transform:translateZ(26px) translateY(-64%) rotateX(-6deg)}
 
-/* De vouwlijn langs de linkerrand, plus de zichtbare dikte van het vel:
-   drie papierlagen op elkaar, net buiten de rand. */
+/* Langs de linkerrand alleen een zachte schaduw, zodat het vel van de kaart
+   loskomt. De gestapelde papierlagen die hier stonden lazen als drie strepen
+   en zijn eruit. */
 #panel::before{
   content:"";
-  position:absolute;top:0;bottom:0;left:-13px;right:auto;width:44px;
+  position:absolute;top:0;bottom:0;left:-16px;right:auto;width:16px;
   pointer-events:none;
-  /* De doorsnede van het vel: het papier zelf, een randje licht op de
-     bovenkant ervan, en de schaduw die bij die dikte hoort. */
-  background:
-    linear-gradient(90deg,
-      transparent 0 1.5px,
-      rgba(255,253,246,.92) 1.5px 3.2px,
-      var(--paper) 3.2px 5.6px,
-      rgba(70,55,35,.11) 5.6px 6.3px,
-      var(--paper-deep) 6.3px 9.2px,
-      rgba(70,55,35,.14) 9.2px 9.9px,
-      var(--paper-deep) 9.9px 12.4px,
-      rgba(70,55,35,.40) 12.4px 14px,
-      transparent 14px 100%),
-    linear-gradient(90deg,
-      rgba(70,55,35,.30) 0 2px,
-      rgba(70,55,35,.17) 2px 8px,
-      rgba(70,55,35,.08) 8px 18px,
-      transparent 18px 100%);
+  background:linear-gradient(90deg,transparent 0,rgba(70,55,35,.14) 100%);
 }
 
 .p-photo{
@@ -517,23 +501,8 @@ body.bezig #map::after{mix-blend-mode:normal;background:rgba(36,31,28,.075)}
     87.5%{opacity:1;transform:perspective(1300px) translate3d(calc(var(--gx,0px) * 0.016),calc(var(--gy,0px) * 0.016),-5px) rotateX(1.2deg) rotateZ(-0.08deg) scale(0.990)}
     100%{opacity:1;transform:none}
   }
-  #panel::before{top:-13px;bottom:auto;left:0;right:0;width:auto;height:44px;
-    background:
-      linear-gradient(180deg,
-        transparent 0 1.5px,
-        rgba(255,253,246,.92) 1.5px 3.2px,
-        var(--paper) 3.2px 5.6px,
-        rgba(70,55,35,.11) 5.6px 6.3px,
-        var(--paper-deep) 6.3px 9.2px,
-        rgba(70,55,35,.14) 9.2px 9.9px,
-        var(--paper-deep) 9.9px 12.4px,
-        rgba(70,55,35,.40) 12.4px 14px,
-        transparent 14px 100%),
-      linear-gradient(180deg,
-        rgba(70,55,35,.30) 0 2px,
-        rgba(70,55,35,.17) 2px 8px,
-        rgba(70,55,35,.08) 8px 18px,
-        transparent 18px 100%)}
+  #panel::before{top:-16px;bottom:auto;left:0;right:0;width:auto;height:16px;
+    background:linear-gradient(180deg,transparent 0,rgba(70,55,35,.14) 100%)}
   .p-photo .print.vliegt{animation-name:foto-vliegt-smal}
   @keyframes foto-vliegt-smal{
     0%{opacity:0;transform:translate3d(-60vw,8vh,-260px) rotateY(58deg) rotateZ(-14deg) scale(.55)}
@@ -753,6 +722,7 @@ body.ruimte .count{color:rgba(246,240,226,.7)}
   width:66px;height:44px;
   margin-left:-33px;
   padding:0;
+  z-index:var(--z,1);
   background:var(--paper);
   border:1px solid rgba(60,45,26,.42);
   box-shadow:0 3px 8px rgba(70,55,35,.26);
@@ -767,9 +737,20 @@ body.ruimte .count{color:rgba(246,240,226,.7)}
 .postmap.open .post-item{
   transform:translate(var(--x,0px),calc(-62px - var(--i,0) * 17px)) rotate(var(--r,0deg));
 }
+/* De laatst gelezen brief ligt bovenop: recht, iets groter en met een
+   diepere schaduw, zodat je meteen ziet welke de bovenste is. */
+.post-item.bovenop{
+  transform:translate(calc(var(--x,0px) * .2),calc(-48px - var(--i,0) * 4px))
+            rotate(0deg) scale(1);
+  box-shadow:0 7px 16px rgba(70,55,35,.36);
+}
+.postmap.open .post-item.bovenop{
+  transform:translate(calc(var(--x,0px) * .2),calc(-70px - var(--i,0) * 17px))
+            rotate(0deg) scale(1.06);
+}
 .post-item:hover,.post-item:focus-visible{
   box-shadow:0 8px 18px rgba(70,55,35,.34);
-  z-index:9;
+  z-index:99;
 }
 .postmap.open .post-item:hover{
   transform:translate(var(--x,0px),calc(-70px - var(--i,0) * 17px)) rotate(0deg) scale(1.06);

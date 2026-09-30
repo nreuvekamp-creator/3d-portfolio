@@ -40,50 +40,51 @@ body.ruimte #bar .brand .label{color:var(--paper-deep);opacity:.75}
 body.ruimte #bar .brand{transition:color .6s var(--ease-soft)}
 
 /* ------------------------------------------------------------
-   Het citaat: een regel die in de leegte naast de bol opkomt.
+   Het citaat: een regel die tussen de sterren hangt. De plek komt
+   uit sterren.js (transform), want hij hangt aan dezelfde hemelbol
+   en draait dus mee. Hier alleen hoe hij eruitziet.
    Ligt boven de kaart, want anders kijkt de bol er overheen.
    ------------------------------------------------------------ */
 
 #citaat{
   position:fixed;
   z-index:20;
-  left:4vw;
-  top:16vh;
-  width:min(30ch,34vw);
+  left:0;
+  top:0;
+  width:min(28ch,32vw);
   margin:0;
   pointer-events:none;
+  text-align:center;
   font-family:var(--serif);
   font-weight:400;
-  font-size:clamp(1.5rem,2.6vw,2.5rem);
+  font-size:clamp(1.3rem,2.2vw,2.1rem);
   line-height:1.16;
   color:var(--paper);
-  text-shadow:0 2px 18px rgba(20,16,14,.65);
+  text-shadow:0 2px 18px rgba(20,16,14,.75);
   opacity:0;
-  transform:translateY(14px);
-  transition:opacity 2s var(--ease-soft), transform 2s var(--ease-soft);
+  transform:translate(-50%,-50%);
+  will-change:transform,opacity;
 }
-#citaat.op{opacity:1;transform:none}
 
 /* Een dun cyaan streepje ervoor, uit de inktdoos. */
 #citaat::before{
   content:"";
   display:block;
   width:44px;height:2px;
-  margin:0 0 14px;
+  margin:0 auto 14px;
   background:var(--cyan);
   opacity:.8;
 }
 
 /* ------------------------------------------------------------
-   Smal scherm: het citaat onderin, kleiner.
+   Smal scherm: kleiner, en smaller dan het scherm zodat een regel
+   die naar de rand draait niet meteen half wegvalt.
    ------------------------------------------------------------ */
 
 @media (max-width:640px){
   #citaat{
-    left:22px;right:22px;width:auto;
-    top:calc(var(--pad-t) + 84px)!important;
-    bottom:auto;
-    font-size:1.2rem;
+    width:min(22ch,64vw);
+    font-size:1.1rem;
     line-height:1.22;
   }
   #citaat::before{width:32px;margin-bottom:10px}
@@ -96,6 +97,4 @@ body.ruimte #bar .brand{transition:color .6s var(--ease-soft)}
 
 @media (prefers-reduced-motion:reduce){
   #sterren{transition:none}
-  #citaat{transition:none;transform:none}
-  #citaat.op{transform:none}
 }

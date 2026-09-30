@@ -45,10 +45,16 @@ window.Intro = (function(){
   var TEMPO = 45;
 
   /* De drie dingen die langsvliegen. De derde is de grap: dit is het. */
+  /* De drie kaarten die op het bureau blijven liggen. Dit zijn de cases die
+     een bezoeker als eerste ziet, dus ze hebben alle drie een foto.
+     `foto` is een pad; laat het weg en de kaart toont alleen tekst. */
   var VOORBEELDEN = [
-    {tekst: "een marathon gelopen in de vorm van een hartje", note: "op de kaart getekend", dx: -230, dy: -90,  r: "-7deg"},
-    {tekst: "een half jaar studeren in Bergen", note: "Noorwegen", dx: 250, dy: 40, r: "6deg"},
-    {tekst: "deze site", note: "ja, deze. dit is nummer drie", dx: -40, dy: 150, r: "-3deg"}
+    {tekst: "een marathon gelopen in de vorm van een hartje",
+     note: "op de kaart getekend", foto: "photos/strava-hart.jpg", r: "-7deg"},
+    {tekst: "een hackathon gewonnen in de haven van Antwerpen",
+     note: "slim stapelen, voor CLdN", foto: "photos/antwerpen.jpg", r: "6deg"},
+    {tekst: "een reclame gemaakt die in de bioscoop draaide",
+     note: "stage bij BTC Direct", foto: "photos/btc-direct.jpg", r: "-3deg"}
   ];
 
   var intro, lijnenBak, rol, voorbeeldBak, envBak;
@@ -63,25 +69,82 @@ window.Intro = (function(){
      geluidsbestanden. Zonder geluid loopt het verhaal precies zo door.
      ------------------------------------------------------------ */
 
-  var geluid = 0;
+  /* Standaard staat de typemachine aan (stand 1). Wie hem uitzet, houdt
+     hem uit: de stand wordt onthouden. */
+  var geluid = 1;
   var ac = null, mix = null, ruisBuf = null;
+  var wachtOpGebaar = false;
+
+  /* Vooruit plannen. De tik wordt op de audioklok gezet en de letter
+     verschijnt op precies hetzelfde geplande moment, zodat ze niet uit
+     elkaar kunnen lopen. */
+  var LOOK = 0.08;
+
+  function bewaar(v){
+    try { localStorage.setItem("intro-geluid", String(v)); } catch (e) {}
+  }
+  function gelezen(){
+    try {
+      var v = localStorage.getItem("intro-geluid");
+      if (v === null) return null;
+      var n = parseInt(v, 10);
+      return (n === 0 || n === 1 || n === 2) ? n : null;
+    } catch (e) { return null; }
+  }
 
   function audioAan(){
-    if (ac) { if (ac.state === "suspended") ac.resume(); return true; }
+    if (ac) return true;
     var AC = window.AudioContext || window.webkitAudioContext;
     if (!AC) return false;
     try {
       ac = new AC();
+      /* Een hoogdoorlaat over alles heen: de lage bons eruit, alleen de tik. */
+      var hp = ac.createBiquadFilter();
+      hp.type = "highpass"; hp.frequency.value = 1400; hp.Q.value = 0.6;
       mix = ac.createGain();
-      mix.gain.value = 0.95;
-      mix.connect(ac.destination);
-      /* Een kwart seconde uitdovende ruis: de grondstof van elke tik. */
-      var n = Math.floor(ac.sampleRate * 0.25);
+      mix.gain.value = 0.22;          /* achtergrond, geen voorgrond */
+      mix.connect(hp); hp.connect(ac.destination);
+      /* Een tiende seconde snel uitdovende ruis: de grondstof van elke tik. */
+      var n = Math.floor(ac.sampleRate * 0.12);
       ruisBuf = ac.createBuffer(1, n, ac.sampleRate);
       var d = ruisBuf.getChannelData(0);
-      for (var i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / n);
+      for (var i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 2);
       return true;
     } catch (e) { ac = null; return false; }
+  }
+
+  /* Probeer te starten. Lukt dat niet (de browser wacht op een gebaar),
+     dan hervatten we bij de eerste de beste aanraking. Nooit een fout. */
+  function probeerStarten(){
+    if (!audioAan()) return;
+    var poging = null;
+    try { poging = ac.resume(); } catch (e) { poging = null; }
+    if (poging && poging.then) poging.then(gelukt, function(){ wachtenOpGebaar(); });
+    setTimeout(function(){ if (ac && ac.state !== "running") wachtenOpGebaar(); else gelukt(); }, 120);
+  }
+
+  function gelukt(){
+    if (!ac || ac.state !== "running") return;
+    wachtOpGebaar = false;
+    if (intro) intro.classList.remove("stil");
+  }
+
+  function wachtenOpGebaar(){
+    if (wachtOpGebaar || !ac || ac.state === "running") return;
+    wachtOpGebaar = true;
+    if (intro && geluid > 0) intro.classList.add("stil");
+    var soorten = ["pointerdown", "keydown", "wheel", "touchstart", "click"];
+    function wek(){
+      soorten.forEach(function(s){ window.removeEventListener(s, wek, true); });
+      if (!ac) return;
+      var p = null;
+      try { p = ac.resume(); } catch (e) { p = null; }
+      if (p && p.then) p.then(gelukt, function(){});
+      setTimeout(gelukt, 60);
+      wachtOpGebaar = false;
+      if (intro) intro.classList.remove("stil");
+    }
+    soorten.forEach(function(s){ window.addEventListener(s, wek, true); });
   }
 
   function ruispuls(t, freq, q, vol, duur, rate){
@@ -92,13 +155,13 @@ window.Intro = (function(){
     bp.type = "bandpass"; bp.frequency.value = freq; bp.Q.value = q;
     var g = ac.createGain();
     g.gain.setValueAtTime(0.0001, t);
-    g.gain.linearRampToValueAtTime(vol, t + 0.002);
+    g.gain.linearRampToValueAtTime(vol, t + 0.0012);
     g.gain.exponentialRampToValueAtTime(0.0001, t + duur);
     s.connect(bp); bp.connect(g); g.connect(mix);
-    s.start(t); s.stop(t + duur + 0.03);
+    s.start(t); s.stop(t + duur + 0.02);
   }
 
-  /* Een korte toon onder de ruis: de hamer die het papier raakt. */
+  /* Een heel kort, hoog tikje: de letterhamer die het papier raakt. */
   function toon(t, type, van, naar, vol, duur){
     var o = ac.createOscillator();
     o.type = type;
@@ -111,59 +174,59 @@ window.Intro = (function(){
     o.start(t); o.stop(t + duur + 0.02);
   }
 
-  /* Vijf aanslagen die echt van elkaar verschillen: hard, dof, met
-     nagalm van het mechaniek, licht, en eentje die net achterblijft.
-     Elke toets krijgt er willekeurig een, nooit twee keer dezelfde
-     achter elkaar. */
+  /* Vijf aanslagen, alle vijf droog en hoog: het verschil zit in de
+     scherpte, niet in de zwaarte. Nooit twee keer dezelfde achter elkaar. */
   var AANSLAGEN = [
-    /* 0: hard, kort, hoog in het lint */
+    /* 0: scherp en droog */
     function(t){
-      ruispuls(t, 2700, 0.8, 0.52, 0.045, 1.25);
-      toon(t, "triangle", 250, 82, 0.26, 0.055);
+      ruispuls(t, 5200, 1.0, 0.36, 0.016, 2.2);
+      toon(t, "triangle", 2600, 1100, 0.05, 0.010);
     },
-    /* 1: dof, zwaar, alsof de toets te diep gaat */
+    /* 1: net iets voller, nog steeds kort */
     function(t){
-      ruispuls(t, 820, 1.1, 0.46, 0.085, 0.5);
-      toon(t, "sine", 145, 58, 0.30, 0.095);
+      ruispuls(t, 4200, 0.9, 0.32, 0.021, 2.0);
+      toon(t, "square", 1900, 850, 0.04, 0.009);
     },
-    /* 2: met nagalm van het mechaniek erachteraan */
+    /* 2: een piepklein naschokje van het mechaniek */
     function(t){
-      ruispuls(t, 1800, 0.7, 0.42, 0.05, 1.0);
-      ruispuls(t + 0.035, 3300, 2.2, 0.20, 0.20, 0.3);
-      toon(t, "triangle", 205, 70, 0.20, 0.07);
+      ruispuls(t, 6200, 1.3, 0.28, 0.013, 2.6);
+      ruispuls(t + 0.016, 7200, 3.0, 0.10, 0.018, 1.2);
     },
-    /* 3: licht, bijna een tikje op glas */
+    /* 3: iets lager, maar zonder bons */
     function(t){
-      ruispuls(t, 3600, 1.5, 0.34, 0.03, 1.5);
-      toon(t, "square", 360, 150, 0.10, 0.03);
+      ruispuls(t, 3400, 1.1, 0.28, 0.022, 1.8);
+      toon(t, "triangle", 1600, 800, 0.04, 0.009);
     },
-    /* 4: blijft net achter; eerst het toetsje, dan pas de klap */
+    /* 4: het toetsje eerst, dan meteen de aanslag */
     function(t){
-      ruispuls(t, 2100, 1.8, 0.14, 0.02, 1.6);
-      ruispuls(t + 0.028, 1300, 0.9, 0.50, 0.07, 0.75);
-      toon(t + 0.028, "triangle", 175, 62, 0.28, 0.085);
+      ruispuls(t, 5800, 1.6, 0.13, 0.009, 2.4);
+      ruispuls(t + 0.011, 4600, 1.0, 0.32, 0.016, 2.0);
     }
   ];
 
   var vorigeAanslag = -1;
-  /* Voor de test: welke aanslag klonk wanneer. */
-  window.__tikLog = [];
 
-  function tik(){
+  /* Voor de test: per aanslag het geplande moment en het moment waarop
+     de letter echt in de DOM kwam. */
+  window.__sync = [];
+  window.__tikken = 0;    /* aantal echt ingeplande aanslagen */
+  window.__spaties = 0;
+
+  /* Eén tik, gepland op de audioklok, op het meegegeven moment. */
+  function tik(t){
     var k = Math.floor(Math.random() * AANSLAGEN.length);
     if (k === vorigeAanslag) k = (k + 1 + Math.floor(Math.random() * (AANSLAGEN.length - 1))) % AANSLAGEN.length;
     vorigeAanslag = k;
-    window.__tikLog.push(k);
     if (geluid < 1 || !ac) return;
-    AANSLAGEN[k](ac.currentTime);
+    window.__tikken++;
+    AANSLAGEN[k](t);
   }
 
-  /* De spatiebalk: breed, zacht en laag, duidelijk geen letter. */
-  function spatie(){
+  /* De spatiebalk: breder en zachter, duidelijk geen letter. */
+  function spatie(t){
     if (geluid < 1 || !ac) return;
-    var t = ac.currentTime;
-    ruispuls(t, 480, 0.7, 0.26, 0.10, 0.35);
-    toon(t, "sine", 96, 52, 0.14, 0.09);
+    window.__spaties++;
+    ruispuls(t, 1700, 0.6, 0.14, 0.030, 1.1);
   }
 
   /* Eind van de regel: het belletje en de wagen die terugschuift. */
@@ -174,12 +237,12 @@ window.Intro = (function(){
     o.type = "sine";
     o.frequency.setValueAtTime(1720, t);
     var og = ac.createGain();
-    og.gain.setValueAtTime(0.16, t);
+    og.gain.setValueAtTime(0.07, t);
     og.gain.exponentialRampToValueAtTime(0.0001, t + 0.34);
     o.connect(og); og.connect(mix);
     o.start(t); o.stop(t + 0.36);
-    ruispuls(t + 0.09, 900, 0.7, 0.13, 0.22, 0.35);
-    ruispuls(t + 0.26, 380, 1.4, 0.16, 0.07, 0.6);
+    ruispuls(t + 0.09, 2200, 0.9, 0.07, 0.09, 1.0);
+    ruispuls(t + 0.26, 3000, 1.4, 0.08, 0.04, 1.4);
   }
 
   /* ------------------------------------------------------------
@@ -257,9 +320,25 @@ window.Intro = (function(){
         return;
       }
       var ch = stap.tekst.charAt(j++);
-      veld.appendChild(document.createTextNode(ch));
-      if (ch === " ") spatie(); else tik();
-      schuifMee();
+
+      /* Eerst plannen, dan pas plaatsen: de tik wordt op de audioklok
+         gezet op t, en de letter verschijnt op datzelfde moment. Zo kan
+         er geen verschuiving ontstaan tussen wat je ziet en wat je hoort. */
+      var mag = (geluid > 0 && ac && ac.state === "running");
+      var vertraag = mag ? LOOK * 1000 : 0;
+      var gepland = performance.now() + vertraag;
+      if (mag) {
+        var t = ac.currentTime + LOOK;
+        if (ch === " ") spatie(t); else tik(t);
+      }
+
+      setTimeout(function(){
+        if (klaar) return;
+        veld.appendChild(document.createTextNode(ch));
+        window.__sync.push({ch: ch, gepland: gepland, dom: performance.now()});
+        schuifMee();
+      }, vertraag);
+
       var d = TEMPO + (Math.random() - 0.5) * 16;
       if (ch === " ") d *= 0.8;
       if (ch === "," || ch === ";" || ch === ":") d += 170;
@@ -291,8 +370,14 @@ window.Intro = (function(){
         el.className = "ex plek-" + (i + 1);
         el.type = "button";
         el.style.setProperty("--r", v.r);
-        el.innerHTML = '<span class="sheet"></span><span class="note"></span>';
-        el.querySelector(".sheet").textContent = v.tekst;
+        el.innerHTML = '<span class="sheet"><span class="beeld"></span><span class="bij"></span></span><span class="note"></span>';
+        el.querySelector(".bij").textContent = v.tekst;
+        if (v.foto) {
+          var img = new Image();
+          img.alt = "";
+          img.onload = function(){ el.querySelector(".beeld").appendChild(img); el.classList.add("met-foto"); };
+          img.src = v.foto;
+        }
         el.querySelector(".note").textContent = v.note;
         el.setAttribute("aria-label", v.tekst + ", " + v.note);
         el.addEventListener("click", function(){ el.classList.toggle("op"); });
@@ -331,9 +416,9 @@ window.Intro = (function(){
   function doosGeluid(){
     if (geluid < 1 || !ac) return;
     var t = ac.currentTime;
-    ruispuls(t, 260, 1.2, 0.22, 0.13, 0.5);
-    ruispuls(t + 0.16, 2400, 2.0, 0.09, 0.30, 0.25);
-    ruispuls(t + 0.55, 1200, 0.6, 0.10, 0.90, 0.2);
+    ruispuls(t, 1600, 1.2, 0.18, 0.09, 1.0);
+    ruispuls(t + 0.16, 2400, 2.0, 0.08, 0.22, 0.7);
+    ruispuls(t + 0.55, 3000, 0.6, 0.07, 0.50, 0.5);
   }
 
   /* --------------------------------------------------------
@@ -458,21 +543,36 @@ window.Intro = (function(){
       /* Eén knop, drie standen: uit, alleen de typemachine, en de
          typemachine met de verteller erbij. Browsers laten geluid pas
          toe na een echt gebaar; deze klik is dat gebaar. */
-      var STANDEN = ["geluid aan", "typemachine", "typemachine en stem"];
+      var STANDEN = ["geluid uit", "typemachine", "typemachine en stem"];
       var gknop = document.getElementById("geluidBtn");
+      var bewaard = gelezen();
+      geluid = (bewaard === null) ? 1 : bewaard;
+      if (geluid > 1 && !window.speechSynthesis) geluid = 1;
+
+      function toonStand(){
+        if (!gknop) return;
+        gknop.setAttribute("aria-pressed", geluid > 0 ? "true" : "false");
+        gknop.textContent = STANDEN[geluid] || STANDEN[0];
+      }
+
       if (gknop) {
         var AC = window.AudioContext || window.webkitAudioContext;
-        if (!AC && !window.speechSynthesis) gknop.hidden = true;
+        if (!AC && !window.speechSynthesis) { gknop.hidden = true; geluid = 0; }
+        toonStand();
         gknop.addEventListener("click", function(){
           var max = window.speechSynthesis ? 2 : 1;
           geluid = (geluid + 1) % (max + 1);
-          if (geluid > 0 && !audioAan()) geluid = window.speechSynthesis ? 2 : 0;
-          gknop.setAttribute("aria-pressed", geluid > 0 ? "true" : "false");
-          gknop.textContent = STANDEN[geluid] || STANDEN[0];
+          if (geluid > 0 && !audioAan()) geluid = 0;
+          if (geluid > 0) probeerStarten();
+          else { intro.classList.remove("stil"); if (ac) { try { ac.suspend(); } catch (e) {} } }
           if (geluid < 2 && window.speechSynthesis) speechSynthesis.cancel();
-          if (geluid > 0) tik();
+          bewaar(geluid);
+          toonStand();
         });
       }
+
+      /* Standaard aan: meteen proberen, en anders bij de eerste aanraking. */
+      if (geluid > 0) probeerStarten();
 
       document.getElementById("skipBtn").addEventListener("click", eindig);
       houdVast(document.getElementById("skipRing"));
@@ -481,6 +581,9 @@ window.Intro = (function(){
     },
 
     /* Zodat ik het verhaal in een test kan doorspoelen. */
-    _eindig: function(){ eindig(); }
+    _eindig: function(){ eindig(); },
+
+    /* Alleen voor de test: de stand van de audioklok. */
+    _audio: function(){ return ac ? ac.state : null; }
   };
 })();

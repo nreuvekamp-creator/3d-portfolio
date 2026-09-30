@@ -28,6 +28,8 @@ var data, trips, map, panel, ink = {}, revealWacht = false;
 var active = {context:{}, study:{}, world:{}};
 var tafel = null, tafelOpen = false;
 var gelezen = {}, postMap = null, postStapel = null, postTeller = null, postOpen = false;
+/* De leesvolgorde: oudste vooraan, laatst gelezen achteraan. */
+var gelezenOrde = [], postVellen = {};
 var dichtBezig = false;
 
 function stil(){
@@ -216,21 +218,31 @@ function leesGelezen(){
   try{
     var rauw = window.localStorage.getItem(GELEZEN_SLEUTEL);
     if (!rauw) return;
-    (JSON.parse(rauw) || []).forEach(function(id){ gelezen[id] = true; });
+    (JSON.parse(rauw) || []).forEach(function(id){
+      if (gelezen[id]) return;
+      gelezen[id] = true;
+      gelezenOrde.push(id);
+    });
   }catch(e){}
 }
 
 function bewaarGelezen(){
   try{
-    window.localStorage.setItem(GELEZEN_SLEUTEL, JSON.stringify(Object.keys(gelezen)));
+    window.localStorage.setItem(GELEZEN_SLEUTEL, JSON.stringify(gelezenOrde));
   }catch(e){}
 }
 
+/* Wie je leest gaat bovenop de stapel; een oude brief die je opnieuw
+   pakt verhuist dus terug naar boven. */
 function markeerGelezen(id){
-  if (gelezen[id]) return;
+  var nieuw = !gelezen[id];
+  var plek = gelezenOrde.indexOf(id);
+  if (!nieuw && plek === gelezenOrde.length - 1) return;
+  if (plek >= 0) gelezenOrde.splice(plek, 1);
   gelezen[id] = true;
+  gelezenOrde.push(id);
   bewaarGelezen();
-  refresh();
+  if (nieuw) refresh();
   vulPostmap();
 }
 
@@ -903,46 +915,67 @@ function maakPostmap(){
    stapel wordt. Wie een foto had, krijgt een fotootje in de stapel. */
 function vulPostmap(){
   if (!postMap || !trips) return;
-  var lijst = trips.filter(function(t){ return gelezen[t.id]; });
-  postStapel.textContent = "";
+  /* Oudste onderop, laatst gelezen bovenop: de volgorde van de stapel
+     volgt de leesvolgorde, niet de volgorde van de reizen. */
+  var lijst = [];
+  gelezenOrde.forEach(function(id){
+    var t = trips.filter(function(x){ return x.id === id; })[0];
+    if (t) lijst.push(t);
+  });
+  var n = lijst.length, gezien = {};
 
   lijst.forEach(function(t, i){
-    var b = document.createElement("button");
-    b.className = "post-item";
-    b.type = "button";
-    b.setAttribute("aria-label", t.title);
-    /* Een hoek en een verschuiving die per brief vastliggen. */
-    var v = vormVan(t), n = i + 1;
-    b.style.setProperty("--r", (((v * 7 + n * 11) % 23) - 11).toFixed(1) + "deg");
-    b.style.setProperty("--x", (((v * 5 + n * 13) % 27) - 13) + "px");
-    b.style.setProperty("--i", String(i));
-
-    var st = fotoReg[t.id];
-    if (st && st.klaar && st.src) {
-      b.classList.add("met-foto");
-      var img = new Image();
-      img.alt = "";
-      img.src = st.src;
-      b.appendChild(img);
-    } else {
-      b.classList.add("met-brief");
-      var zegel = document.createElement("span");
-      zegel.className = "post-zegel";
-      zegel.style.background = zegelKleur(t);
-      b.appendChild(zegel);
-      var titel = document.createElement("span");
-      titel.className = "post-titel";
-      titel.textContent = t.title;
-      b.appendChild(titel);
+    gezien[t.id] = true;
+    var b = postVellen[t.id];
+    if (!b) {
+      b = document.createElement("button");
+      b.className = "post-item";
+      b.type = "button";
+      /* Een hoek en een verschuiving die per brief vastliggen, zodat de
+         stapel bij het herschikken schuift en niet verspringt. */
+      var v = vormVan(t);
+      b.style.setProperty("--r", (((v * 7 + 11) % 23) - 11).toFixed(1) + "deg");
+      b.style.setProperty("--x", (((v * 5 + 13) % 27) - 13) + "px");
+      var st = fotoReg[t.id];
+      if (st && st.klaar && st.src) {
+        b.classList.add("met-foto");
+        var img = new Image();
+        img.alt = "";
+        img.src = st.src;
+        b.appendChild(img);
+      } else {
+        b.classList.add("met-brief");
+        var zegel = document.createElement("span");
+        zegel.className = "post-zegel";
+        zegel.style.background = zegelKleur(t);
+        b.appendChild(zegel);
+        var titel = document.createElement("span");
+        titel.className = "post-titel";
+        titel.textContent = t.title;
+        b.appendChild(titel);
+      }
+      b.addEventListener("click", function(e){
+        e.stopPropagation();
+        openTrip(t.id);
+      });
+      postVellen[t.id] = b;
+      postStapel.appendChild(b);
     }
-    b.addEventListener("click", function(e){
-      e.stopPropagation();
-      openTrip(t.id);
-    });
-    postStapel.appendChild(b);
+    var bovenop = (i === n - 1);
+    b.setAttribute("aria-label", t.title + (bovenop ? "; bovenop de stapel" : ""));
+    b.style.setProperty("--i", String(i));
+    b.style.setProperty("--z", String(i + 1));
+    b.classList.toggle("bovenop", bovenop);
   });
 
-  postTeller.textContent = lijst.length + (lijst.length === 1 ? " gelezen" : " gelezen");
+  /* Vellen die niet meer gelezen zijn, verdwijnen. */
+  Object.keys(postVellen).forEach(function(id){
+    if (gezien[id]) return;
+    if (postVellen[id].parentNode) postVellen[id].parentNode.removeChild(postVellen[id]);
+    delete postVellen[id];
+  });
+
+  postTeller.textContent = n + (n === 1 ? " gelezen" : " gelezen");
   postMap.classList.toggle("leeg", lijst.length === 0);
 }
 
