@@ -285,6 +285,8 @@ body.bezig #map::after{mix-blend-mode:normal;background:rgba(36,31,28,.075)}
    vouwlijn en daarna schuift de kaart eruit.
    ------------------------------------------------------------ */
 
+/* Het envelopje vangt zelf ook een klik op: dat breekt de opening af. */
+.env3d.klikbaar .env-scene{pointer-events:auto;cursor:pointer}
 .env3d{
   position:fixed;width:0;height:0;
   pointer-events:none;z-index:39;
@@ -474,6 +476,14 @@ body.bezig #map::after{mix-blend-mode:normal;background:rgba(36,31,28,.075)}
   transition:background .25s var(--ease);
 }
 .close:hover{background:var(--yellow)}
+/* Tijdens het openen hangt de knop aan de pagina zelf, op de plek waar hij
+   straks in de brief ligt. Zo staat hij vanaf de eerste tel stil en is hij
+   altijd aan te klikken, ook terwijl de brief nog onderweg is. */
+.close.los{
+  position:fixed;top:14px;right:14px;z-index:46;
+  animation:knop-aan .35s var(--ease) both;
+}
+@keyframes knop-aan{from{opacity:0}to{opacity:1}}
 .close:focus-visible{outline:2.5px solid var(--cyan);outline-offset:2px}
 
 /* Smal scherm: het paneel wordt een blad dat van onderen omhoog komt. */
@@ -486,6 +496,8 @@ body.bezig #map::after{mix-blend-mode:normal;background:rgba(36,31,28,.075)}
     box-shadow:0 -22px 60px rgba(70,55,35,.22),0 -13px 20px rgba(70,55,35,.15);
   }
   #panel.open{transform:none}
+  /* Het blad komt van onderen: de losse knop ligt op de bovenrand daarvan. */
+  .close.los{top:calc(22vh + 14px)}
   /* Geen ruimte naast de kaart: hij komt van onderen en scharniert
      dan om zijn onderrand in plaats van om de zijkant. */
   #panel.ontvouwt{transform-origin:50% 100%;animation-name:brief-vouwt-onder}
@@ -773,6 +785,25 @@ body.ruimte .count{color:rgba(246,240,226,.7)}
   max-height:34px;overflow:hidden;
 }
 
+/* Onopvallend: staat op de plek van het opschrift en komt pas tevoorschijn
+   als het mapje open is. Wist wat de site onthoudt, net als ?opnieuw. */
+.postmap.open .post-opschrift{opacity:0}
+.post-opschrift{transition:opacity .3s var(--ease)}
+.post-opnieuw{
+  position:absolute;left:50%;bottom:8px;z-index:6;
+  transform:translateX(-50%);
+  padding:2px 6px;
+  border:0;background:none;
+  font-family:var(--mono);font-size:.5rem;letter-spacing:.1em;text-transform:uppercase;
+  color:rgba(60,45,26,.72);
+  white-space:nowrap;cursor:pointer;
+  opacity:0;pointer-events:none;
+  transition:opacity .3s var(--ease),color .2s var(--ease);
+}
+.postmap.open .post-opnieuw{opacity:1;pointer-events:auto}
+.post-opnieuw:hover{color:var(--ink)}
+.post-opnieuw:focus-visible{outline:2.5px solid var(--cyan);outline-offset:2px;opacity:1;pointer-events:auto}
+
 .post-teller{
   margin:8px 0 0;text-align:right;
   font-size:.56rem;color:var(--ink-soft);
@@ -791,10 +822,12 @@ body.bol .maplibregl-ctrl-bottom-right{margin-bottom:126px}
   .postmap{right:16px;bottom:calc(var(--pad-b) + 16px)}
   .post-map{width:104px;height:70px}
   .post-item{width:54px;height:36px;margin-left:-27px}
+  .post-opnieuw{font-size:.42rem;letter-spacing:.06em}
   body.bol .maplibregl-ctrl-bottom-right{margin-bottom:104px}
 }
 
 @media (prefers-reduced-motion:reduce){
+  .close.los{animation:none}
   #panel.vouwt{animation:none}
   #panel.vouwt::after{display:none}
   .postmap{animation:none}

@@ -30,7 +30,7 @@ var tafel = null, tafelOpen = false;
 var gelezen = {}, postMap = null, postStapel = null, postTeller = null, postOpen = false;
 /* De leesvolgorde: oudste vooraan, laatst gelezen achteraan. */
 var gelezenOrde = [], postVellen = {};
-var dichtBezig = false;
+var dichtBezig = false, dichtStart = 0, sluitKnop = null;
 
 function stil(){
   return window.matchMedia && window.matchMedia("(prefers-reduced-motion:reduce)").matches;
@@ -46,17 +46,33 @@ function stil(){
    want een privevenster mag daar niet aan.
    ------------------------------------------------------------ */
 
-var FOTO_SLEUTEL = "ideeendoos.fotos.v1";
+var FOTO_SLEUTEL = "ideeendoos.fotos.v2";
+var FOTO_OUD = "ideeendoos.fotos.v1";
 var FOTO_PAD = /(?:^|\/)photos\/([^\/?#]+?)\.(jpg|jpeg|png|webp)(?:[?#]|$)/i;
 var fotoReg = {};
 
+/* Alleen de gevonden fotos gaan de opslag in; een reis zonder foto wordt
+   alleen voor dit bezoek onthouden. Zo blijft het voordeel (per reis hooguit
+   een poging) en verschijnt een later toegevoegde foto toch bij de volgende
+   keer. De oude sleutel v1 bewaarde ook de lege uitkomsten; die wordt hier
+   eenmalig omgezet en weggegooid, zodat bezoekers met een vervuild geheugen
+   er vanzelf uit komen. */
 function leesFotoGeheugen(){
   try{
+    var oud = window.localStorage.getItem(FOTO_OUD);
+    if (oud) {
+      var v1 = JSON.parse(oud) || {}, schoon = {};
+      Object.keys(v1).forEach(function(id){ if (v1[id]) schoon[id] = v1[id]; });
+      if (!window.localStorage.getItem(FOTO_SLEUTEL))
+        window.localStorage.setItem(FOTO_SLEUTEL, JSON.stringify(schoon));
+      window.localStorage.removeItem(FOTO_OUD);
+    }
     var rauw = window.localStorage.getItem(FOTO_SLEUTEL);
     if (!rauw) return;
     var o = JSON.parse(rauw) || {};
     Object.keys(o).forEach(function(id){
-      fotoReg[id] = {klaar: true, bezig: false, bron: o[id] || null, src: o[id] || null, wacht: []};
+      if (!o[id]) return;                      /* lege uitkomsten negeren */
+      fotoReg[id] = {klaar: true, bezig: false, bron: o[id], src: o[id], wacht: []};
     });
   }catch(e){}
 }
@@ -65,7 +81,7 @@ function bewaarFotoGeheugen(){
   try{
     var o = {};
     Object.keys(fotoReg).forEach(function(id){
-      if (fotoReg[id].klaar) o[id] = fotoReg[id].src || "";
+      if (fotoReg[id].klaar && fotoReg[id].src) o[id] = fotoReg[id].src;
     });
     window.localStorage.setItem(FOTO_SLEUTEL, JSON.stringify(o));
   }catch(e){}
@@ -208,6 +224,40 @@ function visible(t){
   if (!groupPass("study", t.study)) return false;
   if (!groupPass("world", t.abroad ? "abroad" : "home")) return false;
   return true;
+}
+
+/* ---------- schoon beginnen ---------- */
+
+/* Alles wat de site onthoudt staat onder een eigen naam in localStorage:
+   de gelezen post met de volgorde, en het fotogeheugen. Zet ?opnieuw achter
+   het webadres en dat gaat allemaal weg; de privéschakelaar staat na een
+   herlaadactie toch weer uit. Daarna halen we ?opnieuw uit de adresbalk,
+   zodat een herlaadactie niet nog eens wist. In het postmapje zit dezelfde
+   knop, voor als de adresbalk niet in beeld is. */
+var OPSLAG_VOOR = "ideeendoos.";
+
+function wisGeheugen(){
+  try{
+    var weg = [];
+    for (var i = 0; i < window.localStorage.length; i++) {
+      var k = window.localStorage.key(i);
+      if (k && k.indexOf(OPSLAG_VOOR) === 0) weg.push(k);
+    }
+    weg.forEach(function(k){ window.localStorage.removeItem(k); });
+  }catch(e){}
+  gelezen = {}; gelezenOrde = []; fotoReg = {};
+  active.context.prive = false;
+}
+
+function misschienOpnieuw(){
+  if (!/(?:^|[?&])opnieuw(?:=|&|$)/.test(window.location.search)) return;
+  wisGeheugen();
+  try{
+    var zoek = window.location.search
+      .replace(/(^\?|&)opnieuw(=[^&]*)?/g, "$1")
+      .replace(/^\?&/, "?").replace(/^\?$/, "");
+    window.history.replaceState(null, "", window.location.pathname + zoek + window.location.hash);
+  }catch(e){}
 }
 
 /* ---------- gelezen post ---------- */
@@ -551,6 +601,8 @@ function openTrip(id){
   if (t.zaal && window.Zaal) { closePanel(); Zaal.open(); return; }
 
   stopTimers();
+  /* stopTimers wist ook de klok die de sluitvlag terugzet; hier dus zelf. */
+  dichtBezig = false;
   kaartRust(false);
   ruimEnvelopOp();
   vulPaneel(t);
@@ -568,6 +620,7 @@ function openTrip(id){
   });
 
   if (stil()) {
+    knopTerug();
     panel.classList.remove("ontvouwt");
     panel.classList.add("open");
     beurt.mag = true;
@@ -584,6 +637,7 @@ function openTrip(id){
      (b) de klep klapt open, (c) de kaart schuift eruit,
      (d) de kaart vouwt open tot de brief, (e) de foto komt aanvliegen. */
   document.body.classList.add("bezig");
+  knopLos();
   speelEnvelop(p, t);
   /* De bol vliegt meteen mee en is klaar voordat de brief opengaat; liepen ze
      samen, dan vochten de kaart en de brief om dezelfde beeldjes. */
@@ -599,7 +653,7 @@ function openTrip(id){
   }, 2380);
   /* Zodra de brief plat ligt mag je de bol weer pakken; de menglaag over
      het hele scherm blijft uit tot ook de foto geland is. */
-  later(function(){ kaartRust(false); }, 2420);
+  later(function(){ kaartRust(false); knopTerug(); }, 2420);
   later(function(){ document.body.classList.remove("bezig"); }, 3420);
   /* Pas als de brief openligt telt hij als gelezen. */
   later(function(){ markeerGelezen(t.id); }, 2450);
@@ -744,6 +798,10 @@ function speelEnvelop(p, t){
       '<span class="env-bak"><i class="env-dikte"></i></span>' +
       '<span class="env-klep"></span>' +
     '</span>';
+  /* Vangnet: het envelopje ligt tijdens het openen in de weg; wie erop klikt
+     wil niet verder, dus dat breekt de opening af. */
+  laag.classList.add("klikbaar");
+  laag.addEventListener("click", function(){ vouwDicht(); });
   document.body.appendChild(laag);
   envLaag = laag;
   void laag.offsetWidth;
@@ -821,18 +879,52 @@ function vanTafel(){
   else setTimeout(weg, 460);
 }
 
+/* ---------- de sluitknop tijdens het openen ---------- */
+
+/* Waarom dit nodig is: de knop zit in het paneel, en het paneel staat de
+   eerste seconde nog buiten beeld en vliegt daarna in een seconde naar zijn
+   plek. De knop was dus eerst onbereikbaar en daarna een bewegend doel; een
+   klik kwam op de kaart terecht in plaats van op de knop. Een vaste plek via
+   position:fixed helpt niet zolang de knop in het paneel zit, want een
+   transform op het paneel maakt dat paneel het houvast voor alles erin.
+   Daarom hangt de knop tijdens het openen even aan de pagina zelf, op de plek
+   waar hij straks ook ligt, en gaat hij daarna terug de brief in. */
+function knopLos(){
+  if (!sluitKnop || sluitKnop.parentNode === document.body) return;
+  sluitKnop.classList.add("los");
+  document.body.appendChild(sluitKnop);
+}
+
+function knopTerug(){
+  if (!sluitKnop || !panel || sluitKnop.parentNode === panel) return;
+  sluitKnop.classList.remove("los");
+  panel.insertBefore(sluitKnop, panel.firstChild);
+}
+
 /* ---------- de brief weer dichtvouwen ---------- */
 
 /* De omgekeerde weg, en korter: eerst vouwt het vel zich op, dan komt
    de envelop terug op zijn plek op de kaart, slikt de brief in, klapt
    zijn klep dicht en krimpt terug tot het icoontje. */
 function vouwDicht(){
-  if (!panel.classList.contains("open")) return;
+  /* Vangnet 1: de vlag dichtBezig werd alleen door een klok teruggezet, en die
+     klok werd door elke nieuwe brief stilgezet (stopTimers). Bleef de vlag
+     staan, dan ging er daarna nooit meer iets dicht. Nu vervalt de vlag ook
+     vanzelf, dus een tweede poging werkt altijd. */
+  if (dichtBezig && Date.now() - dichtStart < 2600) return;
+  dichtBezig = false;
+
+  /* Vangnet 2: tijdens de eerste seconde van de opening heeft het paneel de
+     klasse open nog niet; een klik of Escape deed toen niets en de brief ging
+     alsnog open. Nu breken we de opening gewoon af. */
+  if (!panel.classList.contains("open")) { closePanel(); return; }
+
+  knopTerug();
   var beurt = huidig;
   var t = beurt && beurt.trip;
   if (stil() || !t || !map) { closePanel(); return; }
-  if (dichtBezig) return;
   dichtBezig = true;
+  dichtStart = Date.now();
 
   stopTimers();
   ruimEnvelopOp();
@@ -898,11 +990,18 @@ function maakPostmap(){
       '<div class="post-stapel" id="postStapel"></div>' +
       '<span class="post-flap" aria-hidden="true"></span>' +
       '<span class="post-opschrift" aria-hidden="true">Gelezen post</span>' +
+      '<button class="post-opnieuw" id="postOpnieuw" type="button" ' +
+              'title="Wis wat de site onthoudt">Opnieuw beginnen</button>' +
     '</div>' +
     '<p class="post-teller label" id="postTeller"></p>';
   document.body.appendChild(postMap);
   postStapel = postMap.querySelector("#postStapel");
   postTeller = postMap.querySelector("#postTeller");
+  postMap.querySelector("#postOpnieuw").addEventListener("click", function(e){
+    e.stopPropagation();
+    wisGeheugen();
+    window.location.reload();
+  });
   postMap.querySelector("#postGreep").addEventListener("click", function(){
     postOpen = !postOpen;
     postMap.classList.toggle("open", postOpen);
@@ -981,6 +1080,8 @@ function vulPostmap(){
 
 function closePanel(){
   stopTimers();
+  dichtBezig = false;
+  knopTerug();
   kaartRust(false);
   document.body.classList.remove("bezig");
   ruimEnvelopOp();
@@ -1112,6 +1213,7 @@ function zoomNaar(center, zoom){
 return {
   init: function(json){
     leesInkten();
+    misschienOpnieuw();
     leesFotoGeheugen();
     leesGelezen();
     bewaakFotos();
@@ -1128,10 +1230,15 @@ return {
       close.setAttribute("aria-label", "Vouw de brief dicht");
       close.setAttribute("title", "Vouw de brief dicht");
       close.addEventListener("click", vouwDicht);
+      sluitKnop = close;
     }
+    /* Escape moet altijd sluiten; de zaal vangt hem alleen als de zaal open
+       staat, dus hier gewoon doorgaan. */
     document.addEventListener("keydown", function(e){
       if (e.key !== "Escape") return;
-      if (tafelOpen) vanTafel(); else vouwDicht();
+      if (window.Zaal && window.Zaal.isOpen && window.Zaal.isOpen()) return;
+      if (tafelOpen) { vanTafel(); return; }
+      vouwDicht();
     });
     panel.addEventListener("animationend", function(e){
       if (e.target === panel && !e.pseudoElement) panel.classList.remove("ontvouwt");
