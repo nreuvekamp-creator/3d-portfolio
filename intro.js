@@ -64,13 +64,14 @@ window.Intro = (function(){
   var rustig = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   /* ------------------------------------------------------------
-     Geluid. Drie standen: 0 uit, 1 typemachine, 2 typemachine en stem.
+     Geluid. Twee standen: 0 uit, 1 aan. Aan betekent de typemachine;
+     die is geen aparte stand meer maar gewoon wat je hoort.
      Alles wordt ter plekke gemaakt met de Web Audio API; er zijn geen
      geluidsbestanden. Zonder geluid loopt het verhaal precies zo door.
      ------------------------------------------------------------ */
 
-  /* Standaard staat de typemachine aan (stand 1). Wie hem uitzet, houdt
-     hem uit: de stand wordt onthouden. */
+  /* Standaard staat het geluid aan. Wie het uitzet, houdt het uit: de
+     keuze wordt onthouden. */
   var geluid = 1;
   var ac = null, mix = null, ruisBuf = null;
   var wachtOpGebaar = false;
@@ -88,7 +89,10 @@ window.Intro = (function(){
       var v = localStorage.getItem("intro-geluid");
       if (v === null) return null;
       var n = parseInt(v, 10);
-      return (n === 0 || n === 1 || n === 2) ? n : null;
+      /* Een oude stand 2 (met verteller) leest nu gewoon als aan. */
+      if (n === 0) return 0;
+      if (n === 1 || n === 2) return 1;
+      return null;
     } catch (e) { return null; }
   }
 
@@ -245,35 +249,6 @@ window.Intro = (function(){
     ruispuls(t + 0.26, 3000, 1.4, 0.08, 0.04, 1.4);
   }
 
-  /* ------------------------------------------------------------
-     De stem. Voorlopig die van de browser, laag en langzaam gezet.
-     Zodra er echte opnamen zijn, krijgt elke regel in SCRIPT een
-     bestandsnaam in `stem` en vervangt `zeg()` de spraaksynthese
-     door een audio-element.
-     ------------------------------------------------------------ */
-
-  function stemKeuze(){
-    if (!window.speechSynthesis) return null;
-    var lijst = speechSynthesis.getVoices() || [];
-    var nl = lijst.filter(function(v){ return /^nl/i.test(v.lang); });
-    /* Liefst een mannenstem; anders de eerste Nederlandse; anders wat er is. */
-    var diep = nl.filter(function(v){ return /(man|male|xander|ruben|frank|daan)/i.test(v.name); });
-    return diep[0] || nl[0] || lijst[0] || null;
-  }
-
-  function zeg(tekst){
-    if (geluid < 2 || !tekst || !window.speechSynthesis) return;
-    speechSynthesis.cancel();
-    var u = new SpeechSynthesisUtterance(tekst);
-    var v = stemKeuze();
-    if (v) u.voice = v;
-    u.lang = (v && v.lang) || "nl-NL";
-    u.pitch = 0.55;   /* zo laag als het mag: een verteller, geen assistent */
-    u.rate = 0.86;
-    u.volume = 0.95;
-    speechSynthesis.speak(u);
-  }
-
   /* --------------------------------------------------------
      Regels typen
      -------------------------------------------------------- */
@@ -299,7 +274,6 @@ window.Intro = (function(){
 
   function toonRegel(stap, gedaan){
     if (!stap.tekst) { gedaan(); return; }
-    zeg(stap.tekst);
 
     var el = document.createElement("span");
     el.className = "line in" + (stap.klasse ? " " + stap.klasse : "");
@@ -468,7 +442,6 @@ window.Intro = (function(){
   function eindig(){
     if (klaar) return;
     klaar = true;
-    if (window.speechSynthesis) speechSynthesis.cancel();
     clearTimeout(timer);
     clearTimeout(typTimer);
     intro.classList.add("gone");
@@ -540,14 +513,13 @@ window.Intro = (function(){
       var img = document.getElementById("meImg");
       if (img) { img.src = foto; img.alt = (data.profile && data.profile.name) || ""; }
 
-      /* Eén knop, drie standen: uit, alleen de typemachine, en de
-         typemachine met de verteller erbij. Browsers laten geluid pas
-         toe na een echt gebaar; deze klik is dat gebaar. */
-      var STANDEN = ["geluid uit", "typemachine", "typemachine en stem"];
+      /* Eén knop, twee standen: geluid aan (de typemachine) of uit.
+         Browsers laten geluid pas toe na een echt gebaar; deze klik is
+         dat gebaar. */
+      var STANDEN = ["geluid uit", "geluid aan"];
       var gknop = document.getElementById("geluidBtn");
       var bewaard = gelezen();
       geluid = (bewaard === null) ? 1 : bewaard;
-      if (geluid > 1 && !window.speechSynthesis) geluid = 1;
 
       function toonStand(){
         if (!gknop) return;
@@ -557,15 +529,13 @@ window.Intro = (function(){
 
       if (gknop) {
         var AC = window.AudioContext || window.webkitAudioContext;
-        if (!AC && !window.speechSynthesis) { gknop.hidden = true; geluid = 0; }
+        if (!AC) { gknop.hidden = true; geluid = 0; }
         toonStand();
         gknop.addEventListener("click", function(){
-          var max = window.speechSynthesis ? 2 : 1;
-          geluid = (geluid + 1) % (max + 1);
+          geluid = geluid > 0 ? 0 : 1;
           if (geluid > 0 && !audioAan()) geluid = 0;
           if (geluid > 0) probeerStarten();
           else { intro.classList.remove("stil"); if (ac) { try { ac.suspend(); } catch (e) {} } }
-          if (geluid < 2 && window.speechSynthesis) speechSynthesis.cancel();
           bewaar(geluid);
           toonStand();
         });
