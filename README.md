@@ -10,7 +10,7 @@ Alle inhoud staat in **`trips.json`**. Je hoeft geen code aan te raken.
 
 - **Tekst wijzigen**: zoek de reis op `id` en pas `title`, `summary` of `body` aan.
 - **Reis toevoegen**: kopieer een bestaand blok, geef het een nieuw uniek `id` en vul de velden in.
-- **Vraagteken weghalen**: als de gegevens kloppen, verwijder de regel `"todo": true`.
+- **Gestippeld blok weghalen**: als de gegevens kloppen, verwijder de regel `"todo": true`.
 
 Velden per reis:
 
@@ -50,9 +50,9 @@ Ga dan naar http://localhost:8777
 
 ## Techniek
 
-Elf bronbestanden zonder build. MapLibre GL 5.9 (staat in de repo zelf) tekent de bol in globe-projectie,
+Twaalf bronbestanden zonder build. MapLibre GL 5.9 (staat in de repo zelf) tekent de bol in globe-projectie,
 met aquarel tot zoom 5 en Esri Light Gray daarboven, en clustering zodat plekken die dicht bij elkaar
-liggen samenvallen als je uitzoomt. Alles komt van deze repo, behalve de Google-letters en de Esri-kaart vanaf zoom 6.
+liggen samenvallen als je uitzoomt. Alles komt van deze repo, behalve de Google-letters en de Esri-kaart als je ver inzoomt.
 
 ## Hoe de site is opgebouwd
 
@@ -76,5 +76,5 @@ tekst en een `wacht` in milliseconden.
 
 De aquareltegels staan in de repo omdat het archief waar ze vandaan komen geen
 CORS-kop meestuurt, waardoor de browser ze niet in een WebGL-kaart mag gebruiken.
-Vanaf zoom 6 schuift er een lichte kaart van Esri overheen zodat je tot
-straatniveau kunt blijven zoomen.
+Vanaf zoom 5 schuift er een lichte kaart van Esri overheen (de plaatsnamen al vanaf zoom 4)
+zodat je tot straatniveau kunt blijven zoomen.
