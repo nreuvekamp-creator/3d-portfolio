@@ -510,7 +510,7 @@ window.Intro = (function(){
       voorbeeldBak = document.getElementById("examples");
       envBak = document.getElementById("envelopes");
 
-      var foto = (data && data.profile && data.profile.photo) || "photos/niels.png";
+      var foto = (data && data.profile && data.profile.photo) || "photos/niels.webp";
       var img = document.getElementById("meImg");
       if (img) { img.src = foto; img.alt = (data.profile && data.profile.name) || ""; }
 
