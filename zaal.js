@@ -7,13 +7,13 @@ window.Zaal = (function(){
 
   var W = 2200;          /* breedte en diepte van de zaal in px */
   var H = 820;           /* hoogte */
-  var PER_WALL = 8;
-  var EXTS = ["jpg","png","jpeg","webp"];
 
   var root = null, stage = null, room = null, readEl = null;
-  var warp = null, portalBtn = null;
+  var warp = null;
   var arts = [];
-  var closeCbs = [];
+  /* De werken; de wanden worden pas bij de eerste keer openen gebouwd,
+     zodat een bezoek zonder zaal geen enkele zaalfoto ophaalt. */
+  var items = [], gebouwd = false;
   var flat = false;
   var open = false;
   var porting = false;
@@ -37,19 +37,6 @@ window.Zaal = (function(){
     return String(d).slice(0,4);
   }
 
-  /* Probeert de extensies op volgorde; de eerste die laadt wint. */
-  function vindFoto(id, cb){
-    var i = 0;
-    (function poging(){
-      if(i >= EXTS.length){ cb(null); return; }
-      var src = "photos/" + id + "." + EXTS[i++];
-      var img = new Image();
-      img.onload = function(){ cb(src); };
-      img.onerror = poging;
-      img.src = src;
-    })();
-  }
-
   function maakWerk(item, index){
     var btn = el("button", "z-art");
     btn.type = "button";
@@ -63,16 +50,17 @@ window.Zaal = (function(){
     plate.classList.add("is-blank");
     plate.appendChild(titelVlak);
 
-    vindFoto(item.id, function(src){
-      if(!src) return;
-      var img = new Image();
-      img.alt = "";
-      img.src = src;
+    /* Alleen .jpg; is er geen foto, dan blijft het geschepte vlak staan. */
+    var src = "photos/" + item.id + ".jpg";
+    var img = new Image();
+    img.alt = "";
+    img.onload = function(){
       plate.classList.remove("is-blank");
       plate.textContent = "";
       plate.appendChild(img);
       item._foto = src;
-    });
+    };
+    img.src = src;
 
     mat.appendChild(plate);
     frame.appendChild(mat);
@@ -84,8 +72,6 @@ window.Zaal = (function(){
     frame.appendChild(plaque);
 
     btn.appendChild(frame);
-    btn._item = item;
-    btn._index = index;
 
     btn.addEventListener("click", function(){ toon(index); });
     btn.addEventListener("focus", function(){
@@ -116,7 +102,6 @@ window.Zaal = (function(){
     btn.appendChild(plaq);
 
     btn.addEventListener("click", stapDoor);
-    portalBtn = btn;
     return btn;
   }
 
@@ -164,7 +149,6 @@ window.Zaal = (function(){
     ];
 
     var perWall = Math.max(1, Math.ceil(items.length / 3));
-    if(perWall > PER_WALL) perWall = perWall;
 
     var idx = 0;
     faces.forEach(function(f){
@@ -294,28 +278,31 @@ window.Zaal = (function(){
   /* ---------------------------------------------------------- */
 
   function bind(){
-    var dragging = false, px = 0, py = 0, moved = 0;
+    var dragging = false, px = 0, py = 0;
 
-    function start(x, y){ dragging = true; px = x; py = y; moved = 0; stage.classList.add("is-dragging"); }
+    function start(x, y){ dragging = true; px = x; py = y; stage.classList.add("is-dragging"); }
     function move(x, y){
       if(!dragging) return;
       var dx = x - px, dy = y - py;
-      px = x; py = y; moved += Math.abs(dx) + Math.abs(dy);
+      px = x; py = y;
       yawTarget -= dx * 0.16;
       pitchTarget = clamp(pitchTarget + dy * 0.09, -22, 22);
       loop();
     }
     function end(){ dragging = false; stage.classList.remove("is-dragging"); }
 
+    /* Alleen de eerste vinger sleept; een tweede vinger is knijpen. */
     stage.addEventListener("pointerdown", function(e){
+      if(!e.isPrimary) return;
       start(e.clientX, e.clientY);
       /* Begint de druk op een knop, dan geen pointer capture: anders
          landt de klik op het toneel en nooit op de knop zelf. */
       var opKnop = e.target && e.target.closest && e.target.closest("button");
       if(!opKnop) stage.setPointerCapture(e.pointerId);
     });
-    stage.addEventListener("pointermove", function(e){ move(e.clientX, e.clientY); });
-    stage.addEventListener("pointerup", end);
+    stage.addEventListener("pointermove", function(e){ if(e.isPrimary) move(e.clientX, e.clientY); });
+    /* Op window, zodat loslaten buiten het venster de sleep ook beeindigt. */
+    window.addEventListener("pointerup", end);
     stage.addEventListener("pointercancel", end);
 
     stage.addEventListener("wheel", function(e){
@@ -329,6 +316,7 @@ window.Zaal = (function(){
     stage.addEventListener("touchmove", function(e){
       if(e.touches.length !== 2) return;
       e.preventDefault();
+      dragging = false;
       var d = Math.hypot(
         e.touches[0].clientX - e.touches[1].clientX,
         e.touches[0].clientY - e.touches[1].clientY);
@@ -358,7 +346,7 @@ window.Zaal = (function(){
   var api = {
     init: function(data){
       if(root) return api;
-      var items = ((data && data.trips) || []).filter(function(t){
+      items = ((data && data.trips) || []).filter(function(t){
         return t && t.context !== "prive";
       });
 
@@ -375,8 +363,6 @@ window.Zaal = (function(){
       room = el("div", "z-room");
       stage.appendChild(room);
       root.appendChild(stage);
-
-      if(flat) bouwPlat(items); else bouwZaal(items);
 
       var ui = el("div", "z-ui");
       var titel = el("div", "z-title");
@@ -419,12 +405,12 @@ window.Zaal = (function(){
 
       pas();
       bind();
-      window.__zaal = api;
       return api;
     },
 
     open: function(){
       if(!root || open) return;
+      if(!gebouwd){ gebouwd = true; if(flat) bouwPlat(items); else bouwZaal(items); }
       open = true;
       root.hidden = false;
       yaw = 0; pitch = 0; dist = -140;
@@ -446,10 +432,10 @@ window.Zaal = (function(){
       root.classList.remove("is-porting");
       if(warp) warp.classList.remove("is-flying");
       setTimeout(function(){ if(!open) root.hidden = true; }, flat ? 0 : 500);
-      closeCbs.forEach(function(fn){ try{ fn(); }catch(err){} });
     },
 
-    onClose: function(fn){ if(typeof fn === "function") closeCbs.push(fn); }
+    /* globe.js laat Escape met rust zolang de zaal open staat. */
+    isOpen: function(){ return open; }
   };
 
   return api;

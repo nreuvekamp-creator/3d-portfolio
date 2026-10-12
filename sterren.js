@@ -1,6 +1,6 @@
 /* ============================================================
    sterren.js - de ruimte om de bol, met citaten.
-   window.Sterren: init(map), stop()
+   window.Sterren: init(map)
 
    Keuze: canvas 2D, geen honderden losse elementen en geen tweede
    WebGL-context (de kaart heeft die al). Een paar honderd stipjes
@@ -52,6 +52,8 @@ var aX = [1,0,0], aY = [0,1,0], aZ = [0,0,1];
 /* Citaat: een richting aan de hemel, met een eigen op- en afkomen. */
 var citaatIdx = -1, citaatVec = null;
 var citaatOp = 0, citaatDoel = 0, citaatTot = 0, citaatFase = "pauze";
+/* De maat van de regel: een keer gemeten bij het ophangen en bij resize. */
+var hw = 0, hh = 0;
 
 function stil(){
   return !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion:reduce)").matches);
@@ -160,11 +162,16 @@ function leesKaart(){
   if (hemelLat < -1.35) hemelLat = -1.35;
 
   /* Hoe groot de bol zelf op het scherm staat; daar moet het citaat
-     buiten blijven, anders staat de tekst over de aarde heen. */
-  bolPx = 512 * Math.pow(2, z) / (2 * Math.PI);
+     buiten blijven, anders staat de tekst over de aarde heen. Gemeten,
+     niet geraden: een punt 90 graden van het midden ligt op de rand. */
+  var cp = map.project(c), rp = map.project([c.lng, c.lat >= 0 ? c.lat - 90 : c.lat + 90]);
+  bolPx = Math.hypot(rp.x - cp.x, rp.y - cp.y);
 
   draai = (map.getBearing() || 0) * RAD;
   kanteling = (map.getPitch() || 0) * RAD * 0.6;
+
+  /* De lus stond stil en er komt iets te zien: weer tekenen. */
+  if (doel > 0 && actief && !loopId) { vorigeTijd = 0; loopId = requestAnimationFrame(stap); }
 }
 
 /* De drie camera-assen: aX naar rechts, aY omhoog, aZ van ons af.
@@ -295,6 +302,12 @@ function hangCitaatOp(){
     -aZ[1]*ch + aX[1]*ca + aY[1]*sa,
     -aZ[2]*ch + aX[2]*ca + aY[2]*sa
   ];
+  meetCitaat();
+}
+
+function meetCitaat(){
+  var vak = citaatEl.getBoundingClientRect();
+  hw = vak.width / 2 + 8; hh = vak.height / 2 + 8;
 }
 
 /* Eén klok voor alle fases, meegenomen in dezelfde lus. */
@@ -318,8 +331,6 @@ function citaatStap(t, dt){
       /* Naar buiten toe: hoe verder de regel het beeld uit loopt, hoe
          zwakker. Hij wordt tegen de rand gehouden zodat je hem nog ziet
          weggaan, en is weg voordat hij half wegvalt. */
-      var vak = citaatEl.getBoundingClientRect();
-      var hw = vak.width / 2 + 8, hh = vak.height / 2 + 8;
       var buiten = Math.max(0, hw - pt.x, pt.x - (W - hw), hh - pt.y, pt.y - (H - hh));
       if (buiten > 0) rand *= Math.max(0, 1 - buiten / 140);
       if (hw * 2 < W) pt.x = Math.max(hw, Math.min(W - hw, pt.x));
@@ -351,9 +362,11 @@ function citaatStap(t, dt){
       rand = 1;
     }
   } else if (citaatFase === "op" && rand <= 0) {
-    /* Uit beeld gedraaid: niet wachten, meteen een nieuwe plek zoeken. */
+    /* Uit beeld gedraaid: na een seconde een nieuwe plek zoeken. Op een
+       smal scherm past soms geen enkele plek; dan niet elke beeldwisseling
+       opnieuw proberen en de tekst herschrijven. */
     citaatFase = "af";
-    citaatTot = t;
+    citaatTot = t + 1;
   }
 
   var stap = rustig ? 1 : Math.min(dt * 0.6, 1);
@@ -366,7 +379,6 @@ function citaatStap(t, dt){
 
 function stap(ms){
   if (!actief) return;
-  loopId = requestAnimationFrame(stap);
   var t = ms / 1000;
   var dt = vorigeTijd ? Math.min(t - vorigeTijd, 0.1) : 0.016;
   vorigeTijd = t;
@@ -387,6 +399,9 @@ function stap(ms){
   zetAssen();
   teken(t, dt);
   citaatStap(t, dt);
+
+  /* Niets te zien en niets onderweg: stilstaan tot de kaart weer beweegt. */
+  loopId = (alpha === 0 && doel === 0) ? 0 : requestAnimationFrame(stap);
 }
 
 var kaartLeeg = null;
@@ -431,15 +446,18 @@ return {
 
     meet();
     maakSterren();
-    window.addEventListener("resize", this._resize = function(){
+    /* Alleen opnieuw meten; de hemel blijft staan. Een nieuwe hemel alleen
+       als het scherm van smal naar breed omslaat (ander aantal sterren). */
+    var wasSmal = window.innerWidth < 640;
+    window.addEventListener("resize", function(){
       meet();
-      maakSterren();
+      var smal = window.innerWidth < 640;
+      if (smal !== wasSmal) { wasSmal = smal; maakSterren(); }
+      if (citaatVec) meetCitaat();
     });
 
-    map.on("zoom", leesKaart);
+    /* Zoomen, draaien en kantelen sturen allemaal ook "move". */
     map.on("move", leesKaart);
-    map.on("rotate", leesKaart);
-    map.on("pitch", leesKaart);
     vorigeLon = null;
     leesKaart();
     zetAssen();
@@ -450,34 +468,6 @@ return {
     citaatFase = "pauze";
     citaatTot = 0;
     loopId = requestAnimationFrame(stap);
-  },
-
-  stop: function(){
-    actief = false;
-    if (loopId) cancelAnimationFrame(loopId);
-    loopId = 0;
-    if (map) {
-      map.off("zoom", leesKaart); map.off("move", leesKaart);
-      map.off("rotate", leesKaart); map.off("pitch", leesKaart);
-    }
-    if (this._resize) window.removeEventListener("resize", this._resize);
-    zetKaartAchtergrond(false);
-    document.body.classList.remove("ruimte");
-    if (laag) laag.remove();
-    if (citaatEl) citaatEl.remove();
-    laag = canvas = ctx = citaatEl = null;
-    sterren = []; vallers = [];
-    vorigeLon = null; hemelLon = 0; hemelLat = 0;
-  },
-
-  /* Voor de test: waar staat een ster nu op het scherm. */
-  _peil: function(n){
-    var uit = [];
-    for (var i = 0; i < (n || 5) && i < sterren.length; i++) {
-      var p = opScherm([sterren[i].vx, sterren[i].vy, sterren[i].vz]);
-      uit.push(p ? [Math.round(p.x), Math.round(p.y)] : null);
-    }
-    return uit;
   }
 };
 

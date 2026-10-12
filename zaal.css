@@ -24,7 +24,7 @@
 .z-stage{
   position:absolute;
   inset:0;
-  perspective:var(--z-persp,900px);
+  perspective:900px;
   perspective-origin:50% 50%;
   cursor:grab;
 }
@@ -40,7 +40,6 @@
     rotateX(var(--z-pitch,0deg))
     rotateY(var(--z-yaw,0deg));
 }
-.z-room.is-gliding{transition:transform .9s var(--ease)}
 
 /* ------------------------------------------------------------
    De zes vlakken. Het papier krijgt vezel per vlak, niet als
@@ -319,7 +318,6 @@
 #zaal[data-mode="flat"] .z-hint{background:var(--paper);border-top:1px solid var(--line-soft)}
 #zaal[data-mode="flat"] .z-grid{padding-bottom:calc(80px + var(--pad-b))}
 #zaal[data-mode="room"] .z-grid{display:none}
-#zaal[data-mode="room"] .z-hint.z-hint--flat{display:none}
 
 @media (prefers-reduced-motion:reduce){
   #zaal,.z-room,.z-read,.z-frame{transition:none}
@@ -559,6 +557,6 @@
 }
 
 @media (prefers-reduced-motion:reduce){
-  .z-portal-wash,.z-portal-swirl,.z-portal-scheur{animation:none}
+  .z-portal-wash,.z-portal-swirl,.z-portal-scheur,.z-portal-eye::after{animation:none}
   .z-warp{display:none}
 }
