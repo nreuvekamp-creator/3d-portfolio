@@ -16,7 +16,7 @@ window.Fidget = (function(){
 
   var INKTEN = ["--cyan", "--magenta", "--yellow"];
   var MAX_BLAADJES = 54;     /* bloesem mag rijk zijn */
-  var MAX_EXTRA   = 130;    /* wat je er zelf bij klikt */
+  var MAX_EXTRA   = 130;    /* plafond voor alles samen, ook wat je erbij klikt */
 
   var laag, aan = false, blaadjes = [];
   var muisX = 0.5, muisY = 0.5, doelX = 0.5, doelY = 0.5;
@@ -190,8 +190,6 @@ window.Fidget = (function(){
       });
       /* Laatste veegbeurt: wat de klik van zojuist nog achterliet, gaat ook mee. */
       setTimeout(function(){ if (laag) laag.textContent = ""; }, 1400);
-    },
-
-    stop: function(){ aan = false; }
+    }
   };
 })();

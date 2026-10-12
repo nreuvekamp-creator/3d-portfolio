@@ -130,7 +130,6 @@
      halverwege wordt afgesneden. */
   -webkit-mask-image:linear-gradient(transparent 0,#000 22px);
   mask-image:linear-gradient(transparent 0,#000 22px);
-  transition:height .5s var(--ease-soft);
 }
 .rol{
   transition:transform .5s var(--ease-soft);
@@ -205,7 +204,6 @@
   transform:rotate(0deg) scale(1.04);
   box-shadow:0 20px 44px rgba(70,55,35,.32);
 }
-.ex.lig:focus-visible{outline:2.5px solid var(--cyan);outline-offset:6px}
 /* Aangeklikt: hij komt naar je toe. Wat erin zit, komt later. */
 .ex.lig.op{
   transform:rotate(0deg) scale(1.1);
@@ -609,7 +607,6 @@
 }
 .geluid:hover{border-color:var(--ink);color:var(--ink)}
 .geluid[aria-pressed="true"]{background:var(--cyan);border-color:var(--key);color:var(--paper)}
-.geluid:focus-visible{outline:2.5px solid var(--cyan);outline-offset:3px}
 
 /* Zolang de browser het geluid nog tegenhoudt: een klein, rustig teken. */
 #intro.stil .geluid::after{
@@ -618,10 +615,10 @@
 }
 #intro.stil .geluid{animation:geluidWacht 2.6s var(--ease) infinite}
 @keyframes geluidWacht{0%,100%{opacity:.75}50%{opacity:1}}
-@media (prefers-reduced-motion:reduce){#intro.stil .geluid{animation:none}}
 
 .skip{
   opacity:0;
+  visibility:hidden;
   pointer-events:none;
   transition:opacity .5s var(--ease-soft);
   position:absolute;
@@ -630,7 +627,7 @@
   z-index:10;
   display:flex;align-items:center;gap:12px;
 }
-#intro.spatie .skip{opacity:1;pointer-events:auto}
+#intro.spatie .skip{opacity:1;visibility:visible;pointer-events:auto}
 .skip-btn{padding:10px 20px;font-size:.7rem;background:rgba(255,253,247,.72)}
 .skip-hint{margin:0;font-size:.62rem;opacity:.7}
 @media (max-width:560px){.skip-hint{display:none}}

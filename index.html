@@ -5,7 +5,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>De ideeëndoos — Niels Reuvekamp</title>
 <meta name="description" content="Een kijkje in de ideeëndoos van Niels Reuvekamp: elk idee kwam ergens vandaan, en elk idee heeft een plek op de wereld.">
-<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.9.0/dist/maplibre-gl.css">
+<link rel="stylesheet" href="maplibre-gl.css">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Caveat:wght@400;600&display=swap">
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="intro.css">
 <link rel="stylesheet" href="globe.css">
@@ -15,8 +17,8 @@
 </head>
 <body>
 
-<!-- ============ de bol, ligt er vanaf het begin onder ============ -->
-<div id="map"></div>
+<!-- ============ de bol, ligt er vanaf het begin onder; inert tot het verhaal klaar is ============ -->
+<div id="map" inert></div>
 
 <div id="bar" hidden>
   <div class="brand"><span class="label">de ideeëndoos van</span><strong>Niels Reuvekamp</strong></div>
@@ -61,14 +63,16 @@
 
   <!-- de brief: een vel papier waarop de tekst wordt getypt -->
   <div class="vel" id="vel">
-    <div class="lines" id="lines" aria-live="polite"></div>
+    <div class="lines" id="lines" aria-hidden="true"></div>
+    <!-- de schermlezer krijgt per regel de hele zin, niet de losse letters -->
+    <p class="sr-only" id="voorlezer" aria-live="polite"></p>
   </div>
 
   <!-- drie voorbeelden vliegen langs -->
   <div class="examples" id="examples"></div>
 
   <!-- de kist, achterin -->
-  <button class="chest" id="chest" aria-label="Open de doos en ga naar de wereld">
+  <button class="chest" id="chest" aria-label="Open de doos en ga naar de wereld" disabled>
     <div class="glow"></div>
     <div class="box" aria-hidden="true">
       <div class="kist">
@@ -102,7 +106,7 @@
   <!-- wat er uit de kist komt -->
   <div class="envelopes" id="envelopes" aria-hidden="true"></div>
 
-  <!-- geluid: voorlopig de stem van de browser, laag gezet -->
+  <!-- geluid: de typemachine uit intro.js -->
   <button class="geluid label" id="geluidBtn" aria-pressed="false">geluid aan</button>
 
   <!-- overslaan -->
@@ -123,7 +127,7 @@
 
 <div id="err" hidden></div>
 
-<script src="https://unpkg.com/maplibre-gl@5.9.0/dist/maplibre-gl.js"></script>
+<script src="maplibre-gl.js"></script>
 <script src="fidget.js"></script>
 <script src="globe.js"></script>
 <script src="zaal.js"></script>
@@ -138,6 +142,7 @@ fetch("trips.json", {cache: "no-store"})
     if (window.Zaal) Zaal.init(data);
     Fidget.start();
     Intro.start(data, function(){
+      document.getElementById("map").inert = false;
       Globe.reveal();
       Fidget.kalmeer();
       if (window.Sterren && window.__map) Sterren.init(window.__map);
@@ -145,8 +150,8 @@ fetch("trips.json", {cache: "no-store"})
   })
   .catch(function(e){
     var el = document.getElementById("err");
-    el.textContent = "Kon de gegevens niet laden. " + e.message +
-      "  Open deze pagina via een webserver, niet als bestand.";
+    el.textContent = "Er ging iets mis bij het opstarten: " + e.message +
+      (location.protocol === "file:" ? " Open deze pagina via een webserver, niet als bestand." : "");
     el.hidden = false;
   });
 </script>

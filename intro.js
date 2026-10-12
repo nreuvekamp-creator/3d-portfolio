@@ -8,8 +8,6 @@
 
    De tekst staat hieronder in SCRIPT. Dat is het enige wat je hoeft
    aan te passen als het verhaal verandert; de rest regelt zichzelf.
-   Elke regel kan later een geluidsfragment krijgen via het veld
-   `stem`, zonder dat er iets anders verandert.
    ============================================================ */
 
 window.Intro = (function(){
@@ -22,23 +20,23 @@ window.Intro = (function(){
      -------------------------------------------------------- */
 
   var SCRIPT = [
-    {scene: "leegte", tekst: "Hi, ik ben Niels.", stem: null, wacht: 900},
-    {tekst: "Welkom op mijn plekje op het internet.", stem: null, wacht: 900},
-    {tekst: "Het is hier groot, en toch ben je op de juiste plek beland.", klasse: "small", stem: null, wacht: 1100},
+    {scene: "leegte", tekst: "Hi, ik ben Niels.", wacht: 900},
+    {tekst: "Welkom op mijn plekje op het internet.", wacht: 900},
+    {tekst: "Het is hier groot, en toch ben je op de juiste plek beland.", klasse: "small", wacht: 1100},
 
-    {scene: "breed", tekst: "Mijn interesses lopen alle kanten op.", stem: null, wacht: 900},
+    {scene: "breed", tekst: "Mijn interesses lopen alle kanten op.", wacht: 900},
     {voorbeelden: true, wacht: 4280},
 
-    {scene: "kist", tekst: "Dat komt omdat ik iemand van ideeën ben.", stem: null, wacht: 900},
-    {tekst: "Mijn hoofd ontploft er soms van.", stem: null, wacht: 900},
-    {tekst: "Dus ik verzamel ze.", klasse: "hand", stem: null, wacht: 800},
-    {tekst: "In een doos.", stem: null, wacht: 1200},
+    {scene: "kist", tekst: "Dat komt omdat ik iemand van ideeën ben.", wacht: 900},
+    {tekst: "Mijn hoofd ontploft er soms van.", wacht: 900},
+    {tekst: "Dus ik verzamel ze.", klasse: "hand", wacht: 800},
+    {tekst: "In een doos.", wacht: 1200},
 
     {scene: "open", tekst: "", wacht: 1200},
-    {tekst: "Elk idee kwam ergens vandaan.", stem: null, wacht: 900},
-    {tekst: "Dus elk idee heeft een plek op de wereld.", stem: null, wacht: 1300},
+    {tekst: "Elk idee kwam ergens vandaan.", wacht: 900},
+    {tekst: "Dus elk idee heeft een plek op de wereld.", wacht: 1300},
 
-    {scene: "wacht", tekst: "Kom maar kijken.", klasse: "hand", stem: null, wacht: 999999}
+    {scene: "wacht", tekst: "Kom maar kijken.", klasse: "hand", wacht: 999999}
   ];
 
   /* Aanslagtempo: ongeveer 22 aanslagen per seconde, met wat spel erin. */
@@ -89,9 +87,8 @@ window.Intro = (function(){
       var v = localStorage.getItem("intro-geluid");
       if (v === null) return null;
       var n = parseInt(v, 10);
-      /* Een oude stand 2 (met verteller) leest nu gewoon als aan. */
       if (n === 0) return 0;
-      if (n === 1 || n === 2) return 1;
+      if (n === 1) return 1;
       return null;
     } catch (e) { return null; }
   }
@@ -137,16 +134,19 @@ window.Intro = (function(){
     if (wachtOpGebaar || !ac || ac.state === "running") return;
     wachtOpGebaar = true;
     if (intro && geluid > 0) intro.classList.add("stil");
-    var soorten = ["pointerdown", "keydown", "wheel", "touchstart", "click"];
+    /* Alleen events die de browser als gebaar telt: pointerdown en
+       touchstart komen bij een tik te vroeg, wheel telt nooit. */
+    var soorten = ["pointerup", "keydown", "click"];
     function wek(){
-      soorten.forEach(function(s){ window.removeEventListener(s, wek, true); });
       if (!ac) return;
       var p = null;
       try { p = ac.resume(); } catch (e) { p = null; }
-      if (p && p.then) p.then(gelukt, function(){});
-      setTimeout(gelukt, 60);
-      wachtOpGebaar = false;
-      if (intro) intro.classList.remove("stil");
+      /* Pas als het starten gelukt is stoppen we met luisteren; anders
+         krijgt het volgende gebaar nog een kans. */
+      if (p && p.then) p.then(function(){
+        soorten.forEach(function(s){ window.removeEventListener(s, wek, true); });
+        gelukt();
+      }, function(){});
     }
     soorten.forEach(function(s){ window.addEventListener(s, wek, true); });
   }
@@ -210,26 +210,18 @@ window.Intro = (function(){
 
   var vorigeAanslag = -1;
 
-  /* Voor de test: per aanslag het geplande moment en het moment waarop
-     de letter echt in de DOM kwam. */
-  window.__sync = [];
-  window.__tikken = 0;    /* aantal echt ingeplande aanslagen */
-  window.__spaties = 0;
-
   /* Eén tik, gepland op de audioklok, op het meegegeven moment. */
   function tik(t){
     var k = Math.floor(Math.random() * AANSLAGEN.length);
     if (k === vorigeAanslag) k = (k + 1 + Math.floor(Math.random() * (AANSLAGEN.length - 1))) % AANSLAGEN.length;
     vorigeAanslag = k;
     if (geluid < 1 || !ac) return;
-    window.__tikken++;
     AANSLAGEN[k](t);
   }
 
   /* De spatiebalk: breder en zachter, duidelijk geen letter. */
   function spatie(t){
     if (geluid < 1 || !ac) return;
-    window.__spaties++;
     ruispuls(t, 1700, 0.6, 0.14, 0.030, 1.1);
   }
 
@@ -274,6 +266,9 @@ window.Intro = (function(){
 
   function toonRegel(stap, gedaan){
     if (!stap.tekst) { gedaan(); return; }
+    /* De schermlezer krijgt de hele zin in één keer; de letters hieronder
+       zijn voor hem verborgen. */
+    document.getElementById("voorlezer").textContent = stap.tekst;
 
     var el = document.createElement("span");
     el.className = "line in" + (stap.klasse ? " " + stap.klasse : "");
@@ -289,7 +284,6 @@ window.Intro = (function(){
       if (klaar) return;
       if (j >= stap.tekst.length) {
         retour();
-        el.classList.add("af");
         gedaan();
         return;
       }
@@ -300,7 +294,6 @@ window.Intro = (function(){
          er geen verschuiving ontstaan tussen wat je ziet en wat je hoort. */
       var mag = (geluid > 0 && ac && ac.state === "running");
       var vertraag = mag ? LOOK * 1000 : 0;
-      var gepland = performance.now() + vertraag;
       if (mag) {
         var t = ac.currentTime + LOOK;
         if (ch === " ") spatie(t); else tik(t);
@@ -309,7 +302,6 @@ window.Intro = (function(){
       setTimeout(function(){
         if (klaar) return;
         veld.appendChild(document.createTextNode(ch));
-        window.__sync.push({ch: ch, gepland: gepland, dom: performance.now()});
         schuifMee();
       }, vertraag);
 
@@ -444,9 +436,16 @@ window.Intro = (function(){
     klaar = true;
     clearTimeout(timer);
     clearTimeout(typTimer);
+    /* Op de bol is niets meer te horen: de geluidsmotor mag dicht. */
+    if (ac) { try { ac.close(); } catch (e) {} ac = null; }
     intro.classList.add("gone");
-    /* Pas na de uitfade echt uit de weg halen, anders knippert het. */
-    setTimeout(function(){ intro.hidden = true; }, 1700);
+    /* Pas na de uitfade echt uit de weg halen, anders knippert het. Daarna
+       krijgt de kaart de focus, zodat Tab verdergaat waar je nu bent. */
+    setTimeout(function(){
+      intro.hidden = true;
+      var canvas = document.querySelector("#map canvas");
+      if (canvas) canvas.focus();
+    }, 1700);
     if (typeof afgerond === "function") afgerond();
   }
 
@@ -475,6 +474,8 @@ window.Intro = (function(){
     }
 
     window.addEventListener("keydown", function(e){
+      /* Na het verhaal is de spatiebalk weer van de knoppen op de bol. */
+      if (klaar) return;
       if (e.code === "Space" && !e.repeat) {
         e.preventDefault();
         /* De overslaanknop bestaat pas zodra je de spatiebalk aanraakt. */
@@ -548,12 +549,6 @@ window.Intro = (function(){
       houdVast(document.getElementById("skipRing"));
 
       setTimeout(function(){ speel(0); }, 700);
-    },
-
-    /* Zodat ik het verhaal in een test kan doorspoelen. */
-    _eindig: function(){ eindig(); },
-
-    /* Alleen voor de test: de stand van de audioklok. */
-    _audio: function(){ return ac ? ac.state : null; }
+    }
   };
 })();

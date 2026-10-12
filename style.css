@@ -4,8 +4,6 @@
    De losse schermen staan in intro.css en globe.css.
    ============================================================ */
 
-@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Caveat:wght@400;600&family=Special+Elite&family=Cutive+Mono&display=swap");
-
 /* ------------------------------------------------------------
    Echte schrijfmachines, zelf meegeleverd. Niet van Google:
    deze drie komen van dafont en staan in fonts/.
@@ -67,8 +65,8 @@
      afgeleid: even brede letters, slabschreven, ongelijke aanslag.
      De namen liggen vast: de intro en het paneel gebruiken ze ook. */
   --type-1:"JMH Typewriter","Courier Prime","Courier New",monospace;                 /* IBM-pica, vers lint */
-  --type-2:"Moms Typewriter","Special Elite","Courier Prime","Courier New",monospace; /* Remington, versleten aanslag */
-  --type-3:"Old Newspaper Types","Cutive Mono","Courier Prime","Courier New",monospace;   /* Bulletin-elite, licht en ruim */
+  --type-2:"Moms Typewriter","Courier Prime","Courier New",monospace;       /* Remington, versleten aanslag */
+  --type-3:"Old Newspaper Types","Courier Prime","Courier New",monospace;   /* Bulletin-elite, licht en ruim */
 }
 
 *{box-sizing:border-box}
@@ -91,15 +89,12 @@ button{font:inherit;color:inherit;cursor:pointer;background:none;border:0}
    Twee lagen over alles heen, allebei klikdoorlatend.
    ------------------------------------------------------------ */
 
+/* Korrel: ruis uit een SVG-filter, geen afbeelding nodig. */
 .paper-grain{
   position:fixed;
   inset:0;
   pointer-events:none;
   z-index:900;
-}
-
-/* Korrel: ruis uit een SVG-filter, geen afbeelding nodig. */
-.paper-grain{
   opacity:.34;
   transition:opacity 1.6s var(--ease-soft);
   mix-blend-mode:multiply;
@@ -112,55 +107,20 @@ button{font:inherit;color:inherit;cursor:pointer;background:none;border:0}
 
 body.bol .paper-grain{opacity:.12}
 
-/* ------------------------------------------------------------
-   Vierkleurendruk. Geen zwart puntraster (dat was lelijk bij het
-   inzoomen) maar drie zachte inktwolken die net niet op elkaar
-   liggen, zoals cyaan, magenta en geel op een echte pers.
-   Zet .cmyk op een papiervlak; nooit over de kaart heen.
-   ------------------------------------------------------------ */
-
-/* Vierkleurendruk op de fotos: de drie inkten liggen net naast elkaar,
-   zoals een pers die niet helemaal zuiver staat. Alleen hier, niet over
-   de kaart en niet over de hele pagina. */
-.print .shot .cyaan,
-.print .shot .magenta{
-  position:absolute;inset:0;
-  background:inherit;
-  background-size:cover;background-position:center;
-  mix-blend-mode:multiply;
-  pointer-events:none;
-}
-
 /* Vignet in papierkleur, zodat de randen wegvallen in het vel. */
 .vignette{
   position:fixed;inset:0;pointer-events:none;z-index:899;
   background:radial-gradient(120% 90% at 50% 45%,transparent 48%,rgba(160,140,105,.22) 100%);
 }
 
-/* ------------------------------------------------------------
-   Misregistratie: de drukpers stond niet helemaal goed afgesteld.
-   Zet .offset op een element en het krijgt een cyaan en magenta
-   schaduw ernaast, zoals een 3D-strip zonder bril.
-   ------------------------------------------------------------ */
-
-.offset{position:relative;isolation:isolate}
-.offset::before,
-.offset::after{
-  content:attr(data-text);
-  position:absolute;inset:0;
-  pointer-events:none;
-  mix-blend-mode:multiply;
-  z-index:-1;
-}
-.offset::before{color:var(--cyan);transform:translate(-2.5px,1.5px)}
-.offset::after{color:var(--magenta);transform:translate(2.5px,-1.5px)}
+/* De foutmelding van het opstartscript: bovenop alles, ook op het verhaal. */
+#err{position:fixed;left:16px;right:16px;bottom:16px;z-index:1000;padding:12px 16px;background:#fffdf8;border:1.5px solid var(--ink)}
 
 /* ------------------------------------------------------------
    Typografie
    ------------------------------------------------------------ */
 
-h1,h2,h3{font-family:var(--serif);font-weight:400;letter-spacing:.008em;line-height:1.1;margin:0}
-h1{font-size:clamp(2.6rem,7vw,5rem)}
+h2,h3{font-family:var(--serif);font-weight:400;letter-spacing:.008em;line-height:1.1;margin:0}
 h2{font-size:clamp(1.6rem,3.4vw,2.4rem)}
 
 .label{
@@ -171,7 +131,6 @@ h2{font-size:clamp(1.6rem,3.4vw,2.4rem)}
   color:var(--ink-soft);
 }
 .hand{font-family:var(--hand);font-size:1.35em;line-height:1.25;color:var(--cyan)}
-.italic{font-style:italic}
 
 /* ------------------------------------------------------------
    Foto's: altijd ingelijst, altijd gedrukt.
@@ -287,10 +246,9 @@ h2{font-size:clamp(1.6rem,3.4vw,2.4rem)}
 }
 .stamp-btn:hover::before{transform:scaleX(1)}
 .stamp-btn:hover{border-color:var(--key)}
-.stamp-btn:focus-visible{outline:2.5px solid var(--cyan);outline-offset:3px}
 
 /* ------------------------------------------------------------
-   Friemellaag: blaadjes en inktvlekken die blijven liggen.
+   Friemellaag: de bloesem die tijdens het verhaal dwarrelt.
    ------------------------------------------------------------ */
 
 #fidget{position:fixed;inset:0;pointer-events:none;z-index:880;overflow:hidden}
@@ -302,17 +260,15 @@ h2{font-size:clamp(1.6rem,3.4vw,2.4rem)}
   mix-blend-mode:multiply;
   will-change:transform,opacity;
 }
-.blot{
-  position:absolute;
-  border-radius:48% 52% 60% 40% / 55% 45% 55% 45%;
-  mix-blend-mode:multiply;
-  opacity:0;
-  will-change:transform,opacity;
-}
 
 /* ------------------------------------------------------------
-   Toegankelijkheid: wie minder beweging wil, krijgt geen film.
+   Toegankelijkheid: één focusrand voor alles, een onzichtbare
+   regel voor de schermlezer, en wie minder beweging wil krijgt
+   geen film.
    ------------------------------------------------------------ */
+
+:focus-visible{outline:2.5px solid var(--cyan);outline-offset:3px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{
