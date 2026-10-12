@@ -1,60 +1,8 @@
 {
-  "_readme": "Dit bestand is de inhoud van de site. Pas hier teksten aan of voeg reizen toe; de site leest het live in. Velden: id (uniek, bepaalt ook de fotonaam photos/<id>.jpg), title, place, country, lat, lon, date (YYYY-MM of YYYY), context (studie | extracurriculair | prive), study (wb | cmd | bi | honours | stage | null), abroad (true/false), summary (1 zin, op de kaart), body (langere tekst in het paneel), tags (vrije labels), todo (true = gegevens nog onzeker, toont een ? op de site).",
+  "_readme": "Dit bestand is de inhoud van de site. Pas hier teksten aan of voeg reizen toe; de site leest het live in. Velden: id (uniek, bepaalt ook de fotonaam photos/<id>.jpg; alleen .jpg werkt, zet een png of webp eerst om), title, place, country, lat, lon (getallen, geen aanhalingstekens), date (YYYY-MM of YYYY), context (studie | extracurriculair | prive), study (wb | cmd | bi | honours | stage | null), abroad (true/false), summary (1 zin, op de kaart), body (langere tekst in het paneel), tags (vrije labels), todo (true = gegevens nog onzeker, toont een gestippeld blok in de brief en een flauw envelopje).",
   "profile": {
     "name": "Niels Reuvekamp",
-    "photo": "photos/niels.png",
-    "title": "Welkom op mijn wereldreis",
-    "intro": "Hi, wat leuk dat je hier bent. Van alle miljarden websites ben je op de juiste beland. Wat je hier vindt zijn de ervaringen die ik heb beleefd, via mijn studie en daarbuiten. Draai aan de bol, klik op een plek en ik vertel je wat daar gebeurde.",
-    "hint": "Sleep om te draaien, scroll om in te zoomen. Punten die dicht bij elkaar liggen bundelen zich als je uitzoomt."
-  },
-  "filters": {
-    "context": [
-      {
-        "id": "studie",
-        "label": "Binnen studie"
-      },
-      {
-        "id": "extracurriculair",
-        "label": "Extracurriculair"
-      },
-      {
-        "id": "prive",
-        "label": "Privé",
-        "default": false
-      }
-    ],
-    "study": [
-      {
-        "id": "bi",
-        "label": "Business Innovation"
-      },
-      {
-        "id": "cmd",
-        "label": "Communication and Multimedia Design"
-      },
-      {
-        "id": "wb",
-        "label": "Werktuigbouwkunde"
-      },
-      {
-        "id": "honours",
-        "label": "Honours"
-      },
-      {
-        "id": "stage",
-        "label": "Stage"
-      }
-    ],
-    "world": [
-      {
-        "id": "abroad",
-        "label": "Buitenland"
-      },
-      {
-        "id": "home",
-        "label": "Nederland"
-      }
-    ]
+    "photo": "photos/niels.webp"
   },
   "trips": [
     {
@@ -560,8 +508,8 @@
       "title": "De piramide van het Louvre",
       "place": "Louvre, Parijs",
       "country": "Frankrijk",
-      "lat": 48.8606,
-      "lon": 2.3376,
+      "lat": 48.8612,
+      "lon": 2.3410,
       "date": "2024",
       "context": "prive",
       "study": null,

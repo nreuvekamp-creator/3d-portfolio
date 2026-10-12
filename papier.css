@@ -128,14 +128,6 @@
 <rect x='120' y='186' width='6' height='2' transform='rotate(8 120 186)'/>\
 <rect x='240' y='228' width='4' height='2' transform='rotate(70 240 228)'/>\
 <rect x='62' y='246' width='5' height='2' transform='rotate(-24 62 246)'/></g></svg>");
-
-  /* deckle: de rafelige rand van een geschept vel, als masker */
-  --deckle-h:url("data:image/svg+xml;utf8,\
-<svg xmlns='http://www.w3.org/2000/svg' width='72' height='9' preserveAspectRatio='none'>\
-<path d='M0 9 H72 V3.4 C64 1.6 58 4.8 50 2.6 C42 .6 36 4.2 28 2.2 C21 .5 14 4.4 7 2.4 C4 1.7 2 2.8 0 2.2 Z' fill='%23000'/></svg>");
-  --deckle-v:url("data:image/svg+xml;utf8,\
-<svg xmlns='http://www.w3.org/2000/svg' width='9' height='72' preserveAspectRatio='none'>\
-<path d='M9 0 V72 H3.4 C1.6 64 4.8 58 2.6 50 C.6 42 4.2 36 2.2 28 C.5 21 4.4 14 2.4 7 C1.7 4 2.8 2 2.2 0 Z' fill='%23000'/></svg>");
 }
 
 /* ------------------------------------------------------------
@@ -348,41 +340,6 @@
 }
 
 /* ------------------------------------------------------------
-   Deckle-rand. Alleen bij de soorten die met de hand uit de
-   kuip komen; de machinale vellen houden een rechte snee.
-   ------------------------------------------------------------ */
-
-[data-papier="Nederland"],
-[data-papier="Spanje"],
-[data-papier="België"],
-[data-papier="Frankrijk"],
-[data-papier="Japan"],
-[data-papier="Zuid-Korea"]{
-  -webkit-mask-image:
-    linear-gradient(#000,#000),
-    var(--deckle-h), var(--deckle-h),
-    var(--deckle-v), var(--deckle-v);
-  mask-image:
-    linear-gradient(#000,#000),
-    var(--deckle-h), var(--deckle-h),
-    var(--deckle-v), var(--deckle-v);
-  -webkit-mask-repeat:no-repeat,repeat-x,repeat-x,repeat-y,repeat-y;
-  mask-repeat:no-repeat,repeat-x,repeat-x,repeat-y,repeat-y;
-  -webkit-mask-position:center,top left,bottom left,left top,right top;
-  mask-position:center,top left,bottom left,left top,right top;
-  -webkit-mask-size:calc(100% - 12px) calc(100% - 12px),100% 8px,100% 8px,8px 100%,8px 100%;
-  mask-size:calc(100% - 12px) calc(100% - 12px),100% 8px,100% 8px,8px 100%,8px 100%;
-}
-
-/* Japan en Zuid-Korea scheuren ruwer af: iets diepere rand. */
-[data-papier="Japan"],
-[data-papier="Zuid-Korea"]{
-  -webkit-mask-size:calc(100% - 18px) calc(100% - 18px),100% 11px,100% 11px,11px 100%,11px 100%;
-  mask-size:calc(100% - 18px) calc(100% - 18px),100% 11px,100% 11px,11px 100%,11px 100%;
-}
-
-
-/* ------------------------------------------------------------
    Het paneel is het grootste vel van de site. Hij had een eigen
    vlakke achtergrond in globe.css, en omdat #panel zwaarder weegt
    dan [data-papier] won die het altijd: vandaar dat je het papier
@@ -400,14 +357,6 @@
     var(--pap-image);
   background-size:auto auto,var(--pap-image-size);
   background-blend-mode:normal,var(--pap-image-blend);
-}
-
-/* Het deckle-masker knipt de randen weg, en daarmee de slagschaduw
-   van het paneel. Een vel dat tegen de schermrand aanligt heeft die
-   rafelrand niet nodig, dus daar zetten we het masker uit. */
-#panel[data-papier]{
-  -webkit-mask-image:none;
-  mask-image:none;
 }
 
 /* De brief is getypt, niet gezet. Kop en onderschrift blijven in
@@ -434,15 +383,11 @@
    De lijst om de foto is geen geschept vel maar een afdruk: die
    blijft wit, in elk land. globe.js zet data-papier ook op .print,
    dus we draaien hier alleen de opmaak terug, niet het attribuut.
-   Daarmee vervalt ook het deckle-masker, en houdt .print zijn
-   gewone slagschaduw uit style.css.
    ------------------------------------------------------------ */
 
 .print[data-papier]{
   background-color:#fffdf8;
   background-image:none;
-  -webkit-mask-image:none;
-  mask-image:none;
 }
 /* De foto ligt met een schaduwrandje op die witte lijst. */
 .print[data-papier] .shot{
