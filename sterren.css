@@ -14,7 +14,6 @@
   pointer-events:none;
   overflow:hidden;
   opacity:0;
-  transition:opacity .9s var(--ease-soft);
   /* Donker, warm papier; geen zwart scherm. */
   background:
     radial-gradient(58% 58% at 50% 46%, rgba(52,44,38,.55), transparent 70%),
@@ -22,7 +21,6 @@
     radial-gradient(80% 70% at 86% 82%, rgba(214,51,126,.09), transparent 66%),
     linear-gradient(170deg,#241f1c,#2e2622 52%,#1d1916);
 }
-#sterren.aan{opacity:1}
 
 #sterren canvas{
   display:block;
@@ -90,11 +88,3 @@ body.ruimte #bar .brand{transition:color .6s var(--ease-soft)}
   #citaat::before{width:32px;margin-bottom:10px}
 }
 
-/* ------------------------------------------------------------
-   Minder beweging: geen pulseren, geen vallende sterren
-   (dat regelt sterren.js), en het citaat wisselt zonder overgang.
-   ------------------------------------------------------------ */
-
-@media (prefers-reduced-motion:reduce){
-  #sterren{transition:none}
-}
