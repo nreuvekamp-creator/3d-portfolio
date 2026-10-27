@@ -217,6 +217,30 @@
       ]
     },
     {
+      "id": "krydder",
+      "title": "Krydder, Noors oefenen",
+      "place": "HVL Kronstad, Bergen",
+      "country": "Noorwegen",
+      "lat": 60.369,
+      "lon": 5.35,
+      "date": "2026-10",
+      "context": "studie",
+      "study": "bi",
+      "abroad": true,
+      "summary": "Een eigen oefenapp voor Noors die ook zonder internet werkt.",
+      "body": "Voor het vak Noors aan HVL (niveau A1, met het boek Byen er Bergen) ontwierp ik mijn eigen oefenapp. Ik bedacht en regisseerde hem; Claude Code bouwde.\n\nKrydder is Noors voor kruiden. Toen in de les bleek dat we grammatica moesten doen, zuchtte de hele klas. Het antwoord was dat grammatica juist is wat een taal bijzonder maakt. Daar komt het motto vandaan: grammar is the spice of speech. Speech, omdat je een taal leert om met mensen te praten.\n\nHet merk leunt op schoolnostalgie: het krijtbord, een HB-potlood, koffie en kaneel. Kruid klinkt als krijt, dus de krijtkleuren op het bord zijn de kruiden, een per soort grammatica. Een heel kruid is uitleg, gemalen is oefenen; wie een hoofdstuk haalt krijgt zijn eigen kruidenmelange. De kruiden zijn 3D-iconen uit Blender: honderd schetsen, zestien over, semi-realistisch uitgewerkt.\n\nWat erin zit: woordenlijsten uit het boek en het docentmateriaal, examentraining, een leerpad per hoofdstuk met 80 procent als slagingsgrens, luisteren met de audio van de uitgever en dictee, en een natuurlijke Noorse AI-stem die ook offline werkt.",
+      "tags": [
+        "Noors",
+        "Merkontwerp",
+        "Claude Code",
+        "HVL"
+      ],
+      "links": [
+        {"label": "Open Krydder", "url": "https://nreuvekamp-creator.github.io/krydder/"},
+        {"label": "Bekijk het brandbook", "url": "https://nreuvekamp-creator.github.io/krydder/brand.html"}
+      ]
+    },
+    {
       "id": "btc-direct",
       "title": "Stage bij BTC Direct",
       "place": "Nijmegen",

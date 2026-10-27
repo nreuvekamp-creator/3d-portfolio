@@ -626,6 +626,18 @@ function vulPaneel(t){
     });
   }
 
+  var links = document.getElementById("pLinks");
+  links.textContent = "";
+  (t.links || []).forEach(function(l){
+    var a = document.createElement("a");
+    a.href = l.url;
+    a.target = "_blank";
+    a.rel = "noopener";
+    a.textContent = l.label;
+    links.appendChild(a);
+  });
+  links.hidden = !links.firstChild;
+
   var tags = document.getElementById("pTags");
   tags.textContent = "";
   (t.tags || []).forEach(function(x){

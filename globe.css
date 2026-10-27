@@ -441,6 +441,14 @@ body.bezig #map::after{mix-blend-mode:normal;background:rgba(36,31,28,.075)}
 .p-text .par{display:block;margin-bottom:.9em}
 .p-text .par:last-child{margin-bottom:0}
 
+.p-links{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:20px}
+.p-links a{
+  font-family:var(--type-1,var(--mono));font-size:.8rem;letter-spacing:.04em;
+  color:var(--ink);text-decoration:underline;text-decoration-color:var(--cyan);
+  text-decoration-thickness:1.5px;text-underline-offset:4px;
+}
+.p-links a:hover{text-decoration-color:var(--magenta)}
+
 .p-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:24px}
 .tag{
   font-family:var(--type-3,var(--mono));font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;

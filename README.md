@@ -27,6 +27,7 @@ Velden per reis:
 | `summary` | een zin |
 | `body` | het langere verhaal |
 | `tags` | vrije labels |
+| `links` | optioneel: lijst van `{"label": "...", "url": "https://..."}`, klikbare links onder de tekst (openen in een nieuw tabblad) |
 | `todo` | `true` toont een gestippeld blok in de brief en maakt het envelopje flauw |
 
 ## Foto's
